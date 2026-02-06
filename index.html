@@ -444,12 +444,11 @@
             :root {
                 --mobile-top-bar: 15vh;
                 --mobile-market: 20vh;
-                --mobile-log: 60vh;
-                --mobile-drawer: 5vh;
+                --mobile-drawer: clamp(56px, 6vh, 72px);
                 --mobile-drawer-open: 68vh;
                 --mobile-gap: 8px;
             }
-            body { height: 100vh; overflow: hidden; }
+            body { height: 100dvh; overflow: hidden; }
             body.drawer-open::before {
                 content: "";
                 position: fixed;
@@ -460,7 +459,7 @@
             }
             .app {
                 flex-direction: column;
-                height: 100vh;
+                height: 100dvh;
                 padding: 8px;
                 gap: var(--mobile-gap);
             }
@@ -468,21 +467,66 @@
                 order: 1;
                 flex: 1;
                 min-height: 0;
-                padding-bottom: calc(var(--mobile-drawer) + var(--mobile-gap));
+                padding-bottom: calc(var(--mobile-drawer) + var(--mobile-gap) + env(safe-area-inset-bottom));
                 gap: var(--mobile-gap);
             }
             .top-bar {
                 height: var(--mobile-top-bar);
                 padding: 6px 8px;
-                gap: 8px;
+                gap: var(--mobile-gap);
+                align-content: flex-start;
             }
-            .top-bar .stat { font-size: 12px; }
-            .time-display { font-size: 12px; }
-            .path-badge, .player-id-badge { font-size: 11px; }
+            .top-bar .stat { font-size: 12px; order: 1; }
+            .time-display {
+                font-size: 12px;
+                order: 4;
+                margin-left: 0;
+                width: 100%;
+                text-align: left;
+            }
+            .path-badge, .player-id-badge {
+                font-size: 11px;
+                height: 30px;
+                padding: 0 10px;
+                display: inline-flex;
+                align-items: center;
+                max-width: 46vw;
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            .path-badge { order: 1; }
+            .player-id-badge { order: 2; }
+            .action-bar {
+                order: 5;
+                width: 100%;
+                gap: var(--mobile-gap);
+                align-items: center;
+                flex-wrap: wrap;
+                justify-content: flex-start;
+            }
+            .action-bar .btn, .action-bar .speed-select {
+                height: 28px;
+                padding: 0 10px;
+                font-size: 12px;
+                min-width: 72px;
+                box-sizing: border-box;
+                line-height: 28px;
+                border-radius: 8px;
+            }
+            .action-bar .btn { margin-top: 0; }
+            .action-bar .speed-select {
+                appearance: none;
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                padding-right: 24px;
+            }
+            .speed-label { line-height: 28px; }
             main {
-                height: calc(100vh - var(--mobile-top-bar) - var(--mobile-drawer) - var(--mobile-gap));
                 min-height: 0;
                 gap: var(--mobile-gap);
+                flex: 1;
             }
             .market-panel {
                 height: var(--mobile-market);
@@ -491,7 +535,7 @@
             .market-panel h3 { font-size: 12px; margin-bottom: 4px; }
             .chart-placeholder { height: calc(var(--mobile-market) - 62px); }
             .log-panel {
-                height: calc(var(--mobile-log) - (var(--mobile-gap) * 2));
+                flex: 1;
                 display: flex;
                 flex-direction: column;
                 min-height: 0;
