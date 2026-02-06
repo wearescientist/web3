@@ -1219,6 +1219,7 @@ function dismissEndingOnly() {
 function goToStartScreen() {
   document.getElementById('endingScreen').classList.remove('show');
   document.getElementById('startScreen').classList.remove('hidden');
+  document.body.classList.add('start-open');
   const bar = document.getElementById('afterEndBar');
   if (bar) bar.style.display = 'none';
   const btnLastRun = document.getElementById('btnLastRun');
@@ -1326,6 +1327,7 @@ function initStartForm() {
       riskPreference: parseFloat(document.getElementById('initRisk').value) || 0.5,
     };
     document.getElementById('startScreen').classList.add('hidden');
+    document.body.classList.remove('start-open');
     startNewGame(capital, traits);
   });
 }
@@ -1338,6 +1340,7 @@ window.addEventListener('DOMContentLoaded', () => {
   bindHistoryUI();
   bindLastRun();
   renderAchievements();
+  document.body.classList.add('start-open');
 });
 
 window.game = game;

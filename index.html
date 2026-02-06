@@ -64,6 +64,16 @@
             margin-bottom: 8px;
             flex-shrink: 0;
         }
+            .achievement-handle {
+                display: none;
+                width: 52px;
+                height: 4px;
+                border-radius: 999px;
+                background: rgba(255,255,255,0.35);
+                margin: 4px auto 6px;
+                touch-action: pan-y;
+                flex-shrink: 0;
+            }
         .achievement-list {
             flex: 1;
             overflow-y: auto;
@@ -177,7 +187,17 @@
             overflow: hidden;
             flex-shrink: 0;
         }
-        .after-end-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; flex-shrink: 0; }
+        .after-end-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; flex-shrink: 0; width: 100%; }
+        .after-end-bar .btn {
+            margin-top: 0;
+            min-height: 38px;
+            padding: 8px 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1 1 0;
+            min-width: 0;
+        }
         .market-panel h3 { font-size: 14px; color: var(--text-dim); margin-bottom: 8px; }
         .chart-placeholder {
             height: 88px;
@@ -254,13 +274,16 @@
         }
         .start-screen.hidden { display: none; }
         .start-screen h1 {
-            font-size: clamp(24px, 5vw, 36px);
+            font-size: clamp(26px, 6vw, 34px);
             text-align: center;
             margin-bottom: 8px;
             background: linear-gradient(90deg, var(--meme-green), var(--orange));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            max-width: 92vw;
+            line-height: 1.15;
+            text-wrap: balance;
         }
         .start-screen .subtitle { color: var(--text-dim); margin-bottom: 16px; font-size: 14px; }
         .start-actions { margin-bottom: 24px; text-align: center; }
@@ -416,6 +439,143 @@
         .lastrun-log .log-line.positive { border-left: 3px solid var(--green); padding-left: 8px; }
         .lastrun-log .log-line.negative { border-left: 3px solid var(--red); padding-left: 8px; }
         .lastrun-log .log-line.mixed { border-left: 3px solid var(--orange); padding-left: 8px; }
+
+        @media (max-width: 980px) {
+            :root {
+                --mobile-top-bar: 15vh;
+                --mobile-market: 20vh;
+                --mobile-log: 60vh;
+                --mobile-drawer: 5vh;
+                --mobile-drawer-open: 68vh;
+                --mobile-gap: 8px;
+            }
+            body { height: 100vh; overflow: hidden; }
+            body.drawer-open::before {
+                content: "";
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.22);
+                z-index: 1100;
+                pointer-events: none;
+            }
+            .app {
+                flex-direction: column;
+                height: 100vh;
+                padding: 8px;
+                gap: var(--mobile-gap);
+            }
+            .app-left {
+                order: 1;
+                flex: 1;
+                min-height: 0;
+                padding-bottom: calc(var(--mobile-drawer) + var(--mobile-gap));
+                gap: var(--mobile-gap);
+            }
+            .top-bar {
+                height: var(--mobile-top-bar);
+                padding: 6px 8px;
+                gap: 8px;
+            }
+            .top-bar .stat { font-size: 12px; }
+            .time-display { font-size: 12px; }
+            .path-badge, .player-id-badge { font-size: 11px; }
+            main {
+                height: calc(100vh - var(--mobile-top-bar) - var(--mobile-drawer) - var(--mobile-gap));
+                min-height: 0;
+                gap: var(--mobile-gap);
+            }
+            .market-panel {
+                height: var(--mobile-market);
+                padding: 8px;
+            }
+            .market-panel h3 { font-size: 12px; margin-bottom: 4px; }
+            .chart-placeholder { height: calc(var(--mobile-market) - 62px); }
+            .log-panel {
+                height: calc(var(--mobile-log) - (var(--mobile-gap) * 2));
+                display: flex;
+                flex-direction: column;
+                min-height: 0;
+            }
+            #eventLog { flex: 1; overflow-y: auto; }
+            .after-end-bar {
+                margin-bottom: 0;
+                gap: var(--mobile-gap);
+            }
+            .achievement-sidebar {
+                position: fixed;
+                left: 8px;
+                right: 8px;
+                bottom: 8px;
+                height: var(--mobile-drawer);
+                width: auto;
+                max-height: none;
+                border-radius: 16px 16px 12px 12px;
+                z-index: 1200;
+                transition: height 0.25s ease;
+                display: flex;
+                flex-direction: column;
+                padding: 16px 10px 8px;
+                overflow: hidden;
+                box-sizing: border-box;
+                align-items: stretch;
+                justify-content: flex-start;
+            }
+            .achievement-sidebar.is-open { height: var(--mobile-drawer-open); }
+            .achievement-handle { display: block; }
+            .achievement-sidebar:not(.is-open) {
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+            }
+            .achievement-sidebar:not(.is-open) .achievement-list { display: none; }
+            .achievement-sidebar:not(.is-open) h3 { margin: 0; }
+            .achievement-list {
+                grid-template-columns: 1fr;
+                gap: 8px;
+                overflow-y: auto;
+            }
+            .achievement-box {
+                aspect-ratio: auto;
+                min-height: 56px;
+                padding: 10px 12px;
+                align-items: flex-start;
+                text-align: left;
+                justify-content: center;
+                border-radius: 12px;
+            }
+            .achievement-box .achievement-name { font-size: 12px; }
+            .achievement-box .achievement-desc { font-size: 11px; }
+
+            .achievement-handle {
+                position: absolute;
+                top: 6px;
+                left: 50%;
+                transform: translateX(-50%);
+                margin: 0;
+                background: rgba(255,255,255,0.6);
+                box-shadow: 0 0 10px rgba(255,255,255,0.15);
+            }
+
+            .start-screen {
+                padding-top: calc(16px + env(safe-area-inset-top));
+                padding-bottom: calc(16px + env(safe-area-inset-bottom));
+                justify-content: flex-start;
+                overflow: hidden;
+            }
+            .start-form {
+                max-height: calc(100vh - 200px);
+                overflow-y: auto;
+                padding: 16px;
+            }
+            .start-screen .subtitle {
+                font-size: clamp(11px, 3.1vw, 14px);
+                white-space: nowrap;
+                max-width: 94vw;
+                letter-spacing: -0.2px;
+            }
+            .form-group { margin-bottom: 10px; }
+            body.start-open #achievementSidebar { display: none; }
+        }
     </style>
 </head>
 <body>
@@ -465,7 +625,8 @@
             </section>
         </main>
         </div>
-        <aside class="achievement-sidebar">
+        <aside class="achievement-sidebar" id="achievementSidebar">
+            <div class="achievement-handle" id="achievementHandle"></div>
             <h3>🏆 成就</h3>
             <div id="achievementList" class="achievement-list"></div>
         </aside>
@@ -573,5 +734,51 @@
 
     <script src="events.js"></script>
     <script src="game.js"></script>
+    <script>
+        (() => {
+            const sidebar = document.getElementById('achievementSidebar');
+            const handle = document.getElementById('achievementHandle');
+            if (!sidebar || !handle) return;
+            const title = sidebar.querySelector('h3');
+            const mq = window.matchMedia('(max-width: 980px)');
+            let startY = 0;
+            let currentY = 0;
+            let dragging = false;
+            const setOpen = (open) => {
+                sidebar.classList.toggle('is-open', open);
+                document.body.classList.toggle('drawer-open', open);
+            };
+            const dragTargets = [handle, title].filter(Boolean);
+            const onClick = () => {
+                if (!mq.matches) return;
+                setOpen(!sidebar.classList.contains('is-open'));
+            };
+            const onTouchStart = (e) => {
+                if (!mq.matches) return;
+                dragging = true;
+                startY = e.touches[0].clientY;
+                currentY = startY;
+            };
+            const onTouchMove = (e) => {
+                if (!dragging || !mq.matches) return;
+                currentY = e.touches[0].clientY;
+            };
+            const onTouchEnd = () => {
+                if (!dragging || !mq.matches) return;
+                const delta = currentY - startY;
+                if (delta < -20) setOpen(true);
+                if (delta > 20) setOpen(false);
+                dragging = false;
+                startY = 0;
+                currentY = 0;
+            };
+            dragTargets.forEach((el) => {
+                el.addEventListener('click', onClick);
+                el.addEventListener('touchstart', onTouchStart, { passive: true });
+                el.addEventListener('touchmove', onTouchMove, { passive: true });
+                el.addEventListener('touchend', onTouchEnd);
+            });
+        })();
+    </script>
 </body>
 </html>
