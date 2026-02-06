@@ -6,3 +6,4 @@
 - Start screen: title/subtitle responsive sizing, form height tuning, and hide achievements on start.
 - UI polish: button sizing/alignment fixes and market chart spacing.
 - Mobile top bar: layout stabilization, left-aligned time display, dynamic viewport sizing, and action-bar button alignment.
+- Achievement drawer: adjusted bottom offset for floating feel.
