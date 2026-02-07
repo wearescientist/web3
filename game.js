@@ -64,7 +64,7 @@ const LIFE_ENDINGS = {
   mental_collapse: { title: '精神崩溃', desc: '亏到魔怔，住进精神病院。', class: 'tragic', story: '爆仓的那一晚你盯着K线看了通宵，从此再也没能走出来。你总说「会涨的」「抄底」「拿住」，见人就讲你的仓位和信仰。家人把你送进医院，你坐在病房里依然对着窗户比划K线。护士叹气说，又一个币圈来的。你早已分不清现实和盘面，在无尽的横盘与幻想里度过了余生。' },
   betrayed_all: { title: '众叛亲离', desc: '骗了亲友的钱全亏光，没人再信你。', class: 'tragic', story: '当初你拍着胸脯跟亲戚朋友说稳赚，他们把买房款、养老钱都交给了你。归零之后，你再也没脸见人。过年不敢回家，电话不敢接，同学聚会永远缺席。听说母亲因为你气病了，父亲在亲戚面前抬不起头。你躲在一个没人认识的城市，用假名打工，余生都在还债与愧疚中度过。' },
   pig_butchering: { title: '一生黑历史', desc: '被杀猪盘骗光感情和钱。', class: 'tragic', story: '你在网上认识了一个人，聊投资、聊未来、聊感情，对方带你「一起赚钱」。等你把全部身家转进那个平台，发现再也提不出来，那个人也消失了。你报了警，却石沉大海。从此一提投资你就发抖，再也不敢信任何人。那段日子成了你心里永远的黑洞。' },
-  destitute: { title: '贫困潦倒', desc: '投资失败，负债累累，老年流浪街头。', class: 'tragic', story: '年轻时你all in 过无数次，起落落落，最后落得一身债。没有社保，没有积蓄，儿女也和你断了联系。老了以后你只能露宿街头，靠捡瓶子和救济站过活。某个冬夜，你蜷在立交桥下，想起曾经账户里的数字和「财富自由」的梦，像上辈子的事。' },
+  destitute: { title: '贫困潦倒', desc: '投资失败，负债累累，老年流浪街头。', class: 'tragic', story: '离开币圈时，你不仅亏光了所有积蓄，还欠了一身债。没有社保，没有积蓄，儿女也和你断了联系。老了以后你只能露宿街头，靠捡瓶子和救济站过活。某个冬夜，你蜷在立交桥下，想起曾经账户里的数字和「财富自由」的梦，像上辈子的事。' },
   die_alone: { title: '孤独终老', desc: '一生单身，晚年无人陪伴。', class: 'tragic', story: '你把最好的年华都献给了盯盘和社区，没时间恋爱，也没心思成家。等你想安定下来，已经没人愿意靠近一个满嘴K线、负债累累的人。晚年你独自住在一间小公寓里，某天倒在门口，几天后才被邻居发现。葬礼上没有人哭，只有社工按流程把你送走。' },
   sudden_death: { title: '意外早逝', desc: '车祸突然夺走生命。', class: 'tragic', story: '那天你刚在车上看了眼行情，心想再撑一阵就能回本。红灯亮起时你踩下刹车，却被后车狠狠追尾。再醒来时你已经飘在半空，看着救护车和围观的群众。你还有那么多没平掉的仓、没还完的债、没见最后一面的人——但一切都已经来不及了。' },
   cancer_fight: { title: '癌症抗争', desc: '与病魔搏斗多年，最终败北。', class: 'tragic', story: '查出病的那年，你刚把最后一笔钱投进一个「百倍项目」。化疗花光了借来的钱，项目却跑路了。你在病床上刷着维权群，苦笑：原来人生和币圈一样，都是庄家说了算。弥留之际，你握着家人的手说，别再碰那些了。他们点头，泪流满面。' },
@@ -75,9 +75,9 @@ const LIFE_ENDINGS = {
   climber_missing: { title: '冒险家攀登珠峰失踪', desc: '登顶途中失联，永远留在雪山上。', class: 'tragic', story: '币圈梦碎后你想换个活法，报名了珠峰商业登山。冲顶那天天气突变，你和队伍失联。对讲机里最后一句是「我能看见顶了」。搜救队只找到你的一只手套。你永远留在那片雪白里，再也不用面对K线和债务。' },
   programmer_burnout: { title: '程序员996猝死', desc: '长期加班，某天倒在工位上。', class: 'tragic', story: '亏钱之后你只能拼命接活还债，996成了常态。那天凌晨你还在改需求，心想做完这单就能还掉一笔。忽然眼前一黑，你再也没醒过来。同事发现你时，屏幕还停在交易所页面。你的遗物里有一张纸条：等牛市来了，记得帮我清仓。' },
   travel_blogger_death: { title: '旅行博主死于冒险', desc: '为流量去危险地带，一次失手再没回来。', class: 'tragic', story: '为了涨粉接广告，你去了越来越危险的地方。那次在悬崖边拍「币圈自由人生」时，脚下一滑。镜头记录了你最后的尖叫和坠落的天空。评论区有人说 RIP，有人说炒作翻车。没人知道你是为了还债才这么拼。' },
-  musician_depression: { title: '音乐家巅峰后抑郁', desc: '红极一时后过气，抑郁多年。', class: 'tragic', story: '你曾靠一首歌火遍全网，赚到的钱全投进了币圈，想「钱生钱」。后来歌过气了，币也归零了。你再也写不出东西，每天躲在房间里不见人。某个深夜你弹完最后一曲，走向了阳台。你的歌还在播放器里被循环，而你已不再需要掌声。' },
-  alcohol_early_death: { title: '酗酒毁健康早逝', desc: '借酒浇愁，肝坏了。', class: 'tragic', story: '爆仓之后你开始酗酒，从每晚一瓶到从早喝到晚。家人劝你戒，你说戒了更难受。几年后你查出肝硬化，医生说晚了。临终前你盯着天花板，想起没亏之前的日子，像隔了一辈子。酒瓶还立在床头，再也没人替你收。' },
-  dementia_forgotten: { title: '痴呆晚年被遗忘', desc: '得了阿尔茨海默，谁也不认识。', class: 'tragic', story: '币圈那几年你记过无数个代码、白皮书、路线图。老了却连自己儿女的名字都叫不出。你总嘟囔着一串数字，护工说那是你当年的钱包地址。你坐在养老院走廊里望着窗外，偶尔笑一下，没人知道你在想什么。也许是你曾拥有过的那一串零。' },
+  musician_depression: { title: '音乐家巅峰后抑郁', desc: '红极一时后过气，抑郁多年。', class: 'tragic', story: '离开币圈时，你的歌早已过气，币也归零了。当年那首歌赚到的版税，你全投进了币圈想放大，结果崩盘。你再也写不出东西，每天躲在房间里不见人。某个深夜你弹完最后一曲，走向了阳台。你的歌还在播放器里被循环，而你已不再需要掌声。' },
+  alcohol_early_death: { title: '酗酒毁健康早逝', desc: '借酒浇愁，肝坏了。', class: 'tragic', story: '离开币圈时，你的肝已经不行了。爆仓之后你开始酗酒，从每晚一瓶到从早喝到晚。家人劝你戒，你说戒了更难受。几年后你查出肝硬化，医生说晚了。临终前你盯着天花板，想起没亏之前的日子，像隔了一辈子。酒瓶还立在床头，再也没人替你收。' },
+  dementia_forgotten: { title: '痴呆晚年被遗忘', desc: '得了阿尔茨海默，谁也不认识。', class: 'tragic', story: '离开币圈时，你已经记不得那些代码了。币圈那几年你记过无数个代码、白皮书、路线图。老了却连自己儿女的名字都叫不出。你总嘟囔着一串数字，护工说那是你当年的钱包地址。你坐在养老院走廊里望着窗外，偶尔笑一下，没人知道你在想什么。也许是你曾拥有过的那一串零。' },
   politician_jail: { title: '政客腐败入狱而终', desc: '贪腐落马，牢里待了十几年。', class: 'tragic', story: '离开币圈后你进了体制，位高权重时经手的项目与资金数不胜数，也从中捞了不少——链上的习惯带到了线下。东窗事发后，你在法庭上听着对自己的指控，一条条对得上记录。你在监狱里度过十几年，出狱时满头白发，曾经的圈子早已没人认得你。' },
   divorce_lonely: { title: '离婚多次孤独', desc: '离了几次婚，晚年无人探望。', class: 'tragic', story: '币圈那几年每一段婚姻都毁在你的执念上——要么亏钱吵翻天，要么有钱了膨胀到对方无法忍受。离场后孩子跟了前任，渐渐不再联系。晚年你住在养老院，过节时看着别人被接走，你的床位前从没有人来。你才明白，有些东西比财富更难挽回。' },
   unfilial_nursing_home: { title: '子女不孝孤独院', desc: '儿女不闻不问，在养老院孤独离世。', class: 'tragic', story: '当年你沉迷炒币，没管过孩子学习，也没给过他们安全感。离场时你已一无所有。他们长大后背井离乡，很少回来。你住进养老院后，他们只在过年时打一通电话。最后那天你握着护士的手说想见孩子一面。他们赶到时，你已经闭上了眼睛。' },
@@ -87,15 +87,15 @@ const LIFE_ENDINGS = {
   eco_hero: { title: '环保斗士改变世界后离去', desc: '推动立法、改变行业，累垮了身体。', class: 'tragic', story: '离开币圈时你带着第一桶金转投环保，四处奔走、推动立法、对抗大公司。你赢了太多场仗，却输给了自己的身体。临终前你躺在病床上，看着新闻里播报你推动通过的法案，笑了笑。有人问你后悔吗，你说，只后悔没早点离开那个盘面。' },
   war_survivor: { title: '战争幸存者创伤一生', desc: '从战乱中活下来，PTSD伴随一生。', class: 'tragic', story: '你在战乱中失去家人和家园，带着仅剩的一点钱逃到异国，误打误撞进了币圈。离场时你依旧一无所有。你活下来了，却每晚被噩梦惊醒——有时是炮火，有时是爆仓。晚年你在疗养院里，偶尔会突然抱头蹲下。护士说，那是又「回到那边」了。' },
   parent_sacrifice: { title: '父母为孩子牺牲一切', desc: '把一切给了孩子，自己省吃俭用。', class: 'tragic', story: '币圈那几年你赚过也亏过，离场时所剩无几。之后你一辈子没为自己活，每一分钱都给了孩子读书、买房、创业。自己生病舍不得看，吃饭凑合。孩子出息了却很少回来。你走的时候很安详，心想他们过得好就好。葬礼上他们哭得很伤心，你再也听不见。' },
-  athlete_disabled: { title: '运动员伤残退役', desc: '重伤退役，赔偿金花完，晚景凄凉。', class: 'tragic', story: '你在赛场上重伤终结职业生涯，赔偿金本可安稳度日，你却听信人言全部投进「稳赚」的币圈项目。爆雷之后你一无所有，腿脚又不便，只能靠低保过活。你常盯着电视里的比赛回放，那是人生最辉煌的瞬间，却再也不会重来。' },
-  artist_posthumous: { title: '艺术家穷困而死却后世成名', desc: '生前穷困潦倒，死后作品天价。', class: 'tragic', story: '你一生坚持创作却从未被市场认可。为了活下去你也曾进币圈想赚点钱，亏得精光。你在狭小阁楼里去世，身边只有未完成的作品。多年后有人发现你的画，拍卖行拍出天价。评论家说你是被时代忽略的天才。可你早已化作尘土，一分钱也花不到。' },
-  writer_hermit: { title: '作家畅销书后隐居', desc: '写过爆款后再也写不出，隐居避世。', class: 'tragic', story: '你曾写畅销书，版税和名气让你飘飘然，把钱投进币圈想「放大」。崩盘之后你再也写不出东西，读者骂你江郎才尽。你躲到乡下，不接电话不见人，每天对着空白文档发呆。临终前你烧掉所有未完成的手稿，说，留着一个写不出字的人的名字，没意思。' },
+  athlete_disabled: { title: '运动员伤残退役', desc: '重伤退役，赔偿金花完，晚景凄凉。', class: 'tragic', story: '离开币圈时，你不仅亏光了赔偿金，还欠下了一身债。当年重伤退役后，你把所有赔偿金都投进了币圈想翻本，结果项目rug，你一无所有。腿脚不便又没有其他技能，只能靠低保过活。你常盯着电视里的比赛回放，那是人生最辉煌的瞬间，却再也不会重来。' },
+  artist_posthumous: { title: '艺术家穷困而死却后世成名', desc: '生前穷困潦倒，死后作品天价。', class: 'tragic', story: '离开币圈时，你已经身无分文。币圈那几年你不仅没赚到钱，还把卖画的一点积蓄全亏了。你在狭小阁楼里去世，身边只有未完成的作品。多年后有人发现你的画，拍卖行拍出天价。评论家说你是被时代忽略的天才，可你早已化作尘土，一分钱也花不到。' },
+  writer_hermit: { title: '作家畅销书后隐居', desc: '写过爆款后再也写不出，隐居避世。', class: 'tragic', story: '离开币圈时，你再也写不出东西了。币圈那几年你不仅亏光了版税，还欠了出版社的预付款。你躲到乡下，不接电话不见人，每天对着空白文档发呆。临终前你烧掉所有未完成的手稿，说，留着一个写不出字的人的名字，没意思。' },
   // ----- 惨但活着 -----
   bankruptcy: { title: '破产归零', desc: '币圈轮回，重开学费。本金耗尽，灰溜溜离场。', class: 'bad', story: '最后一笔仓位爆掉的时候，你盯着归零的账户看了很久。没有哭，也没有闹，只是默默关了软件，卸载了所有交易所和钱包。你走出网吧，阳光刺眼。你知道自己又交了一笔学费，只是这次贵得有点离谱。你深吸一口气，告诉自己：从头再来吧，反正也没啥可再输的了。' },
   wage_slave_debt: { title: '打工人还债', desc: '亏光后老实上班，还债还了十年。', class: 'bad', story: '亏光之后你删掉了所有币圈群，找了一份朝九晚五的工作。每个月工资到账，先还债，剩下的刚够吃饭。同事聊股票聊基金，你从不插嘴。十年后最后一笔债还清那天，你一个人去吃了一顿好的，没有庆祝，只是觉得终于可以喘口气了。你再也没碰过任何「高收益」的东西。' },
   back_to_farm: { title: '回老家种地', desc: '币圈梦碎，回村务农。', class: 'bad', story: '城市待不下去了，你拖着行李箱回到老家。父母没多问，给你腾了间房。你跟着下地，手上磨出了茧子，心里反而踏实了。手机里还存着当年的K线截图，你偶尔翻出来看看，像看别人的故事。村里人问你城里混得咋样，你笑着说，混不动了，回来种地。' },
   quit_forever: { title: '戒断韭菜', desc: '亏怕了，卸载所有交易所和钱包。', class: 'bad', story: '那天晚上你删掉了所有交易所APP、钱包、行情软件，退掉了所有群。手机一下子安静了。你躺在床上想，要是早一点收手该多好。可世上没有要是。从此你绝口不提币圈，有人聊你也只是笑笑。你知道自己戒的不是币，是那个总想一夜暴富的自己。' },
-  small_loss_exit: { title: '小亏离场', desc: '赔了一点及时收手，当交学费。', class: 'bad', story: '你亏了一笔，不多不少，刚好肉疼但不致命。你冷静下来算了算，要是再玩下去，可能真的会倾家荡产。于是你提现了剩下的钱，卸载了软件。朋友问你咋不玩了，你说交够学费了，该毕业了。后来你偶尔还会想起那段日子，但再也没有回去过。' },
+  
   // ----- 普通/路人 -----
   nobody: { title: '币圈路人甲', desc: '小赚小亏混完几年，没暴富也没归零。', class: 'normal', story: '你在币圈混了几年，赚过也亏过，最后算下来不痛不痒。没有暴富的传说，也没有归零的惨剧，你就是那种在群里从不发言、持仓永远不敢梭哈的路人甲。离开的那天你退了群，没人注意到。你回归正常生活，偶尔在新闻里看到币圈消息，会心一笑，像在说：那几年，我也在。' },
   exit_ashore: { title: '及时止损上岸', desc: '套现一笔，买房买车。', class: 'normal', story: '你在相对高位套现了一笔，虽然没吃到最顶，但足够付首付了。你买了房买了车，把剩下的钱存进银行，再也不看行情。朋友还在群里晒收益，你只是默默潜水。有时你会想，要是多拿一会儿会不会更赚？但你更清楚，多少人就是死在这个「要是」上。你选择了上岸，从此币圈只是饭桌上的谈资。' },
@@ -118,11 +118,11 @@ const LIFE_ENDINGS = {
   mountain_hermit: { title: '山里隐居安度晚年', desc: '携家进山，含饴弄孙。', class: 'good', story: '你在合适的时机套现离场，带着家人进山隐居。你在山间含饴弄孙，偶尔种菜采茶，与世无争。你偶尔会想起当年链上的喧嚣与机会，但从不后悔。你在一个安静的午后离世，窗外是青山白云，心里是满满的平静。' },
   teacher_legacy: { title: '教师桃李满天下', desc: '教书育人一辈子。', class: 'good', story: '你曾靠币圈赚过一笔，却没有沉迷。你用那笔钱读了想读的书、考了想考的证，最后成了一名教师。你教了一辈子书，学生遍布各行各业。退休时他们从各地赶来为你庆贺。你站在讲台上说，谢谢你们，让我觉得这一生没有白活。' },
   farmer_land: { title: '农民守着田地终老', desc: '守着祖传几亩地，春种秋收。', class: 'good', story: '你在城里打拼过，也在币圈折腾过，最后回到老家继承了那几亩地。你春种秋收，不再看K线，只看天气和庄稼。邻居笑你城里混不下去才回来，你也不解释。你觉得脚踩在泥土里，比踩在云端踏实。你在一个丰收的秋天离世，谷仓里堆满了金黄的稻子。' },
-  couple_70_same_day: { title: '夫妻相伴70年同日离', desc: '与老伴同日离世。', class: 'good', story: '你和老伴相伴七十年，从未分开。那天早上你们一起吃了早饭，下午她先走了，你握着她的手坐了一夜，天亮时也闭上了眼睛。儿女说这是福气，没人拆散你们。葬礼上他们把你俩合葬在一起，墓碑上刻着：同生共死，不负此生。' },
+  couple_70_same_day: { title: '夫妻相伴70年同日离', desc: '与老伴同日离世。', class: 'good', story: '你们在币圈认识，当时她刚做空被爆仓，你正为多军欢呼。不打不相识，后来你们成了最铁的炒币CP。牛市里一起纸醉金迷，熊市里一起泡面度日，你们约定不管盈亏，五十年后一起看K线。那天早上你们还在讨论某个新上的土狗币，下午她心梗先走，你握着她的手，看着账户里盈亏参半的仓位，笑着闭上了眼睛。儿女说你们是币圈鸳鸯，墓碑上刻着：多空双杀，同生共死。' },
   scientist_nobel: { title: '科学家诺奖后低调', desc: '拿过诺奖后深居简出。', class: 'good', story: '离开币圈时你小有积蓄，全投回了实验室。你一生专注研究，后来拿了诺奖，却拒绝一切商业活动，深居简出。你最后是在实验室里走的，手里还拿着一份未完成的论文。有人说你是真正的学者，你说，只是把币圈那几年换成了该做的事。' },
   doctor_hero_death: { title: '医生救人无数自己病逝', desc: '救过无数人，自己倒在一线。', class: 'good', story: '离开币圈时你带着赚到的钱转行学医，后来成了一名医生，资助贫困患者、冲在一线。你救过无数人，却没能救活自己。你倒在工作岗位上的那天，全城自发为你送行。墓前常年有人献花，他们说，你才是真正的英雄。' },
   chef_empire: { title: '厨师开连锁帝国', desc: '从路边摊做到全球连锁。', class: 'good', story: '离开币圈时你带着第一桶金没有继续赌，而是开了一家小餐馆。你用心做每一道菜，口碑越来越好，分店一家接一家。晚年你把配方和经营之道传给了徒弟，自己退居幕后。你常说，炒币和炒菜一样，火候到了就该起锅。' },
-  athlete_empire: { title: '运动员奥运金牌后商业帝国', desc: '金牌退役后经商成功。', class: 'good', story: '你拿过奥运金牌，退役后把奖金和代言投进币圈，眼光和运气都不错。离场时你带着赚到的钱建立了商业帝国，名字写进教科书。晚年你捐建无数体育场馆，说想让更多孩子站上领奖台。你是在睡梦中离世的，嘴角带笑。' },
+  athlete_empire: { title: '运动员奥运金牌后商业帝国', desc: '金牌退役后经商成功。', class: 'good', story: '离开币圈时，你拿着奥运奖金和代言收入的投资回报，建立了真正的商业帝国。退役后你把奖金分批投入币圈，五年后带着回报离场，用这笔钱进军实业。名字写进教科书，晚年你捐建无数体育场馆。你是在睡梦中离世的，嘴角带笑。' },
   lottery_late: { title: '晚年中彩票逆袭', desc: '晚年意外中大奖。', class: 'good', story: '你年轻时在币圈亏过不少，晚年早已不再幻想暴富。某天你随手买了一张彩票，竟然中了大奖。你给儿孙各留了一笔，剩下的捐给了慈善。你自己没花几年就平静离世，有人说你命好，你笑着说，是啊，命好到最后一刻才兑现。' },
   philanthropist_poor: { title: '慈善家捐光家产安贫乐道', desc: '捐光家产，晚年清贫却心安。', class: 'good', story: '你把从币圈赚到的钱几乎全捐了，自己过着简朴的生活。有人笑你傻，你说钱够用就好。晚年你住在小公寓里，吃着粗茶淡饭，却比谁都心安。你离世时没有留下什么遗产，却留下了无数人的感激。有人说你是圣人，你摆摆手说，只是做了想做的事。' },
   inherit_fortune: { title: '突然继承巨额遗产', desc: '远房亲戚留了一笔巨款。', class: 'good', story: '你从未想过会有一笔巨额遗产从天而降。那位远房亲戚你甚至没什么印象，遗嘱里却写了你的名字。你用那笔钱还清了债务，买了房，剩下的存起来。你常想，命运真是难以预料。你从此不再为钱发愁，却也再不敢乱来，你说，这是对那份幸运的尊重。' },
@@ -134,7 +134,7 @@ const LIFE_ENDINGS = {
   kol_top: { title: 'KOL顶流', desc: '圈内顶流，广告躺赚。', class: 'great', story: '你成了圈里公认的顶流，却从没数过粉丝到底多少。你早已习惯了被关注，也学会了和名气相处。你接广告、开Space、偶尔为正义发声。有人骂你割韭菜，你从不辩解，因为你知道自己从未骗过任何人。你出门会被认出来要签名，你总是礼貌地配合。你觉得这是影响力该有的样子。' },
   business_boss: { title: '商业大佬', desc: '做交易所/资管/合规，行业里没人不知道你。', class: 'great', story: '你创立的企业成了行业基础设施，没人不知道你的名字。你推动合规、参与制定标准，把野路子变成了正规军。晚年你卸任了所有职务，只保留名誉头衔。有人说你定义了行业，你说你只是做了该做的事。你的传记畅销全球，而你本人早已不再关心这些。' },
   vc_king: { title: '风投之王', desc: '早期押中多个百倍项目。', class: 'great', story: '你早期押中的项目一个接一个百倍千倍，金主排队给你送钱。你从不说自己多厉害，只说运气好。你投人、投趋势、也投直觉。晚年你的portfolio里躺着无数个传奇项目，而你只是淡淡地说，都是他们自己争气。你被写进教科书，被称为风投之王，而你最骄傲的是从未辜负过信任你的人。' },
-  billionaire: { title: '亿万富翁', desc: '创业成功，豪宅名车。', class: 'great', story: '你的身家早已突破亿级，豪宅、名车、私人飞机对你来说只是日常。你却从不炫富，反而把大量财富投入了慈善和科研。你在慈善晚宴上被尊为传奇，台下掌声雷动。你举杯致意，心里想的却是很多年前那个在网吧里盯盘、泡面都舍不得加肠的少年。' },
+  
   celebrity_legend: { title: '名人传奇', desc: '成为行业大佬，传记畅销。', class: 'great', story: '你的传记畅销全球，你的名字被写进商学院案例。葬礼那天来了无数人，有同行、有后辈、有受过你帮助的陌生人。有人说你是一个时代的符号，有人说你只是把一件事做到了极致。你听不到了。你的墓志铭很简单：他活过，他做过，他留下了。' },
   richest: { title: '成为首富', desc: '财富登顶全球榜单。', class: 'peak', story: '你登顶全球财富榜的那天，没有庆祝，只是一个人坐在办公室里发呆。你想起很多年前第一次买币时的紧张和期待。如今你每天醒来都在想怎么把钱花在有意义的地方。你建学校、捐医院、搞科研，有人说你在赎罪，你说你只是在做觉得对的事。首富对你来说只是一个数字，你更在意的是身后名。' },
   crypto_empire: { title: '加密帝国', desc: '建起自己的公链/生态/帝国，一呼百应。', class: 'peak', story: '你建起了自己的公链和生态，无数项目在你的网络上运行，无数人在你的规则下创造。你被称作「加密帝国」的缔造者，一呼百应。晚年你退居幕后，把治理权交给社区。你说，帝国会延续，而你会成为历史里的一行字。你离世时，全网节点为你默哀一分钟。' },
@@ -196,18 +196,66 @@ const LIFE_ENDINGS = {
   airdrop_tycoon: { title: '空投大亨', desc: '撸遍各大空投，财富自由。', class: 'good', story: '你从早期就开始多钱包撸空投，每个项目你都认真交互。几年下来，几个大毛让你直接财务自由。你从不炫耀，只说运气好。后来你建了一个社群，专门教人如何辨别真空投和骗局。你说：羊毛要撸，但要撸得干净。' },
   memecoin_emperor: { title: '梗币皇帝', desc: '一手打造现象级 Meme 币，名留青史。', class: 'peak', story: '你创造了一个现象级 Meme 币，从社区梗图到上所、拉盘、FOMO，你每一步都踩准了节奏。虽然最后泡沫破了，但你的名字永远和那个符号绑在一起。有人骂你割韭菜，有人说你定义了 Meme 时代。你晚年不再回应，只发过一条推：我们曾一起相信过一只狗。' },
   web3_prophecy: { title: 'Web3 先知', desc: '预言成真，被奉为行业先知。', class: 'peak', story: '你在多年前写的几篇关于 Web3 的预言，后来逐一应验。人们把你奉为先知，每有大事就翻出你的旧文。你从未借机敛财，只是继续写、继续思考。临终前你说：我不是先知，只是愿意相信代码和共识能改变世界。你的账号被永久置顶，成了某种圣经。' },
+  
+  // ==================== 新增结局 ====================
+  // ----- 悲剧类新增 -----
+  liquidated_all: { title: '爆仓清算', desc: '杠杆拉满，一夜归零。', class: 'tragic', story: '离开币圈时，你的账户显示「已平仓」三个红字。那一夜100倍杠杆的爆仓，不仅带走了你的本金，还有借来的几十万。你站在窗前抽了一夜的烟，看着天慢慢亮起来。你知道，五年的炒币生涯结束了，而你欠下的债，需要下半辈子去还。' },
+  scam_victim: { title: '土狗归零', desc: 'All in土狗，项目方连夜跑路。', class: 'tragic', story: '离开币圈时，你手里只剩下一串归零的代币合约地址。那个你All in的土狗，在项目方撤池子的那一刻就已经死了。维权群从热闹到沉寂，最后只剩你一个人还在转发那条「绝对安全」的宣传推文。你知道钱回不来了，这段疯狂的生涯也该结束了。' },
+  exchange_frozen: { title: '账户冻结', desc: '交易所风控，资产无法取出。', class: 'tragic', story: '离开币圈时，你的资产还锁在那家已经破产的交易所里。五年积累的仓位，变成了债权人会议上的一个编号。你从天天刷公告，到几周看一次，最后连邮件都懒得打开。那串数字还在，只是再也不属于你了。你学会了最重要的一课：Not your keys, not your coins。' },
+  
+  // ----- 坏结局新增 -----
+  forced_hodl: { title: '被套牢五年', desc: '山顶买入，割肉就亏，一直等到退市。', class: 'bad', story: '离开币圈时，你钱包里的代币早已从交易所下架。五年前山顶买入的仓位，现在连卖都卖不掉。你从天天看盘，到卸载软件，最后连助记词都找不到了。那成了一串被遗忘的数字，就像这段被套牢的青春。' },
+  stablecoin_depeg: { title: '稳定币脱锚', desc: '以为安全，结果UST崩盘。', class: 'bad', story: '离开币圈时，你的「稳定」理财账户里只剩几美分的残值。那个黑色星期三，20%的年化变成了-99%的本金。你本以为找到了安全的港湾，结果发现港湾也会沉没。你把剩下的钱取出来，买了张火车票，决定回老家重新开始。' },
+  
+  // ----- 普通类新增 -----
+  nft_flipper: { title: 'NFT倒爷', desc: '低买高卖，赚点差价。', class: 'normal', story: '离开币圈时，你的Opensea账号已经三个月没登录了。NFT热潮过去，你手里最后一幅图也打折出了。几年倒爷生涯，赚过也亏过，最后算下来小赚一台新电脑。你卸载了Discord，把钱包备份存进抽屉，回归了朝九晚五的正常生活。' },
+  airdrop_farmer: { title: '羊毛党', desc: '批量开号，专撸空投。', class: 'normal', story: '离开币圈时，那几十部二手手机还堆在墙角。你算了一笔账：几年的Gas费、服务器、时间成本，减去卖空投的收入，其实也就攒了小几十万。够付个小房子的首付，但不够财富自由。你卖掉了设备，觉得比起那些梭哈归零的人，自己已经算聪明了。' },
+  discord_mod: { title: '社区管理', desc: '在项目方当Mod，领工资。', class: 'normal', story: '离开币圈时，你管理过的Discord服务器大多已经人去楼空。五年的Mod生涯，你踢过无数广告，见证过无数Rug，领的代币工资大多归零。虽然没发财，但你攒下了一套观察项目的本事。你决定把这份经验写成文档，卖给想入行的新人，算是最后一次割韭菜。' },
+  
+  // ----- 好结局新增 -----
+  gmx_trader: { title: '衍生品大师', desc: '在GMX等平台做策略，稳定盈利。', class: 'good', story: '离开币圈时，你清算了所有仓位，把资金还给了投资人。五年的衍生品套利，收益曲线比心跳还平稳。你说服自己：活得久比赚得快更重要，但现在该让钱休息了。你把策略写成白皮书开源，然后注销了所有交易账号。' },
+  bitcoin_maxi: { title: '比特币最大主义者', desc: '只囤BTC，穿越牛熊。', class: 'good', story: '离开币圈时，你的冷钱包里躺着几百个比特币。五年的只买不卖，三次牛熊轮回，你从未动摇。别人笑你保守，你说时间会证明一切。现在你财务自由了，但你还是每天早上看一遍K线，不是为了交易，只是习惯。' },
+  crypto_writer: { title: '加密作家', desc: '写币圈故事，出版成书。', class: 'good', story: '离开币圈时，你的书已经再版了三次。你把这五年的疯狂、荒诞、悲欢离合都写进了文字里。版税足够你生活，但你还在写，因为新的故事每天都在发生。你说，自己不再是炒币的人，而是记录炒币的人。' },
+  node_operator: { title: '节点运营商', desc: '跑以太坊/BTC节点，收服务费。', class: 'good', story: '离开币圈时，你的机房还在运转。五年的节点运营，让你明白不需要炒币也能在这个行业生存。你给钱包商、交易所提供接入服务，稳定的现金流比暴涨暴跌更让人安心。你说，只要区块链还在运行，你就还有收入。' },
+  
+  // ----- 大成类新增 -----
+  crypto_banker: { title: '加密银行家', desc: '做合规稳定币支付，打通传统金融。', class: 'great', story: '离开币圈时，你的支付通道已经服务了上万家企业。你把币圈的自由和 TradFi 的合规嫁接在一起，成了真正的「加密银行家」。虽然低调，但你知道自己改变了很多人汇款的方式。你把公司交给了团队，自己退居二线，开始写回忆录。' },
+  mining_farm: { title: '矿场主', desc: '在电价低的地方建矿场。', class: 'great', story: '离开币圈时，你的矿场每年还在产出几千个比特币。经历过政策清退、币价腰斩，但你挺过来了。你把矿场运营交给了本地团队，自己带着家人搬到了温暖的地方。你说，挖矿是印钞机生意，但更重要的是知道什么时候关机。' },
+  crypto_lawyer: { title: '加密律师', desc: '专做币圈合规和维权。', class: 'great', story: '离开币圈时，你的律师事务所在圈内已经无人不知。你帮项目方做过合规，帮受害者维过权，见证了这个行业从野蛮生长到逐步规范。你把股份卖给了合伙人，决定用余生去写一本关于加密法律的书。' },
+  token_economist: { title: '代币经济学家', desc: '设计Token模型，被无数项目采用。', class: 'great', story: '离开币圈时，你设计的代币模型已经成为行业标准。无数项目方还在排队请你做顾问，但你说脑子用久了也会累。你把经验和方法论整理成在线课程，卖给了想入行的年轻人。你说，最好的投资是教别人投资。' },
+  
+  // ----- 巅峰类新增 -----
+  stablecoin_issuer: { title: '稳定币发行商', desc: '发行了流通百亿美元的稳定币。', class: 'peak', story: '离开币圈时，你发行的稳定币已经成了全球支付的基础设施。你把公司的控制权交给了董事会，自己退居幕后。虽然每天还会收到黑客威胁和监管邮件，但你终于有时间陪家人了。你说，创造历史的人，往往也是失去自由的人。' },
+  layer2_founder: { title: 'L2创始人', desc: '以太坊L2解决方案的创造者。', class: 'peak', story: '离开币圈时，你做的L2已经成了以太坊生态的默认选择。你把治理权交给了社区，代码开源，自己只保留了一个节点。人们把你和V神并列谈论，但你觉得自己只是个写代码的。你说，真正的builder，是创造不需要自己的系统。' },
+  
+  // ----- 科幻/离奇类新增 -----
+  blockchain_afterlife: { title: '链上永生', desc: '把意识上传到区块链。', class: 'weird', story: '离开币圈时，你完成了最后的交易——把自己的意识写入区块链。你的思维在无数个节点上运行，只要链不消失，你就永远存在。你成了第一个真正「永生」的人，虽然你也说不清，现在的你还是不是你。', storyPoor: '离开币圈时，你已经一无所有。最后的钱投入了意识上传实验，结果被困在一条濒死的公链上。每天和僵尸项目、废弃合约作伴，你求死不得，因为私钥已经丢了。', storyRich: '离开币圈时，你资助并参与了意识上传研究。你的意识运行在以太坊上，通过智能合约与世界交互。你可以「看到」每一笔交易，「感受」每一个区块的产生。你说这才是真正的去中心化永生。' },
+  multi_chain_self: { title: '多链分身', desc: '在每个公链都有一个你。', class: 'weird', story: '离开币圈时，你通过跨链桥把自己的意识复制到了每条公链上。每个「你」在不同链上经历着不同的人生。有的你在以太坊上当DeFi农民，有的你在Solana上炒Meme，有的你在比特币链上佛系hodl。你终于实现了真正的「多元化配置」。', storyPoor: '离开币圈时，你试图通过跨链桥转移最后的资产逃命，结果桥被黑。你在每条链上都只剩一点残渣，成了多链乞丐，每个你都在挨饿。', storyRich: '离开币圈时，你在每条主流链上都有大量资产和社交关系。你成了多链公民，没有主链，每条链都是你的家。你说这才是真正的去中心化人生。' },
+  nft_afterlife: { title: 'NFT升天', desc: '把自己做成NFT，永生在链上。', class: 'weird', story: '离开币圈时，你把自己的记忆、人格、声音都铸造成了NFT。任何人拥有这个NFT，就能和你「对话」。你成了数字世界的幽灵，在OpenSea上被买卖，在元宇宙里被展示。有人说这是永生的荣耀，有人说这是灵魂的囚禁。', storyPoor: '离开币圈时，你把自己做成了免费NFT，希望有人记得你。结果Gas费太高，根本没人Mint。你成了一个没有人拥有的孤魂野鬼。', storyRich: '离开币圈时，你把自己做成了限量版的NFT系列。你的形象出现在顶级画廊和元宇宙地标，成了数字时代的蒙娜丽莎，永远被观赏，永远被交易。' },
+  smart_contract_god: { title: '合约之神', desc: '和智能合约融为一体。', class: 'weird', story: '离开币圈时，你写了一个可以自我进化的智能合约，并把控制权交给了它。合约开始自己写代码、自己审计、自己部署。渐渐地，你分不清是你控制着合约，还是合约控制着你。最后你成了合约的一部分，永远在链上执行着某种不可名状的逻辑。', storyPoor: '离开币圈时，你试图写合约翻身，结果合约有漏洞。你被机器人套利者榨干了最后一滴，你的代码成了教科书里的反面案例。', storyRich: '离开币圈时，你写的合约管理着数十亿资产，被称为「不可能被黑」的神级代码。人们传说合约里藏着你的意识，你在用某种方式守护着这笔财富。' },
+  
+  // ----- 修复的问题结局 -----
+  politician_jail_fixed: { title: '贪官落马', desc: '币圈亏光后进体制捞钱，最终落马。', class: 'tragic', story: '离开币圈时，你欠了一屁股债，只能托关系进了体制。你利用职务之便大肆敛财，想把币圈的损失补回来。东窗事发后，你在法庭上听着对自己的指控，才发现链上的习惯带到线下是死路一条。你在监狱里度过十几年，出狱时满头白发。' },
+  divorce_lonely_fixed: { title: '离婚三次孤独终老', desc: '币圈亏光后婚姻破裂，晚年无人探望。', class: 'tragic', story: '离开币圈时，你把家里的积蓄都赔光了。第一任妻子因此离开，第二任受不了你的债务，第三任在你第三次爆仓后彻底死心。你再也没有勇气走入婚姻，晚年独自住在养老院，过节时看着别人被接走。你才明白，有些东西比财富更难挽回。' },
+  chef_chain: { title: '连锁餐饮老板', desc: '币圈赚的第一桶金开了几家餐厅。', class: 'good', story: '离开币圈时，你带着第一桶金没有继续赌，而是开了一家小餐馆。用心做每一道菜，口碑越来越好，在周边城市开了几家分店。你说炒币和炒菜一样，火候到了就该起锅。晚年把店传给了徒弟，自己偶尔去店里坐坐。' },
+  athlete_investor: { title: '运动员投资人', desc: '退役后用奖金投资币圈，小有成就。', class: 'good', story: '离开币圈时，你的比特币持仓已经翻了五倍。退役后把奖金分批投入币圈，不追求暴富，只是长期持有主流币。现在你用这笔钱开了体育培训班，教孩子们运动。你说投资就像训练，坚持比爆发更重要。' },
+  lottery_small: { title: '小彩票中奖', desc: '晚年意外中了一笔小奖。', class: 'good', story: '离开币圈时，你已经不再幻想暴富。某天随手买了一张彩票，中了几十万。不多不少，刚好够改善生活。你笑着说这是命运的补偿，然后把大部分捐给了当年币圈认识的落魄朋友。' },
+  inherit_surprise: { title: '意外继承遗产', desc: '远房亲戚留了一笔遗产。', class: 'good', story: '离开币圈时，你从未想过会有一笔遗产从天而降。那位远房亲戚你甚至没什么印象，遗嘱里却写了你的名字，不多不少，刚好够还清债务、买个小房子。你说，这是对那份幸运的尊重。' },
+  beach_retire: { title: '海边小镇养老', desc: '在海边小镇定居，平淡度日。', class: 'good', story: '离开币圈时，你带着家人在一个物价低廉的海边小镇定居。每天看日出日落，偶尔钓鱼。你偶尔会想起当年链上的喧嚣，但从不后悔。你觉得，能和家人一起听海浪的声音，就是最大的财富。' },
+  rug_caught: { title: '发币被抓资产充公', desc: '发币跑路后被抓，所有资产被没收。', class: 'bad', story: '离开币圈时，你发币后想卷款跑路，结果还没来得及转移就被抓获。所有资产被冻结充公，用来赔偿受害者。你被判了重刑，链上你的项目成了反面教材。出狱时身无分文，行业早已变了天。' }
 };
 
 /** 现实类结局按档位分池（90% 从对应档位抽） */
-const REALISTIC_TRAGIC = ['beggar', 'debt_suicide', 'debt_fugitive', 'jail', 'mental_collapse', 'betrayed_all', 'destitute', 'die_alone', 'sudden_death', 'cancer_fight', 'homeless_freeze', 'gambling_ruin', 'abuse_depression', 'journalist_killed', 'climber_missing', 'programmer_burnout', 'travel_blogger_death', 'musician_depression', 'alcohol_early_death', 'dementia_forgotten', 'politician_jail', 'divorce_lonely', 'unfilial_nursing_home', 'misdiagnosis', 'stroke_collapse', 'heart_attack', 'eco_hero', 'war_survivor', 'parent_sacrifice', 'athlete_disabled', 'artist_posthumous', 'writer_hermit'];
-const REALISTIC_BAD = ['bankruptcy', 'wage_slave_debt', 'back_to_farm', 'quit_forever', 'small_loss_exit', 'rug_puller_jail'];
-const REALISTIC_NORMAL = ['nobody', 'exit_ashore', 'forget_hold', 'side_income', 'lurker', 'plain_life', 'worker_retirement_ok'];
-const REALISTIC_GOOD = ['small_rich', 'passive_life', 'kol_small', 'early_retire', 'angel_glory', 'peaceful_old_age', 'family_bliss', 'travel_world', 'retire_after_peak', 'charity_remembered', 'mountain_hermit', 'teacher_legacy', 'farmer_land', 'couple_70_same_day', 'scientist_nobel', 'doctor_hero_death', 'chef_empire', 'athlete_empire', 'lottery_late', 'philanthropist_poor', 'inherit_fortune', 'faith_transcendence', 'island_retire', 'airdrop_tycoon'];
-const REALISTIC_GREAT = ['freedom', 'mogul', 'kol_top', 'business_boss', 'vc_king', 'billionaire', 'celebrity_legend', 'chain_whale', 'dao_founder', 'nft_king', 'defi_pioneer'];
-const REALISTIC_PEAK = ['richest', 'crypto_empire', 'legend', 'satoshi_reborn', 'moon_lambo', 'memecoin_emperor', 'web3_prophecy'];
+const REALISTIC_TRAGIC = ['beggar', 'debt_suicide', 'debt_fugitive', 'jail', 'mental_collapse', 'betrayed_all', 'destitute', 'die_alone', 'sudden_death', 'cancer_fight', 'homeless_freeze', 'gambling_ruin', 'abuse_depression', 'journalist_killed', 'climber_missing', 'programmer_burnout', 'travel_blogger_death', 'musician_depression', 'alcohol_early_death', 'dementia_forgotten', 'politician_jail_fixed', 'divorce_lonely_fixed', 'unfilial_nursing_home', 'misdiagnosis', 'stroke_collapse', 'heart_attack', 'war_survivor', 'parent_sacrifice', 'athlete_disabled', 'artist_posthumous', 'writer_hermit', 'liquidated_all', 'scam_victim', 'exchange_frozen'];
+const REALISTIC_TRAGIC_WITH_ECO = ['beggar', 'debt_suicide', 'debt_fugitive', 'jail', 'mental_collapse', 'betrayed_all', 'destitute', 'die_alone', 'sudden_death', 'cancer_fight', 'homeless_freeze', 'gambling_ruin', 'abuse_depression', 'journalist_killed', 'climber_missing', 'programmer_burnout', 'travel_blogger_death', 'musician_depression', 'alcohol_early_death', 'dementia_forgotten', 'politician_jail', 'divorce_lonely', 'unfilial_nursing_home', 'misdiagnosis', 'stroke_collapse', 'heart_attack', 'eco_hero', 'war_survivor', 'parent_sacrifice', 'athlete_disabled', 'artist_posthumous', 'writer_hermit'];
+const REALISTIC_BAD = ['bankruptcy', 'wage_slave_debt', 'back_to_farm', 'quit_forever', 'rug_caught', 'forced_hodl', 'stablecoin_depeg'];
+const REALISTIC_NORMAL = ['nobody', 'exit_ashore', 'forget_hold', 'side_income', 'lurker', 'plain_life', 'worker_retirement_ok', 'nft_flipper', 'airdrop_farmer', 'discord_mod'];
+const REALISTIC_GOOD = ['small_rich', 'passive_life', 'kol_small', 'early_retire', 'angel_glory', 'peaceful_old_age', 'family_bliss', 'travel_world', 'retire_after_peak', 'charity_remembered', 'mountain_hermit', 'teacher_legacy', 'farmer_land', 'couple_70_same_day', 'scientist_nobel', 'doctor_hero_death', 'chef_chain', 'athlete_investor', 'lottery_small', 'philanthropist_poor', 'inherit_surprise', 'faith_transcendence', 'beach_retire', 'airdrop_tycoon', 'gmx_trader', 'bitcoin_maxi', 'crypto_writer', 'node_operator'];
+const REALISTIC_GREAT = ['freedom', 'mogul', 'kol_top', 'business_boss', 'vc_king', 'celebrity_legend', 'chain_whale', 'dao_founder', 'nft_king', 'defi_pioneer', 'crypto_banker', 'mining_farm', 'crypto_lawyer', 'token_economist'];
+const REALISTIC_PEAK = ['richest', 'crypto_empire', 'legend', 'satoshi_reborn', 'moon_lambo', 'memecoin_emperor', 'web3_prophecy', 'stablecoin_issuer', 'layer2_founder'];
 
 /** 其他类结局（科幻/离奇，约10% 概率无视档位抽） */
-const OTHER_ENDINGS = ['space_explorer', 'mind_upload', 'cyborg_300', 'apocalypse_survivor', 'ai_merge', 'time_traveler', 'mars_settler', 'nano_immortal', 'vr_addict_death', 'space_elevator', 'clone_fusion', 'hacker_ai_wipe', 'probe_lost', 'upload_virus', 'dystopia_suppressed', 'quantum_mad', 'gene_edit_self_aging', 'virtual_idol', 'captain_wormhole', 'alien_ambassador', 'bci_paralyzed', 'wasteland_leader', 'cryo_awake_alone', 'robot_uprising_survivor', 'moon_base_death', 'parallel_lost', 'enhanced_soldier', 'climate_hero_drown', 'space_miner_cancer', 'immortality_assassinated', 'ai_cult_leader', 'deep_sea_rupture', 'vr_admin_trapped', 'antigrav_crash', 'wormhole_trapped', 'grey_goo_sacrifice', 'cyber_hacker_hunted', 'star_war_veteran'];
+const OTHER_ENDINGS = ['space_explorer', 'mind_upload', 'cyborg_300', 'apocalypse_survivor', 'ai_merge', 'time_traveler', 'mars_settler', 'nano_immortal', 'vr_addict_death', 'space_elevator', 'clone_fusion', 'hacker_ai_wipe', 'probe_lost', 'upload_virus', 'dystopia_suppressed', 'quantum_mad', 'gene_edit_self_aging', 'virtual_idol', 'captain_wormhole', 'alien_ambassador', 'bci_paralyzed', 'wasteland_leader', 'cryo_awake_alone', 'robot_uprising_survivor', 'moon_base_death', 'parallel_lost', 'enhanced_soldier', 'climate_hero_drown', 'space_miner_cancer', 'immortality_assassinated', 'ai_cult_leader', 'deep_sea_rupture', 'vr_admin_trapped', 'antigrav_crash', 'wormhole_trapped', 'grey_goo_sacrifice', 'cyber_hacker_hunted', 'star_war_veteran', 'blockchain_afterlife', 'multi_chain_self', 'nft_afterlife', 'smart_contract_god'];
 
 const OTHER_ENDING_CHANCE = 0.1;
 
@@ -227,15 +275,17 @@ const RARITY_WEIGHTS_BY_TIER = {
 
 /** 每个结局的稀有度（用于抽选与标题颜色） */
 const ENDING_RARITY = {
-  beggar: 'common', debt_suicide: 'uncommon', debt_fugitive: 'common', jail: 'uncommon', mental_collapse: 'common', betrayed_all: 'uncommon', pig_butchering: 'uncommon', destitute: 'common', die_alone: 'common', sudden_death: 'common', cancer_fight: 'uncommon', homeless_freeze: 'common', gambling_ruin: 'uncommon', abuse_depression: 'common', journalist_killed: 'rare', climber_missing: 'uncommon', programmer_burnout: 'common', travel_blogger_death: 'uncommon', musician_depression: 'uncommon', alcohol_early_death: 'common', dementia_forgotten: 'common', politician_jail: 'uncommon', divorce_lonely: 'common', unfilial_nursing_home: 'common', misdiagnosis: 'common', stroke_collapse: 'common', heart_attack: 'common', eco_hero: 'rare', war_survivor: 'uncommon', parent_sacrifice: 'common', athlete_disabled: 'uncommon', artist_posthumous: 'rare', writer_hermit: 'uncommon',
-  bankruptcy: 'common', wage_slave_debt: 'common', back_to_farm: 'common', quit_forever: 'uncommon', small_loss_exit: 'common',
-  nobody: 'common', exit_ashore: 'uncommon', forget_hold: 'common', side_income: 'common', lurker: 'common', plain_life: 'uncommon', worker_retirement_ok: 'common',
-  small_rich: 'uncommon', passive_life: 'rare', kol_small: 'uncommon', early_retire: 'rare', angel_glory: 'rare', peaceful_old_age: 'rare', family_bliss: 'uncommon', travel_world: 'rare', retire_after_peak: 'epic', charity_remembered: 'epic', mountain_hermit: 'uncommon', teacher_legacy: 'rare', farmer_land: 'uncommon', couple_70_same_day: 'rare', scientist_nobel: 'epic', doctor_hero_death: 'epic', chef_empire: 'rare', athlete_empire: 'epic', lottery_late: 'uncommon', philanthropist_poor: 'epic', inherit_fortune: 'uncommon', faith_transcendence: 'uncommon', island_retire: 'rare',
-  freedom: 'legendary', mogul: 'epic', kol_top: 'epic', business_boss: 'legendary', vc_king: 'legendary', billionaire: 'legendary', celebrity_legend: 'epic',
-  richest: 'mythic', crypto_empire: 'mythic', legend: 'supreme',
+  beggar: 'common', debt_suicide: 'uncommon', debt_fugitive: 'common', jail: 'uncommon', mental_collapse: 'common', betrayed_all: 'uncommon', pig_butchering: 'uncommon', destitute: 'common', die_alone: 'common', sudden_death: 'common', cancer_fight: 'uncommon', homeless_freeze: 'common', gambling_ruin: 'uncommon', abuse_depression: 'common', journalist_killed: 'rare', climber_missing: 'uncommon', programmer_burnout: 'common', travel_blogger_death: 'uncommon', musician_depression: 'uncommon', alcohol_early_death: 'common', dementia_forgotten: 'common', politician_jail_fixed: 'uncommon', divorce_lonely_fixed: 'common', unfilial_nursing_home: 'common', misdiagnosis: 'common', stroke_collapse: 'common', heart_attack: 'common', eco_hero: 'rare', war_survivor: 'uncommon', parent_sacrifice: 'common', athlete_disabled: 'uncommon', artist_posthumous: 'rare', writer_hermit: 'uncommon',
+  bankruptcy: 'common', wage_slave_debt: 'common', back_to_farm: 'common', quit_forever: 'uncommon', rug_caught: 'rare', forced_hodl: 'uncommon', stablecoin_depeg: 'uncommon',
+  nobody: 'common', exit_ashore: 'uncommon', forget_hold: 'common', side_income: 'common', lurker: 'common', plain_life: 'uncommon', worker_retirement_ok: 'common', nft_flipper: 'uncommon', airdrop_farmer: 'uncommon', discord_mod: 'common',
+  small_rich: 'uncommon', passive_life: 'rare', kol_small: 'uncommon', early_retire: 'rare', angel_glory: 'rare', peaceful_old_age: 'rare', family_bliss: 'uncommon', travel_world: 'rare', retire_after_peak: 'epic', charity_remembered: 'epic', mountain_hermit: 'uncommon', teacher_legacy: 'rare', farmer_land: 'uncommon', couple_70_same_day: 'rare', scientist_nobel: 'epic', doctor_hero_death: 'epic', chef_chain: 'uncommon', athlete_investor: 'rare', lottery_small: 'uncommon', philanthropist_poor: 'epic', inherit_surprise: 'uncommon', faith_transcendence: 'uncommon', beach_retire: 'rare', airdrop_tycoon: 'epic', gmx_trader: 'rare', bitcoin_maxi: 'rare', crypto_writer: 'rare', node_operator: 'uncommon',
+  freedom: 'legendary', mogul: 'epic', kol_top: 'epic', business_boss: 'legendary', vc_king: 'legendary', celebrity_legend: 'epic', chain_whale: 'epic', dao_founder: 'legendary', nft_king: 'epic', defi_pioneer: 'legendary', crypto_banker: 'epic', mining_farm: 'epic', crypto_lawyer: 'epic', token_economist: 'legendary',
+  richest: 'mythic', crypto_empire: 'mythic', legend: 'supreme', satoshi_reborn: 'supreme', moon_lambo: 'mythic', memecoin_emperor: 'mythic', web3_prophecy: 'supreme', stablecoin_issuer: 'mythic', layer2_founder: 'mythic',
   space_explorer: 'rare', mind_upload: 'epic', cyborg_300: 'epic', apocalypse_survivor: 'rare', ai_merge: 'legendary', time_traveler: 'legendary', mars_settler: 'epic', nano_immortal: 'epic', vr_addict_death: 'uncommon', space_elevator: 'rare', clone_fusion: 'epic', hacker_ai_wipe: 'legendary', probe_lost: 'rare', upload_virus: 'uncommon', dystopia_suppressed: 'epic', quantum_mad: 'rare', zombie_apocalypse: 'epic', gene_edit_self_aging: 'rare', virtual_idol: 'uncommon', captain_wormhole: 'epic', alien_ambassador: 'epic', bci_paralyzed: 'rare', wasteland_leader: 'rare', cryo_awake_alone: 'rare', robot_uprising_survivor: 'rare', moon_base_death: 'epic', parallel_lost: 'epic', enhanced_soldier: 'rare', climate_hero_drown: 'rare', space_miner_cancer: 'uncommon', immortality_assassinated: 'legendary', ai_cult_leader: 'epic', deep_sea_rupture: 'uncommon', vr_admin_trapped: 'rare', antigrav_crash: 'rare', wormhole_trapped: 'legendary', grey_goo_sacrifice: 'mythic', cyber_hacker_hunted: 'epic', star_war_veteran: 'rare',
-  // 新增结局补足紫橙红金
-  chain_whale: 'epic', dao_founder: 'legendary', nft_king: 'epic', defi_pioneer: 'legendary', satoshi_reborn: 'supreme', moon_lambo: 'mythic', rug_puller_jail: 'rare', airdrop_tycoon: 'epic', memecoin_emperor: 'mythic', web3_prophecy: 'supreme',
+  // 新增科幻结局
+  blockchain_afterlife: 'epic', multi_chain_self: 'epic', nft_afterlife: 'uncommon', smart_contract_god: 'legendary',
+  // 悲剧类新增
+  liquidated_all: 'uncommon', scam_victim: 'common', exchange_frozen: 'uncommon',
 };
 
 /** 按稀有度从池中抽一条结局；先按档位权重 roll 稀有度，再在该稀有度内随机 */
@@ -252,13 +302,30 @@ function pickEndingByRarity(pool, tier) {
   return finalPool[Math.floor(Math.random() * finalPool.length)];
 }
 
-/** 从池中抽一条结局；约10%概率改为从「其他类」池抽取，且按稀有度权重抽 */
-function pickFromPool(pool, tier) {
+/** 从池中抽一条结局；根据市场哲学调整 weird 结局概率 */
+function pickFromPool(pool, tier, state) {
   const actualTier = tier || 'normal';
-  if (Math.random() < OTHER_ENDING_CHANCE && OTHER_ENDINGS.length > 0) {
+  // 使用根据市场哲学调整后的 weird 结局概率
+  const weirdChance = state ? getWeirdEndingChance(state) : OTHER_ENDING_CHANCE;
+  
+  // 检查是否有结局池调整（如虚无主义强制切到 weird 池）
+  let finalPool = pool;
+  let finalTier = actualTier;
+  
+  if (state) {
+    const adjustment = getAdjustedEndingPool(state, pool, tier);
+    if (adjustment.forced) {
+      return pickEndingByRarity(adjustment.pool, adjustment.tier);
+    }
+    finalPool = adjustment.pool;
+    finalTier = adjustment.tier;
+  }
+  
+  // 按调整后的概率决定是否进入 weird 结局池
+  if (Math.random() < weirdChance && OTHER_ENDINGS.length > 0) {
     return pickEndingByRarity(OTHER_ENDINGS, 'weird');
   }
-  return pickEndingByRarity(pool, actualTier);
+  return pickEndingByRarity(finalPool, finalTier);
 }
 
 /** 净资产 = 现金 - 负债，用于结局与显示 */
@@ -275,6 +342,74 @@ function getTraitBadBias(state) {
   return Math.max(0, Math.min(1, 0.5 + badBias));
 }
 
+/** 根据市场哲学和性格特质获取 weird 结局概率调整系数
+ * 市场哲学影响:
+ *   技术派: weird-5%
+ *   消息面: 标准概率
+ *   价值投资: weird-5%
+ *   虚无主义: weird+15%
+ * 性格特质影响:
+ *   实用主义者: weird-8%
+ *   均衡派: 标准
+ *   幻想家: weird+12%
+ */
+function getWeirdEndingChance(state) {
+  const philosophy = state.philosophy || 'news';
+  const personality = state.personality || 'balanced';
+  const baseChance = OTHER_ENDING_CHANCE; // 0.1
+  
+  // 市场哲学调整
+  let philMod = 0;
+  switch (philosophy) {
+    case 'technical': philMod = -0.05; break;
+    case 'value': philMod = -0.05; break;
+    case 'nihilism': philMod = 0.15; break;
+    case 'news':
+    default: philMod = 0; break;
+  }
+  
+  // 性格特质调整
+  let persMod = 0;
+  switch (personality) {
+    case 'pragmatist': persMod = -0.08; break;
+    case 'dreamer': persMod = 0.12; break;
+    case 'balanced':
+    default: persMod = 0; break;
+  }
+  
+  // 综合计算（最低2%，最高35%）
+  return Math.max(0.02, Math.min(0.35, baseChance + philMod + persMod));
+}
+
+/** 根据市场哲学获取结局池调整
+ * 某些哲学会解锁专属结局或改变结局倾向
+ */
+function getAdjustedEndingPool(state, pool, tier) {
+  const philosophy = state.philosophy || 'news';
+  let adjustedPool = [...pool];
+  
+  // 虚无主义增加更多 weird 结局到可用池
+  if (philosophy === 'nihilism' && tier !== 'weird') {
+    // 有概率从其他池切换到 weird 池
+    if (Math.random() < 0.15) {
+      return { pool: OTHER_ENDINGS, tier: 'weird', forced: true };
+    }
+  }
+  
+  // 技术派更容易出 chain_whale/defi_pioneer
+  if (philosophy === 'technical' && tier === 'great') {
+    // 如果是 great 池，增加 chain_whale 权重（复制一次增加概率）
+    if (adjustedPool.includes('chain_whale')) {
+      adjustedPool.push('chain_whale');
+    }
+    if (adjustedPool.includes('defi_pioneer')) {
+      adjustedPool.push('defi_pioneer');
+    }
+  }
+  
+  return { pool: adjustedPool, tier, forced: false };
+}
+
 /** 根据状态或强制ID得到人生结局ID（用于 endGame 展示）. 悲惨/坏结局只有「亏完」才合理，有几十万不算惨。 */
 function getLifeEndingId(state, forcedId) {
   const w = getNetWealth(state);
@@ -286,31 +421,36 @@ function getLifeEndingId(state, forcedId) {
   if (Math.random() < 0.01) return 'zombie_apocalypse';
 
   function rollBadVsTragic(tragicChance) {
-    return Math.random() < tragicChance ? pickFromPool(REALISTIC_TRAGIC, 'tragic') : pickFromPool(REALISTIC_BAD, 'bad');
+    return Math.random() < tragicChance ? pickFromPool(REALISTIC_TRAGIC, 'tragic', state) : pickFromPool(REALISTIC_BAD, 'bad', state);
   }
   function rollBadVsNormal(badChance) {
-    return Math.random() < badChance ? pickFromPool(REALISTIC_BAD, 'bad') : pickFromPool(REALISTIC_NORMAL, 'normal');
+    return Math.random() < badChance ? pickFromPool(REALISTIC_BAD, 'bad', state) : pickFromPool(REALISTIC_NORMAL, 'normal', state);
   }
 
   // ========== 只有 0 或负资产才出悲惨/坏结局 ==========
   if (w <= 0) {
-    return rollBadVsTragic(0.5 + badBias * 0.4);
+    // 负资产时排除 eco_hero（环保斗士需要正资产才能达成）
+    const tragicPool = REALISTIC_TRAGIC;
+    const badPool = REALISTIC_BAD;
+    return Math.random() < (0.5 + badBias * 0.4) 
+      ? pickFromPool(tragicPool, 'tragic', state) 
+      : pickFromPool(badPool, 'bad', state);
   }
 
   // ========== 0～20 万：普通、好 ==========
   if (w <= 200000) {
-    return Math.random() < (0.4 + badBias * 0.2) ? pickFromPool(REALISTIC_GOOD, 'good') : pickFromPool(REALISTIC_NORMAL, 'normal');
+    return Math.random() < (0.4 + badBias * 0.2) ? pickFromPool(REALISTIC_GOOD, 'good', state) : pickFromPool(REALISTIC_NORMAL, 'normal', state);
   }
   // ========== 20 万～300 万：好 ==========
   if (w <= 3e6) {
-    return pickFromPool(REALISTIC_GOOD, 'good');
+    return pickFromPool(REALISTIC_GOOD, 'good', state);
   }
   // ========== 300 万～5000 万：大成 ==========
   if (w <= 5e7) {
-    return pickFromPool(REALISTIC_GREAT, 'great');
+    return pickFromPool(REALISTIC_GREAT, 'great', state);
   }
   // ========== 大于 5000 万：大成、巅峰 ==========
-  return Math.random() < 0.5 ? pickFromPool(REALISTIC_GREAT, 'great') : pickFromPool(REALISTIC_PEAK, 'peak');
+  return Math.random() < 0.5 ? pickFromPool(REALISTIC_GREAT, 'great', state) : pickFromPool(REALISTIC_PEAK, 'peak', state);
 }
 
 let game = {
@@ -323,6 +463,11 @@ let game = {
   marketPhase: 'sideway',
   marketTicksLeft: 0,
   lastRunSummary: null,
+  decisionMode: 'auto', // 'auto' | 'manual'
+  pendingDecision: null,
+  decisionTimer: null,
+  decisionTimeLeft: 0,
+  decisionTimeout: 10000, // 手动模式决策限时10秒
 };
 
 function getDefaultState() {
@@ -356,6 +501,247 @@ function getDefaultState() {
 }
 
 const PATH_IDS = ['kol', 'job', 'trading', 'launch', 'invest', 'staking', 'airdrop'];
+
+/** ==================== 关键决策点系统 ==================== */
+const DECISION_POOL = [
+  {
+    id: 'bull_coming',
+    title: '📈 牛市来了？',
+    desc: '市场开始躁动，社区里都在喊「牛回速归」，你决定...',
+    condition: (s) => s.year >= 1 && s.week === 6 && Math.random() < 0.6,
+    choices: [
+      { emoji: '🚀', text: '全仓梭哈', hint: '高风险高收益', effect: (s) => { s.runRiskRewardMult *= 2.5; s.luck = Math.min(1, s.luck + 0.15); return '你all in了，波动率拉满！'; } },
+      { emoji: '⚖️', text: '半仓试探', hint: '稳健操作', effect: (s) => { s.runRiskRewardMult *= 1.3; return '你选择了稳健，进退有度。'; } },
+      { emoji: '🏃', text: '减仓观望', hint: '保守策略', effect: (s) => { s.runRiskRewardMult *= 0.6; s.rationality = Math.min(1, s.rationality + 0.1); return '你选择了观望，现金为王。'; } },
+    ]
+  },
+  {
+    id: 'bear_panic',
+    title: '📉 暴跌恐慌',
+    desc: '市场连续下跌，你的持仓已经亏了30%，你决定...',
+    condition: (s) => getNetWealth(s) < (s.capital * 0.7) && Math.random() < 0.5,
+    choices: [
+      { emoji: '💎', text: '死拿不动', hint: '相信会回本', effect: (s) => { s.strategy = Math.min(1, s.strategy + 0.1); s.runRiskRewardMult *= 0.9; return '你选择了死拿，时间会证明一切。'; } },
+      { emoji: '✂️', text: '割肉止损', hint: '减少损失', effect: (s) => { const loss = (s.wealth || 0) * 0.15; s.wealth -= loss; s.capital *= 0.85; s.rationality = Math.min(1, s.rationality + 0.15); return `你割肉了，损失 ${Math.floor(loss)} U，但保住了本金。`; } },
+      { emoji: '📉', text: '反手做空', hint: '赌继续跌', effect: (s) => { s.runRiskRewardMult *= 2; s.luck = Math.max(0, s.luck - 0.1); return '你反手做空，成败在此一举！'; } },
+    ]
+  },
+  {
+    id: 'gem_project',
+    title: '💎 发现「宝石」项目',
+    desc: '群里有人推荐一个新项目，说是「下一个百倍币」，你决定...',
+    condition: (s) => s.year >= 1 && Math.random() < 0.4,
+    choices: [
+      { emoji: '🎯', text: 'All in干', hint: '要么暴富要么归零', effect: (s) => { s.runRiskRewardMult *= 3; s.luck = Math.max(0, s.luck - 0.2); return '你All in了这个「宝石」项目！'; } },
+      { emoji: '🎲', text: '小仓位玩', hint: '亏了不心疼', effect: (s) => { s.runRiskRewardMult *= 1.2; return '你用小仓位参与，风险可控。'; } },
+      { emoji: '🚫', text: '肯定是骗局', hint: '理性拒绝', effect: (s) => { s.rationality = Math.min(1, s.rationality + 0.15); return '你识破了骗局，躲过一劫。'; } },
+    ]
+  },
+  {
+    id: 'debt_crisis',
+    title: '💸 债务危机',
+    desc: '你负债累累，债主开始催款，你决定...',
+    condition: (s) => (s.debt || 0) > (s.wealth || 0) * 0.5 && Math.random() < 0.6,
+    choices: [
+      { emoji: '🎰', text: '借新还旧', hint: '继续赌', effect: (s) => { s.debt += 50000; s.wealth += 30000; s.riskPreference = Math.min(1, s.riskPreference + 0.2); return '你又借了 50000 U，希望能翻本。'; } },
+      { emoji: '💼', text: '找份工作', hint: '打工还债', effect: (s) => { s.debt = Math.max(0, s.debt - 20000); s.runRiskRewardMult *= 0.5; s.pathWeights.job += 2; return '你决定先打工还债，踏实一点。'; } },
+      { emoji: '🏃', text: '换个城市', hint: '跑路躲债', effect: (s) => { s.debt = Math.floor(s.debt * 0.3); s.social = Math.max(0, s.social - 0.3); return '你选择了跑路，债务减少但声望受损。'; } },
+    ]
+  },
+  {
+    id: 'kol_opportunity',
+    title: '🎤 KOL之路',
+    desc: '你的推文突然小爆，有项目方找你合作，你决定...',
+    condition: (s) => s.mainPath === 'kol' && s.fans > 5000 && Math.random() < 0.5,
+    choices: [
+      { emoji: '💰', text: '接广告', hint: '先赚一笔', effect: (s) => { s.wealth += 10000; s.fans += 2000; return '你接了广告，赚到 10000 U，粉丝增加！'; } },
+      { emoji: '🤝', text: '谈长期合作', hint: '建立关系', effect: (s) => { s.wealth += 5000; s.social = Math.min(1, s.social + 0.2); return '你建立了长期合作关系，人脉增加。'; } },
+      { emoji: '🚫', text: '拒绝割韭菜', hint: '爱惜羽毛', effect: (s) => { s.fans += 5000; s.rationality = Math.min(1, s.rationality + 0.1); return '你拒绝了广告，粉丝更加信任你！'; } },
+    ]
+  },
+  {
+    id: 'market_phase',
+    title: '🌊 市场转折',
+    desc: '市场氛围变了，你觉得接下来会是...',
+    condition: (s) => s.week === 0 && s.year > 0 && Math.random() < 0.7,
+    choices: [
+      { emoji: '📈', text: '看多做多', hint: '押注上涨', effect: (s) => { s.runRiskRewardMult *= 1.5; game.marketPhase = 'bull'; game.marketTicksLeft = 6; return '你看多市场，准备迎接牛市！'; } },
+      { emoji: '📉', text: '看空做空', hint: '押注下跌', effect: (s) => { s.runRiskRewardMult *= 1.5; game.marketPhase = 'bear'; game.marketTicksLeft = 6; return '你看空市场，准备做空！'; } },
+      { emoji: '➡️', text: '继续震荡', hint: '观望', effect: (s) => { s.runRiskRewardMult *= 0.8; s.rationality = Math.min(1, s.rationality + 0.1); return '你认为市场还会震荡，保持观望。'; } },
+    ]
+  },
+  {
+    id: 'black_swan',
+    title: '🦢 黑天鹅预警',
+    desc: '你听到风声，可能有大事要发生，你决定...',
+    condition: (s) => s.year >= 2 && Math.random() < 0.3,
+    choices: [
+      { emoji: '🛡️', text: '清仓避险', hint: '保住本金', effect: (s) => { s.capital = Math.floor(s.capital * 0.9); s.wealth = Math.floor(s.wealth * 0.95); s.rationality = Math.min(1, s.rationality + 0.2); return '你清仓避险，虽然少赚但保住了大部分本金。'; } },
+      { emoji: '🎰', text: '赌一把大的', hint: '危机也是机会', effect: (s) => { s.runRiskRewardMult *= 3; s.luck = Math.max(0, s.luck - 0.15); return '你决定赌一把，富贵险中求！'; } },
+      { emoji: '🤷', text: '装死不动', hint: '佛系持币', effect: (s) => { s.strategy = Math.min(1, s.strategy + 0.1); return '你选择装死，长期持有不动摇。'; } },
+    ]
+  },
+];
+
+/** 检查并触发决策点 - 每年最多触发一次 */
+function checkAndTriggerDecision() {
+  if (!game.running || game.state.ended) return false;
+  if (game.pendingDecision) return true; // 已有待处理的决策
+  
+  const s = game.state;
+  
+  // 检查本决策年是否已经触发过决策（第1年1月不触发，给玩家适应时间）
+  if (s.year === 0 && s.week < 2) return false;
+  
+  // 使用当前年月作为key，确保每年只触发一次
+  const currentYearKey = `year_${s.year}`;
+  if (!s.usedDecisions) s.usedDecisions = [];
+  if (s.usedDecisions.includes(currentYearKey)) return false;
+  
+  // 只在特定月份触发（每年第6月，即年中）
+  if (s.week !== 6) return false;
+  
+  const eligibleDecisions = DECISION_POOL.filter(d => d.condition(s));
+  
+  if (eligibleDecisions.length === 0) return false;
+  
+  // 随机选择一个决策
+  const decision = eligibleDecisions[Math.floor(Math.random() * eligibleDecisions.length)];
+  
+  // 记录本决策年已触发
+  s.usedDecisions.push(currentYearKey);
+  
+  game.pendingDecision = decision;
+  
+  if (game.decisionMode === 'manual') {
+    showDecisionModal(decision);
+    return true;
+  } else {
+    // 自动模式：自动选择
+    autoResolveDecision(decision);
+    return false;
+  }
+}
+
+/** 显示决策弹窗（手动模式） */
+function showDecisionModal(decision) {
+  game.paused = true;
+  if (game.tickInterval) { clearInterval(game.tickInterval); game.tickInterval = null; }
+  
+  const overlay = document.getElementById('decisionOverlay');
+  const title = document.getElementById('decisionTitle');
+  const desc = document.getElementById('decisionDesc');
+  const choices = document.getElementById('decisionChoices');
+  const timerBar = document.getElementById('timerBar');
+  
+  title.textContent = decision.title;
+  desc.textContent = decision.desc;
+  
+  choices.innerHTML = '';
+  decision.choices.forEach((choice, index) => {
+    const btn = document.createElement('button');
+    btn.className = 'decision-choice-btn';
+    btn.innerHTML = `
+      <span class="emoji">${choice.emoji}</span>
+      <span class="text">${choice.text}<br><span class="hint">${choice.hint}</span></span>
+    `;
+    btn.onclick = () => resolveDecision(index);
+    choices.appendChild(btn);
+  });
+  
+  overlay.classList.add('show');
+  
+  // 启动倒计时
+  game.decisionTimeLeft = game.decisionTimeout;
+  if (game.decisionTimer) clearInterval(game.decisionTimer);
+  
+  game.decisionTimer = setInterval(() => {
+    game.decisionTimeLeft -= 100;
+    const pct = (game.decisionTimeLeft / game.decisionTimeout) * 100;
+    timerBar.style.width = pct + '%';
+    
+    if (game.decisionTimeLeft <= 0) {
+      // 超时自动随机选择
+      resolveDecision(Math.floor(Math.random() * decision.choices.length));
+    }
+  }, 100);
+}
+
+/** 自动决策（自动模式） */
+function autoResolveDecision(decision) {
+  const s = game.state;
+  
+  // 根据人物特性选择
+  const rationality = s.rationality || 0.5;
+  const riskPreference = s.riskPreference || 0.5;
+  const luck = s.luck || 0.5;
+  
+  // 计算每个选项的权重
+  const weights = decision.choices.map((c, i) => {
+    // 简单启发：理性高偏好保守选项（通常是最后一个），风险偏好高偏好激进选项（通常是第一个）
+    let weight = 1;
+    if (i === 0) weight = riskPreference * 2 + (1 - rationality);
+    else if (i === decision.choices.length - 1) weight = rationality * 2;
+    else weight = 1;
+    return Math.max(0.1, weight);
+  });
+  
+  const total = weights.reduce((a, b) => a + b, 0);
+  let r = Math.random() * total;
+  let choiceIndex = 0;
+  for (let i = 0; i < weights.length; i++) {
+    r -= weights[i];
+    if (r <= 0) { choiceIndex = i; break; }
+  }
+  
+  applyDecision(decision, choiceIndex, true);
+}
+
+/** 手动决策选择 */
+function resolveDecision(choiceIndex) {
+  if (game.decisionTimer) {
+    clearInterval(game.decisionTimer);
+    game.decisionTimer = null;
+  }
+  
+  const overlay = document.getElementById('decisionOverlay');
+  overlay.classList.remove('show');
+  
+  applyDecision(game.pendingDecision, choiceIndex, false);
+}
+
+/** 应用决策效果 */
+function applyDecision(decision, choiceIndex, isAuto) {
+  const s = game.state;
+  const choice = decision.choices[choiceIndex];
+  
+  // 记录已使用
+  s.usedDecisions.push(decision.id);
+  
+  // 应用效果
+  const result = choice.effect(s);
+  
+  // 记录日志
+  const timeStr = `第${s.year + 1}年${s.week + 1}月`;
+  const modeText = isAuto ? '(自动)' : '(手动)';
+  s.eventLog.unshift({ 
+    time: timeStr, 
+    text: `[决策] ${decision.title}: ${choice.text} ${modeText} → ${result}`, 
+    type: 'mixed', 
+    netWealth: getNetWealth(s) 
+  });
+  
+  game.pendingDecision = null;
+  
+  // 恢复游戏
+  if (game.decisionMode === 'manual') {
+    game.paused = false;
+    startTickLoop();
+  }
+  
+  updateUI();
+  renderLog();
+}
 
 /** 根据人物设定计算各路径的权重（0~1），用于加权随机抽一条路径 */
 function computePathWeights(traits) {
@@ -394,8 +780,12 @@ function startNewGame(initCapital, traits) {
   const weights = computePathWeights(traits || {});
   const path = pickPathByWeights(weights);
   const state = getDefaultState();
-  const playerIdInput = document.getElementById('initPlayerId');
-  state.playerId = (playerIdInput && playerIdInput.value) ? String(playerIdInput.value).trim().slice(0, 32) : '';
+  // 使用传入的 playerId（从输入框获取），若无则为空
+  if (traits && traits.playerId) {
+    state.playerId = traits.playerId;
+  } else {
+    state.playerId = '';
+  }
   state.capital = Math.max(1000, Math.min(50000, initCapital));
   state.wealth = state.capital;
   state.debt = 0;
@@ -406,6 +796,8 @@ function startNewGame(initCapital, traits) {
   state.rationality = traits && traits.rationality != null ? traits.rationality : 0.5;
   state.strategy = traits && traits.strategy != null ? traits.strategy : 0.5;
   state.riskPreference = traits && traits.riskPreference != null ? traits.riskPreference : 0.5;
+  state.philosophy = traits && traits.philosophy ? traits.philosophy : 'news'; // 市场哲学: technical/news/value/nihilism
+  state.personality = traits && traits.personality ? traits.personality : 'balanced'; // 性格特质: pragmatist/balanced/dreamer
   // 该路径 5% 先天圣体（全正面）、5% 倒霉圣体（全负面+一直借钱）
   const saintRoll = Math.random();
   if (saintRoll < 0.05) state.pathSaint = 'blessed';
@@ -456,6 +848,12 @@ function runTick() {
     return;
   }
   const isLastMonth = (s.year === MAX_YEARS - 1 && s.week === TICKS_PER_YEAR - 2);
+  
+  // 检查是否需要触发决策点
+  if (checkAndTriggerDecision()) {
+    return; // 有决策正在处理，暂停tick
+  }
+  
   // 时间推进：1 tick = 1 月
   s.week++;
   if (s.week >= TICKS_PER_YEAR) {
@@ -568,10 +966,7 @@ function runTick() {
   }
 
   // 游戏结束条件：仅 A10 或 跑满五年（财富归零/负资产不结束，可负债跑完）
-  if (s.wealth >= A10) {
-    endGame('freedom');
-    return;
-  }
+
   if (s.year >= MAX_YEARS) {
     endGame('time_up');
     return;
@@ -747,7 +1142,8 @@ function applyEventEffect(ev, choiceIndex) {
     s.debt = (s.debt || 0) + add;
     result.debtAdd = add;
   }
-  if (s.wealth >= A10) endGame('freedom');
+  // A10提前结束游戏设定已移除 - 现在必须跑满五年
+  // if (s.wealth >= A10) endGame('freedom');
   return result;
 }
 
@@ -767,7 +1163,7 @@ function pushLog(ev, outcome, result) {
   } else {
     const parts = [ev.name];
     if (outcome) parts.push(' → ' + outcome);
-    if (result && (result.gain > 0 || result.loss > 0)) parts.push(result.gain > 0 ? '，收益 +' + formatU(result.gain) + ' U' : '，亏损 ' + formatU(result.loss) + ' U');
+    if (result && (result.gain > 0 || result.loss > 0)) parts.push(result.gain > 0 ? '，收益 +' + formatU(result.gain) : '，亏损 ' + formatU(result.loss));
     text = parts.join('');
   }
   s.eventLog.unshift({ time: timeStr, text, type: ev.type || 'negative', netWealth: getNetWealth(s) });
@@ -780,7 +1176,7 @@ function renderLog() {
   if (!s) return;
   const el = document.getElementById('eventLog');
   el.innerHTML = s.eventLog.map(e => {
-    const netStr = e.netWealth != null ? formatU(e.netWealth) + ' U' : '—';
+    const netStr = e.netWealth != null ? formatU(e.netWealth) : '—';
     return `<div class="log-entry ${e.type}"><span class="log-net">${netStr}</span><span class="time">${e.time}</span>${e.text}</div>`;
   }).join('');
 }
@@ -864,7 +1260,7 @@ function showEndingScreen(title, storyFormatted, netW, rarity, unlockedObjs) {
   const unEl = document.getElementById('endingUnlocked');
   const playerIdEl = document.getElementById('endingPlayerId');
   if (box) box.className = 'ending-box rarity-' + rarity;
-  if (titleEl) titleEl.textContent = title + ' · ' + formatU(netW) + ' U';
+  if (titleEl) titleEl.textContent = title + ' · ' + formatU(netW);
   if (playerIdEl) {
     const pid = (game.state && game.state.playerId) ? String(game.state.playerId).trim() : '';
     if (pid) { playerIdEl.textContent = '玩家 ID: ' + pid; playerIdEl.style.display = 'block'; } else { playerIdEl.style.display = 'none'; playerIdEl.textContent = ''; }
@@ -904,7 +1300,7 @@ const ACHIEVEMENTS = [
   { id: 'ending_moon_lambo', name: '月球兰博', desc: '达成月球兰博结局', rarity: 'mythic', check: p => p.endingId === 'moon_lambo' },
   { id: 'ending_legend', name: '链上传说', desc: '达成链上传说结局', rarity: 'supreme', check: p => p.endingId === 'legend' },
   { id: 'run_5y', name: '跑满五年', desc: '模拟跑满 5 年再结算', rarity: 'rare', check: p => Number(p.year) >= MAX_YEARS - 1 && Number(p.week) >= TICKS_PER_YEAR - 1 },
-  { id: 'bankrupt_1y', name: '一年内破产', desc: '第 1 年内净资产归零或负债', rarity: 'uncommon', check: p => (Number(p.year) === 0 || (Number(p.year) === 1 && Number(p.week) === 0)) && Number(p.netWealth) <= 0 },
+  
   { id: 'catastrophe', name: '黑天鹅幸存', desc: '单局遭遇过 80%～150% 暴雷', rarity: 'uncommon', check: p => p.hadCatastrophe === true },
   { id: 'windfall_100', name: '百倍暴富', desc: '单局触发过百倍暴富', rarity: 'rare', check: p => p.hadWindfall100 === true },
   { id: 'windfall_1000', name: '千倍暴富', desc: '单局触发过千倍暴富', rarity: 'epic', check: p => p.hadWindfall1000 === true },
@@ -930,7 +1326,7 @@ const ACHIEVEMENTS = [
   { id: 'zero_fans', name: '路人甲', desc: '以 0 粉丝结束一局', rarity: 'common', check: p => Number(p.fans ?? 0) <= 0 },
   { id: 'gone_zero', name: '归零', desc: '以净资产≤0 结束一局（归零或负债即算）', rarity: 'common', check: p => Number(p.netWealth) <= 0 },
   { id: 'rich_and_famous', name: '又富又红', desc: '单局净资产≥100 万且粉丝≥10 万', rarity: 'epic', check: p => Number(p.netWealth) >= 1e6 && Number(p.fans) >= 1e5 },
-  { id: 'early_exit', name: '及时止损', desc: '2 年内达成上岸或小亏离场类结局', rarity: 'rare', check: p => { const y = (Number(p.year) || 0) * TICKS_PER_YEAR + (Number(p.week) || 0); return y <= 24 && ['exit_ashore', 'small_loss_exit', 'quit_forever'].includes(p.endingId); } },
+  { id: 'early_exit', name: '及时止损', desc: '2 年内达成上岸或戒断类结局', rarity: 'rare', check: p => { const y = (Number(p.year) || 0) * TICKS_PER_YEAR + (Number(p.week) || 0); return y <= 24 && ['exit_ashore', 'quit_forever'].includes(p.endingId); } },
   { id: 'chain_whale_ending', name: '链上巨鲸', desc: '达成链上巨鲸结局', rarity: 'epic', check: p => p.endingId === 'chain_whale' },
   { id: 'dao_founder_ending', name: 'DAO 创始人', desc: '达成 DAO 创始人结局', rarity: 'legendary', check: p => p.endingId === 'dao_founder' },
   { id: 'ending_early_retire', name: '提前退休', desc: '达成提前退休结局', rarity: 'rare', check: p => p.endingId === 'early_retire' },
@@ -945,7 +1341,7 @@ const ACHIEVEMENTS = [
   { id: 'ending_airdrop_tycoon', name: '空投大亨', desc: '达成空投大亨结局', rarity: 'epic', check: p => p.endingId === 'airdrop_tycoon' },
   { id: 'ending_good', name: '善终', desc: '达成任意美好类结局', rarity: 'uncommon', check: p => (LIFE_ENDINGS[p.endingId] || {}).class === 'good' },
   { id: 'zero_debt', name: '零负债通关', desc: '以零负债结束一局', rarity: 'rare', check: p => Number(p.debt ?? 0) <= 0 },
-  { id: 'bankrupt_3y', name: '三年内破产', desc: '第 3 年内净资产归零或负债', rarity: 'rare', check: p => Number(p.year ?? 0) < 3 && Number(p.netWealth) <= 0 },
+  
   { id: 'ending_mogul', name: '项目大佬', desc: '达成项目大佬结局', rarity: 'epic', check: p => p.endingId === 'mogul' },
   { id: 'ending_richest', name: '首富', desc: '达成首富结局', rarity: 'mythic', check: p => p.endingId === 'richest' },
   { id: 'ending_web3_prophecy', name: 'Web3 预言', desc: '达成 Web3 预言结局', rarity: 'supreme', check: p => p.endingId === 'web3_prophecy' },
@@ -955,7 +1351,7 @@ const ACHIEVEMENTS = [
   { id: 'ending_doctor_hero_death', name: '医者仁心', desc: '达成医生救人无数自己病逝结局', rarity: 'epic', check: p => p.endingId === 'doctor_hero_death' },
   { id: 'ending_chef_empire', name: '厨师帝国', desc: '达成厨师开连锁帝国结局', rarity: 'rare', check: p => p.endingId === 'chef_empire' },
   { id: 'ending_athlete_empire', name: '奥运金牌后商业帝国', desc: '达成运动员奥运金牌后商业帝国结局', rarity: 'epic', check: p => p.endingId === 'athlete_empire' },
-  { id: 'ending_billionaire', name: '亿万富翁', desc: '达成亿万富翁结局', rarity: 'legendary', check: p => p.endingId === 'billionaire' },
+  
   { id: 'ending_vc_king', name: '风投之王', desc: '达成风投之王结局', rarity: 'legendary', check: p => p.endingId === 'vc_king' },
   { id: 'ending_business_boss', name: '商业大佬', desc: '达成商业大佬结局', rarity: 'legendary', check: p => p.endingId === 'business_boss' },
   { id: 'ending_kol_top', name: 'KOL 顶流', desc: '达成 KOL 顶流结局', rarity: 'epic', check: p => p.endingId === 'kol_top' },
@@ -998,6 +1394,43 @@ const ACHIEVEMENTS = [
   { id: 'ending_inherit_fortune', name: '继承巨款', desc: '达成突然继承巨额遗产结局', rarity: 'uncommon', check: p => p.endingId === 'inherit_fortune' },
   { id: 'ending_lottery_late', name: '晚年中奖', desc: '达成晚年中彩票逆袭结局', rarity: 'uncommon', check: p => p.endingId === 'lottery_late' },
   { id: 'ending_philanthropist_poor', name: '捐光家产', desc: '达成慈善家捐光家产安贫乐道结局', rarity: 'rare', check: p => p.endingId === 'philanthropist_poor' },
+  
+  // ----- 新增结局成就 -----
+  // 悲剧类
+  { id: 'ending_liquidated', name: '爆仓归零', desc: '达成爆仓清算结局', rarity: 'uncommon', check: p => p.endingId === 'liquidated_all' },
+  { id: 'ending_scam', name: '土狗归零', desc: '达成All in土狗被跑路结局', rarity: 'common', check: p => p.endingId === 'scam_victim' },
+  { id: 'ending_frozen', name: '账户冻结', desc: '达成交易所冻结资产结局', rarity: 'uncommon', check: p => p.endingId === 'exchange_frozen' },
+  { id: 'ending_politician_fixed', name: '贪官落马', desc: '达成贪官落马结局', rarity: 'uncommon', check: p => p.endingId === 'politician_jail_fixed' },
+  { id: 'ending_divorce_fixed', name: '离婚三次', desc: '达成离婚三次孤独终老结局', rarity: 'common', check: p => p.endingId === 'divorce_lonely_fixed' },
+  // 坏结局
+  { id: 'ending_forced_hodl', name: '被套五年', desc: '达成被套牢五年结局', rarity: 'uncommon', check: p => p.endingId === 'forced_hodl' },
+  { id: 'ending_stable_depeg', name: '稳定币崩盘', desc: '达成稳定币脱锚结局', rarity: 'uncommon', check: p => p.endingId === 'stablecoin_depeg' },
+  { id: 'ending_rug_caught', name: '发币被抓', desc: '达成发币被抓资产充公结局', rarity: 'rare', check: p => p.endingId === 'rug_caught' },
+  // 普通类
+  { id: 'ending_nft_flipper', name: 'NFT倒爷', desc: '达成NFT倒爷结局', rarity: 'uncommon', check: p => p.endingId === 'nft_flipper' },
+  { id: 'ending_airdrop_farmer', name: '羊毛党', desc: '达成批量撸空投结局', rarity: 'uncommon', check: p => p.endingId === 'airdrop_farmer' },
+  { id: 'ending_discord_mod', name: 'Discord Mod', desc: '达成社区管理结局', rarity: 'common', check: p => p.endingId === 'discord_mod' },
+  // 好结局
+  { id: 'ending_gmx_trader', name: '衍生品大师', desc: '达成衍生品交易大师结局', rarity: 'rare', check: p => p.endingId === 'gmx_trader' },
+  { id: 'ending_bitcoin_maxi', name: '比特币Maxi', desc: '达成比特币最大主义者结局', rarity: 'rare', check: p => p.endingId === 'bitcoin_maxi' },
+  { id: 'ending_crypto_writer', name: '加密作家', desc: '达成加密作家结局', rarity: 'rare', check: p => p.endingId === 'crypto_writer' },
+  { id: 'ending_node_operator', name: '节点运营商', desc: '达成节点运营商结局', rarity: 'uncommon', check: p => p.endingId === 'node_operator' },
+  { id: 'ending_chef_chain', name: '餐饮老板', desc: '达成连锁餐饮老板结局', rarity: 'uncommon', check: p => p.endingId === 'chef_chain' },
+  { id: 'ending_athlete_investor', name: '运动员投资人', desc: '达成运动员投资人结局', rarity: 'rare', check: p => p.endingId === 'athlete_investor' },
+  { id: 'ending_beach_retire', name: '海边养老', desc: '达成海边小镇养老结局', rarity: 'rare', check: p => p.endingId === 'beach_retire' },
+  // 大成类
+  { id: 'ending_crypto_banker', name: '加密银行家', desc: '达成加密银行家结局', rarity: 'epic', check: p => p.endingId === 'crypto_banker' },
+  { id: 'ending_mining_farm', name: '矿场主', desc: '达成矿场主结局', rarity: 'epic', check: p => p.endingId === 'mining_farm' },
+  { id: 'ending_crypto_lawyer', name: '加密律师', desc: '达成加密律师结局', rarity: 'epic', check: p => p.endingId === 'crypto_lawyer' },
+  { id: 'ending_token_economist', name: '代币经济学家', desc: '达成代币经济学家结局', rarity: 'legendary', check: p => p.endingId === 'token_economist' },
+  // 巅峰类
+  { id: 'ending_stablecoin_issuer', name: '稳定币发行商', desc: '达成稳定币发行商结局', rarity: 'mythic', check: p => p.endingId === 'stablecoin_issuer' },
+  { id: 'ending_layer2_founder', name: 'L2创始人', desc: '达成以太坊L2创始人结局', rarity: 'mythic', check: p => p.endingId === 'layer2_founder' },
+  // 科幻类
+  { id: 'ending_blockchain_afterlife', name: '链上永生', desc: '达成链上永生结局', rarity: 'epic', check: p => p.endingId === 'blockchain_afterlife' },
+  { id: 'ending_multi_chain', name: '多链分身', desc: '达成多链分身结局', rarity: 'epic', check: p => p.endingId === 'multi_chain_self' },
+  { id: 'ending_nft_afterlife', name: 'NFT升天', desc: '达成NFT升天结局', rarity: 'uncommon', check: p => p.endingId === 'nft_afterlife' },
+  { id: 'ending_contract_god', name: '合约之神', desc: '达成智能合约之神结局', rarity: 'legendary', check: p => p.endingId === 'smart_contract_god' },
 ];
 
 const ACHIEVEMENT_KEY = 'memeMaxAchievements';
@@ -1100,6 +1533,11 @@ function saveGameHistory(record) {
     if (list.length > HISTORY_MAX) list.length = HISTORY_MAX;
     localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
   } catch (err) { /* quota or disabled */ }
+  
+  // 上报到在线排行榜（如果启用了）
+  if (typeof submitGameResult === 'function' && game.state) {
+    submitGameResult(game.state);
+  }
 }
 
 function getGameHistory() {
@@ -1133,9 +1571,21 @@ function updateUI() {
 }
 
 function formatU(n) {
-  if (n >= 1e6) return (n / 1e6).toFixed(2) + 'M';
-  if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
-  return Math.floor(n).toString();
+  // 使用美元货币格式显示
+  const num = Number(n) || 0;
+  const absNum = Math.abs(num);
+  const sign = num < 0 ? '-' : '';
+  
+  if (absNum >= 1e9) {
+    return sign + '$' + (absNum / 1e9).toFixed(2) + 'B';
+  }
+  if (absNum >= 1e6) {
+    return sign + '$' + (absNum / 1e6).toFixed(2) + 'M';
+  }
+  if (absNum >= 1e3) {
+    return sign + '$' + (absNum / 1e3).toFixed(1) + 'K';
+  }
+  return sign + '$' + absNum.toFixed(0);
 }
 
 function renderChart() {
@@ -1189,7 +1639,7 @@ function openLastRunModal() {
   const r = game.lastRunSummary;
   if (!r) return;
   document.getElementById('lastRunTitle').textContent = r.title || '上一局';
-  const metaParts = [formatU(r.wealth) + ' U', '第 ' + (r.year + 1) + ' 年 ' + (r.week + 1) + ' 月', (PATHS.find(p => p.id === r.path) || {}).name || r.path];
+  const metaParts = [formatU(r.wealth), '第 ' + (r.year + 1) + ' 年 ' + (r.week + 1) + ' 月', (PATHS.find(p => p.id === r.path) || {}).name || r.path];
   if (r.playerId) metaParts.unshift('ID: ' + r.playerId);
   document.getElementById('lastRunMeta').textContent = metaParts.join(' · ');
   document.getElementById('lastRunStory').textContent = r.story || '';
@@ -1227,24 +1677,100 @@ function goToStartScreen() {
 }
 
 function bindRestart() {
+  // 再来一局 - 直接重新开始，使用默认参数
   document.getElementById('btnRestart').addEventListener('click', () => {
-    goToStartScreen();
+    document.getElementById('endingScreen').classList.remove('show');
+    const bar = document.getElementById('afterEndBar');
+    if (bar) bar.style.display = 'none';
+    // 使用保存的设置开始新游戏
+    const styleMap = {
+      degen: { riskPreference: 0.85, rationality: 0.3, strategy: 0.2, social: 0.6, luck: 0.5 },
+      balanced: { riskPreference: 0.5, rationality: 0.5, strategy: 0.5, social: 0.5, luck: 0.5 },
+      diamond: { riskPreference: 0.3, rationality: 0.7, strategy: 0.9, social: 0.4, luck: 0.5 }
+    };
+    const baseTraits = styleMap[savedSettings.style] || styleMap.balanced;
+    const philosophyMap = {
+      technical: { luckMod: 0, rationalityMod: 0.15 },
+      news: { luckMod: 0.05, rationalityMod: -0.05 },
+      value: { luckMod: -0.05, rationalityMod: 0.1 },
+      nihilism: { luckMod: -0.1, rationalityMod: 0 }
+    };
+    const philEffects = philosophyMap[savedSettings.philosophy] || philosophyMap.news;
+    const personalityMap = {
+      pragmatist: { weirdMod: -0.08 },
+      balanced: { weirdMod: 0 },
+      dreamer: { weirdMod: 0.12 }
+    };
+    const personalityEffects = personalityMap[savedSettings.personality] || personalityMap.balanced;
+    // 获取保存的玩家ID
+    let savedPlayerId = '';
+    try { savedPlayerId = localStorage.getItem('memeMaxPlayerId') || ''; } catch (e) {}
+    
+    const traits = {
+      luck: Math.max(0, Math.min(1, baseTraits.luck + philEffects.luckMod)),
+      social: baseTraits.social,
+      rationality: Math.max(0, Math.min(1, baseTraits.rationality + philEffects.rationalityMod)),
+      strategy: baseTraits.strategy,
+      riskPreference: baseTraits.riskPreference,
+      style: savedSettings.style,
+      philosophy: savedSettings.philosophy,
+      personality: savedSettings.personality,
+      weirdMod: personalityEffects.weirdMod,
+      playerId: savedPlayerId
+    };
     game.state = null;
     game.running = false;
-    const btnPause = document.getElementById('btnPause');
-    if (btnPause) btnPause.style.display = 'none';
+    startNewGame(1000, traits);
   });
   document.getElementById('btnEndingDismiss')?.addEventListener('click', () => {
     dismissEndingOnly();
   });
   document.getElementById('btnRestartFromBar')?.addEventListener('click', () => {
-    goToStartScreen();
+    const bar = document.getElementById('afterEndBar');
+    if (bar) bar.style.display = 'none';
+    // 使用保存的设置开始新游戏
+    const styleMap = {
+      degen: { riskPreference: 0.85, rationality: 0.3, strategy: 0.2, social: 0.6, luck: 0.5 },
+      balanced: { riskPreference: 0.5, rationality: 0.5, strategy: 0.5, social: 0.5, luck: 0.5 },
+      diamond: { riskPreference: 0.3, rationality: 0.7, strategy: 0.9, social: 0.4, luck: 0.5 }
+    };
+    const baseTraits = styleMap[savedSettings.style] || styleMap.balanced;
+    const philosophyMap = {
+      technical: { luckMod: 0, rationalityMod: 0.15 },
+      news: { luckMod: 0.05, rationalityMod: -0.05 },
+      value: { luckMod: -0.05, rationalityMod: 0.1 },
+      nihilism: { luckMod: -0.1, rationalityMod: 0 }
+    };
+    const philEffects = philosophyMap[savedSettings.philosophy] || philosophyMap.news;
+    const personalityMap = {
+      pragmatist: { weirdMod: -0.08 },
+      balanced: { weirdMod: 0 },
+      dreamer: { weirdMod: 0.12 }
+    };
+    const personalityEffects = personalityMap[savedSettings.personality] || personalityMap.balanced;
+    
+    // 获取保存的玩家ID
+    let savedPlayerId = '';
+    try { savedPlayerId = localStorage.getItem('memeMaxPlayerId') || ''; } catch (e) {}
+    
+    const traits = {
+      luck: Math.max(0, Math.min(1, baseTraits.luck + philEffects.luckMod)),
+      social: baseTraits.social,
+      rationality: Math.max(0, Math.min(1, baseTraits.rationality + philEffects.rationalityMod)),
+      strategy: baseTraits.strategy,
+      riskPreference: baseTraits.riskPreference,
+      style: savedSettings.style,
+      philosophy: savedSettings.philosophy,
+      personality: savedSettings.personality,
+      weirdMod: personalityEffects.weirdMod,
+      playerId: savedPlayerId
+    };
     game.state = null;
     game.running = false;
-    const btnPause = document.getElementById('btnPause');
-    if (btnPause) btnPause.style.display = 'none';
+    startNewGame(1000, traits);
   });
-  document.getElementById('btnLastRunFromBar')?.addEventListener('click', openLastRunModal);
+  // 结局收起后显示"查看历史"按钮
+  document.getElementById('btnHistoryFromBar')?.addEventListener('click', openHistoryModal);
 }
 
 function openHistoryModal() {
@@ -1259,7 +1785,7 @@ function openHistoryModal() {
     ? '<p class="history-item" style="cursor:default;">暂无历史对局</p>'
     : list.map(r => {
         const pathName = (PATHS.find(p => p.id === r.path) || {}).name || r.path || '-';
-        const metaParts = [formatU(r.wealth != null ? r.wealth : 0) + ' U', '第' + ((r.year != null ? r.year : 0) + 1) + '年' + ((r.week != null ? r.week : 0) + 1) + '月', pathName];
+        const metaParts = [formatU(r.wealth != null ? r.wealth : 0), '第' + ((r.year != null ? r.year : 0) + 1) + '年' + ((r.week != null ? r.week : 0) + 1) + '月', pathName];
         if (r.playerId) metaParts.unshift('ID: ' + escapeHtml(r.playerId));
         return `<div class="history-item" data-id="${r.id}">
           <span class="hi-title">${escapeHtml(r.title || '未命名')}</span>
@@ -1284,7 +1810,7 @@ function showHistoryDetail(id) {
   listEl.style.display = 'none';
   detailEl.style.display = 'block';
   titleEl.textContent = r.title || '未命名';
-  const detailMetaParts = [formatU(r.wealth != null ? r.wealth : 0) + ' U', '粉丝 ' + formatU(r.fans || 0), '第 ' + ((r.year != null ? r.year : 0) + 1) + ' 年 ' + ((r.week != null ? r.week : 0) + 1) + ' 月'];
+  const detailMetaParts = [formatU(r.wealth != null ? r.wealth : 0), '粉丝 ' + formatU(r.fans || 0), '第 ' + ((r.year != null ? r.year : 0) + 1) + ' 年 ' + ((r.week != null ? r.week : 0) + 1) + ' 月'];
   if (r.playerId) detailMetaParts.unshift('ID: ' + r.playerId);
   metaEl.textContent = detailMetaParts.join(' · ');
   const storyEl = document.getElementById('historyDetailStory');
@@ -1314,18 +1840,158 @@ function bindHistoryUI() {
   });
 }
 
+/** 设置面板 UI 绑定 */
+function bindSettingsUI() {
+  const btnSettings = document.getElementById('btnSettings');
+  const overlay = document.getElementById('settingsOverlay');
+  const form = document.getElementById('settingsForm');
+  const btnCancel = document.getElementById('settingsCancel');
+  const styleSelect = document.getElementById('settingStyle');
+  const philSelect = document.getElementById('settingPhilosophy');
+  const personalitySelect = document.getElementById('settingPersonality');
+  const decisionModeSelect = document.getElementById('settingDecisionMode');
+  
+  if (!btnSettings || !overlay) {
+    console.warn('Settings UI elements not found');
+    return;
+  }
+  
+  // 打开设置面板
+  btnSettings.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // 同步当前保存的设置为面板值
+    if (styleSelect) styleSelect.value = savedSettings.style;
+    if (philSelect) philSelect.value = savedSettings.philosophy;
+    if (personalitySelect) personalitySelect.value = savedSettings.personality;
+    if (decisionModeSelect) decisionModeSelect.value = savedSettings.decisionMode || 'auto';
+    overlay.classList.add('show');
+    console.log('Settings opened');
+  });
+  
+  // 保存设置
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const style = styleSelect?.value || 'balanced';
+      const philosophy = philSelect?.value || 'news';
+      const personality = personalitySelect?.value || 'balanced';
+      const decisionMode = decisionModeSelect?.value || 'auto';
+      savedSettings = { style, philosophy, personality, decisionMode };
+      overlay.classList.remove('show');
+      showToast('设置已保存，将在下一局生效');
+      console.log('Settings saved:', savedSettings);
+    });
+  }
+  
+  // 取消
+  if (btnCancel) {
+    btnCancel.addEventListener('click', (e) => {
+      e.preventDefault();
+      overlay.classList.remove('show');
+    });
+  }
+  
+  // 点击遮罩关闭
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.classList.remove('show');
+  });
+  
+  // ESC键关闭
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && overlay.classList.contains('show')) {
+      overlay.classList.remove('show');
+    }
+  });
+}
+
+/** 显示临时提示 */
+function showToast(message) {
+  let toast = document.getElementById('gameToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'gameToast';
+    toast.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;z-index:3000;opacity:0;transition:opacity 0.3s;pointer-events:none;';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = message;
+  toast.style.opacity = '1';
+  setTimeout(() => { toast.style.opacity = '0'; }, 2000);
+}
+
+/** 全局保存的设置（用于新游戏） */
+let savedSettings = {
+  style: 'balanced',
+  philosophy: 'news',
+  personality: 'balanced'
+};
+
 function initStartForm() {
   const form = document.getElementById('startForm');
+  if (!form) return;
+  
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    const capital = parseInt(document.getElementById('initCapital').value, 10) || 1000;
-    const traits = {
-      luck: parseFloat(document.getElementById('initLuck').value) || 0.5,
-      social: parseFloat(document.getElementById('initSocial').value) || 0.5,
-      rationality: parseFloat(document.getElementById('initRationality').value) || 0.5,
-      strategy: parseFloat(document.getElementById('initStrategy').value) || 0.5,
-      riskPreference: parseFloat(document.getElementById('initRisk').value) || 0.5,
+    
+    const capital = 1000; // 固定本金
+    const style = document.getElementById('initStyle')?.value || 'balanced';
+    const philosophy = document.getElementById('initPhilosophy')?.value || 'news';
+    const personality = document.getElementById('initPersonality')?.value || 'balanced';
+    const decisionMode = document.getElementById('initDecisionMode')?.value || 'auto';
+    
+    // 设置决策模式
+    game.decisionMode = decisionMode;
+    
+    // 保存设置供后续使用
+    savedSettings = { style, philosophy, personality, decisionMode };
+    
+    // 根据风格自动计算基础参数
+    const styleMap = {
+      degen: { riskPreference: 0.85, rationality: 0.3, strategy: 0.2, social: 0.6, luck: 0.5 },
+      balanced: { riskPreference: 0.5, rationality: 0.5, strategy: 0.5, social: 0.5, luck: 0.5 },
+      diamond: { riskPreference: 0.3, rationality: 0.7, strategy: 0.9, social: 0.4, luck: 0.5 }
     };
+    const baseTraits = styleMap[style] || styleMap.balanced;
+    
+    // 市场哲学影响运气和理性
+    const philosophyMap = {
+      technical: { luckMod: 0, rationalityMod: 0.15 },
+      news: { luckMod: 0.05, rationalityMod: -0.05 },
+      value: { luckMod: -0.05, rationalityMod: 0.1 },
+      nihilism: { luckMod: -0.1, rationalityMod: 0 }
+    };
+    const philEffects = philosophyMap[philosophy] || philosophyMap.news;
+    
+    // 性格特质影响 weird 结局概率
+    const personalityMap = {
+      pragmatist: { weirdMod: -0.08 },
+      balanced: { weirdMod: 0 },
+      dreamer: { weirdMod: 0.12 }
+    };
+    const personalityEffects = personalityMap[personality] || personalityMap.balanced;
+    
+    const traits = {
+      luck: Math.max(0, Math.min(1, baseTraits.luck + philEffects.luckMod)),
+      social: baseTraits.social,
+      rationality: Math.max(0, Math.min(1, baseTraits.rationality + philEffects.rationalityMod)),
+      strategy: baseTraits.strategy,
+      riskPreference: baseTraits.riskPreference,
+      style: style,             // 操作风格
+      philosophy: philosophy,   // 市场哲学
+      personality: personality, // 性格特质
+      weirdMod: personalityEffects.weirdMod // weird结局概率调整
+    };
+    
+    // 获取玩家ID（从输入框，不再是钱包地址）
+    const playerIdInput = document.getElementById('initPlayerId');
+    const playerId = (playerIdInput && playerIdInput.value) ? String(playerIdInput.value).trim().slice(0, 32) : '';
+    traits.playerId = playerId;
+    
+    // 保存玩家ID到localStorage供下次使用
+    if (playerId) {
+      try { localStorage.setItem('memeMaxPlayerId', playerId); } catch (e) {}
+    }
+    
     document.getElementById('startScreen').classList.add('hidden');
     document.body.classList.remove('start-open');
     startNewGame(capital, traits);
@@ -1333,12 +1999,22 @@ function initStartForm() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+  // 恢复保存的玩家ID
+  try {
+    const savedPlayerId = localStorage.getItem('memeMaxPlayerId');
+    if (savedPlayerId) {
+      const playerIdInput = document.getElementById('initPlayerId');
+      if (playerIdInput) playerIdInput.value = savedPlayerId;
+    }
+  } catch (e) {}
+  
   initStartForm();
   bindSpeedSelect();
   bindPause();
   bindRestart();
   bindHistoryUI();
   bindLastRun();
+  bindSettingsUI();
   renderAchievements();
   document.body.classList.add('start-open');
 });
