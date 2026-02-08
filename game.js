@@ -1909,6 +1909,12 @@ function renderAchievements() {
       <div class="achievement-desc">${descStr}</div>
     </div>`;
   }).join('');
+  
+  // 更新预览卡片上的成就数量
+  const previewCount = document.getElementById('previewAchCount');
+  if (previewCount) {
+    previewCount.textContent = `${unlocked.length}/${ACHIEVEMENTS.length} 已解锁`;
+  }
 }
 
 const HISTORY_KEY = 'memeMaxHistory';

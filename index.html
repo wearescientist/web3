@@ -884,58 +884,81 @@
                 gap: var(--mobile-gap);
             }
             .top-bar {
-                height: var(--mobile-top-bar);
-                padding: 6px 8px;
-                gap: var(--mobile-gap);
-                align-content: flex-start;
+                min-height: auto;
+                height: auto;
+                padding: 8px;
+                gap: 6px;
+                flex-wrap: wrap;
             }
-            .top-bar .stat { font-size: 12px; order: 1; }
-            .time-display {
-                font-size: 12px;
-                order: 4;
-                margin-left: 0;
+            .top-bar .stats-row {
+                display: flex;
                 width: 100%;
-                text-align: left;
+                gap: 12px;
+                justify-content: flex-start;
+                flex-wrap: nowrap;
+            }
+            .top-bar .stat { 
+                font-size: 12px; 
+                flex-shrink: 0;
+            }
+            .top-bar .stat-value {
+                font-size: 14px;
+                max-width: 80px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                display: inline-block;
+                vertical-align: bottom;
+            }
+            .top-bar .info-row {
+                display: flex;
+                width: 100%;
+                gap: 8px;
+                justify-content: flex-start;
+            }
+            .time-display {
+                font-size: 11px;
+                margin-left: auto;
+                white-space: nowrap;
             }
             .path-badge, .player-id-badge {
-                font-size: 11px;
-                height: 30px;
-                padding: 0 10px;
+                font-size: 10px;
+                height: 24px;
+                padding: 0 8px;
                 display: inline-flex;
                 align-items: center;
-                max-width: 46vw;
+                max-width: 40vw;
                 min-width: 0;
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
             }
-            .path-badge { order: 1; }
-            .player-id-badge { order: 2; }
             .action-bar {
-                order: 5;
                 width: 100%;
-                gap: var(--mobile-gap);
+                gap: 6px;
                 align-items: center;
-                flex-wrap: wrap;
+                flex-wrap: nowrap;
                 justify-content: flex-start;
             }
-            .action-bar .btn, .action-bar .speed-select {
+            .action-bar .btn {
                 height: 28px;
-                padding: 0 10px;
-                font-size: 12px;
-                min-width: 72px;
-                box-sizing: border-box;
-                line-height: 28px;
-                border-radius: 8px;
+                padding: 0 8px;
+                font-size: 11px;
+                min-width: 60px;
+                flex-shrink: 0;
             }
-            .action-bar .btn { margin-top: 0; }
             .action-bar .speed-select {
-                appearance: none;
-                -webkit-appearance: none;
-                -moz-appearance: none;
-                padding-right: 24px;
+                height: 28px;
+                padding: 0 6px;
+                font-size: 11px;
+                min-width: 50px;
+                flex-shrink: 0;
             }
-            .speed-label { line-height: 28px; }
+            .speed-label { 
+                font-size: 11px;
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
             main {
                 min-height: 0;
                 gap: var(--mobile-gap);
@@ -971,32 +994,158 @@
                 transition: height 0.25s ease;
                 display: flex;
                 flex-direction: column;
-                padding: 16px 10px 8px;
+                padding: 20px 12px 12px;
                 overflow: hidden;
                 box-sizing: border-box;
                 align-items: stretch;
                 justify-content: flex-start;
             }
             .achievement-sidebar.is-open { height: var(--mobile-drawer-open); }
-            .achievement-handle { display: block; }
+            
+            /* 拖动条 - 增大识别区域 */
+            .achievement-handle { 
+                display: block;
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                width: 100%;
+                height: 32px;
+                background: transparent;
+                cursor: grab;
+                z-index: 10;
+            }
+            .achievement-handle::before {
+                content: "";
+                position: absolute;
+                top: 8px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 52px;
+                height: 4px;
+                border-radius: 999px;
+                background: rgba(255,255,255,0.5);
+                box-shadow: 0 0 10px rgba(255,255,255,0.2);
+            }
+            .achievement-handle:active {
+                cursor: grabbing;
+            }
+            
+            /* 收起状态 - 双卡片预览 */
             .achievement-sidebar:not(.is-open) {
+                flex-direction: row;
                 align-items: center;
                 justify-content: center;
-                gap: 4px;
+                gap: 12px;
+                padding: 24px 16px 16px;
             }
-            .achievement-sidebar:not(.is-open) .achievement-list { display: none; }
-            .achievement-sidebar:not(.is-open) h3 { margin: 0; }
-            .achievement-list {
-                grid-template-columns: 1fr !important;
-                gap: 10px;
-                overflow-y: auto;
+            .achievement-sidebar:not(.is-open) .sidebar-tabs,
+            .achievement-sidebar:not(.is-open) .tab-content {
+                display: none !important;
             }
-            .sidebar-tabs {
-                display: flex;
-            }
-            #achievementSidebar:not(.is-open) .sidebar-tabs {
+            
+            /* 预览卡片 */
+            .drawer-preview {
                 display: none;
             }
+            .achievement-sidebar:not(.is-open) .drawer-preview {
+                display: flex;
+                flex: 1;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+                padding: 16px 12px;
+                background: rgba(255,255,255,0.06);
+                border-radius: 12px;
+                border: 1px solid rgba(255,255,255,0.1);
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            .achievement-sidebar:not(.is-open) .drawer-preview:active {
+                background: rgba(255,255,255,0.1);
+                transform: scale(0.98);
+            }
+            .drawer-preview-icon {
+                font-size: 24px;
+            }
+            .drawer-preview-title {
+                font-size: 13px;
+                font-weight: 600;
+                color: var(--text);
+            }
+            .drawer-preview-sub {
+                font-size: 10px;
+                color: var(--text-dim);
+            }
+            
+            /* 展开状态 */
+            .achievement-sidebar.is-open .drawer-preview {
+                display: none;
+            }
+            .achievement-sidebar.is-open .sidebar-tabs {
+                display: flex;
+                flex-shrink: 0;
+                margin-bottom: 12px;
+            }
+            
+            .sidebar-tabs {
+                display: none;
+                flex-direction: row;
+                gap: 8px;
+            }
+            .sidebar-tab {
+                flex: 1;
+                padding: 10px;
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                background: rgba(0,0,0,0.3);
+                color: var(--text-dim);
+                font-size: 13px;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            .sidebar-tab.active {
+                background: rgba(240,185,11,0.15);
+                border-color: var(--orange);
+                color: var(--text);
+            }
+            
+            /* 标签内容区域 - 展开后独占全部空间 */
+            .tab-content {
+                display: none;
+                flex: 1;
+                overflow-y: auto;
+                min-height: 0;
+            }
+            .tab-content.active {
+                display: flex;
+                flex-direction: column;
+            }
+            
+            /* 成就列表 */
+            #achievementList.tab-content.active {
+                display: grid;
+                grid-template-columns: 1fr !important;
+                gap: 10px;
+                align-content: start;
+            }
+            
+            /* 排行榜内容 */
+            .leaderboard-content {
+                padding: 4px;
+            }
+            .leaderboard-content .lb-section {
+                margin-bottom: 16px;
+            }
+            .leaderboard-content .lb-section h4 {
+                font-size: 12px;
+                color: var(--text-dim);
+                margin-bottom: 8px;
+                padding-bottom: 4px;
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+            }
+            
             .achievement-box {
                 aspect-ratio: auto;
                 min-height: 56px;
@@ -1008,16 +1157,6 @@
             }
             .achievement-box .achievement-name { font-size: 12px; }
             .achievement-box .achievement-desc { font-size: 11px; }
-
-            .achievement-handle {
-                position: absolute;
-                top: 6px;
-                left: 50%;
-                transform: translateX(-50%);
-                margin: 0;
-                background: rgba(255,255,255,0.6);
-                box-shadow: 0 0 10px rgba(255,255,255,0.15);
-            }
 
             .start-screen {
                 padding-top: calc(16px + env(safe-area-inset-top));
@@ -1092,13 +1231,28 @@
         </div>
         <aside class="achievement-sidebar" id="achievementSidebar">
             <div class="achievement-handle" id="achievementHandle"></div>
-            <!-- 移动端标签切换 -->
+            
+            <!-- 收起状态预览卡片 -->
+            <div class="drawer-preview" id="previewAchievements">
+                <div class="drawer-preview-icon">🏆</div>
+                <div class="drawer-preview-title">成就</div>
+                <div class="drawer-preview-sub" id="previewAchCount">加载中...</div>
+            </div>
+            <div class="drawer-preview" id="previewLeaderboard">
+                <div class="drawer-preview-icon">📊</div>
+                <div class="drawer-preview-title">排行榜</div>
+                <div class="drawer-preview-sub">点击查看</div>
+            </div>
+            
+            <!-- 展开状态标签切换 -->
             <div class="sidebar-tabs" id="sidebarTabs">
                 <button type="button" class="sidebar-tab active" data-tab="achievements">🏆 成就</button>
                 <button type="button" class="sidebar-tab" data-tab="leaderboard">📊 排行榜</button>
             </div>
+            
             <!-- 成就列表 -->
             <div id="achievementList" class="achievement-list tab-content active" data-content="achievements"></div>
+            
             <!-- 排行榜内容 -->
             <div id="leaderboardContent" class="leaderboard-content tab-content" data-content="leaderboard">
                 <div class="lb-section">
@@ -1291,24 +1445,35 @@
         </div>
     </div>
     <script>
+        // 底部抽屉交互
         (() => {
             const sidebar = document.getElementById('achievementSidebar');
             const handle = document.getElementById('achievementHandle');
+            const previewAch = document.getElementById('previewAchievements');
+            const previewLb = document.getElementById('previewLeaderboard');
+            const tabs = document.querySelectorAll('.sidebar-tab');
             if (!sidebar || !handle) return;
-            const title = sidebar.querySelector('h3');
+            
             const mq = window.matchMedia('(max-width: 980px)');
             let startY = 0;
             let currentY = 0;
             let dragging = false;
-            const setOpen = (open) => {
+            
+            const setOpen = (open, tabName = null) => {
                 sidebar.classList.toggle('is-open', open);
                 document.body.classList.toggle('drawer-open', open);
+                // 如果指定了标签，切换到对应标签
+                if (open && tabName) {
+                    tabs.forEach(t => {
+                        t.classList.toggle('active', t.dataset.tab === tabName);
+                    });
+                    document.querySelectorAll('.tab-content').forEach(c => {
+                        c.classList.toggle('active', c.dataset.content === tabName);
+                    });
+                }
             };
-            const dragTargets = [handle, title].filter(Boolean);
-            const onClick = () => {
-                if (!mq.matches) return;
-                setOpen(!sidebar.classList.contains('is-open'));
-            };
+            
+            // 拖动条交互
             const onTouchStart = (e) => {
                 if (!mq.matches) return;
                 dragging = true;
@@ -1322,18 +1487,28 @@
             const onTouchEnd = () => {
                 if (!dragging || !mq.matches) return;
                 const delta = currentY - startY;
-                if (delta < -20) setOpen(true);
-                if (delta > 20) setOpen(false);
+                if (delta < -30) setOpen(true);
+                if (delta > 30) setOpen(false);
                 dragging = false;
                 startY = 0;
                 currentY = 0;
             };
-            dragTargets.forEach((el) => {
-                el.addEventListener('click', onClick);
-                el.addEventListener('touchstart', onTouchStart, { passive: true });
-                el.addEventListener('touchmove', onTouchMove, { passive: true });
-                el.addEventListener('touchend', onTouchEnd);
+            
+            handle.addEventListener('touchstart', onTouchStart, { passive: true });
+            handle.addEventListener('touchmove', onTouchMove, { passive: true });
+            handle.addEventListener('touchend', onTouchEnd);
+            handle.addEventListener('click', () => {
+                if (!mq.matches) return;
+                setOpen(!sidebar.classList.contains('is-open'));
             });
+            
+            // 预览卡片点击
+            if (previewAch) {
+                previewAch.addEventListener('click', () => setOpen(true, 'achievements'));
+            }
+            if (previewLb) {
+                previewLb.addEventListener('click', () => setOpen(true, 'leaderboard'));
+            }
         })();
         
         // 排行榜侧边栏交互
