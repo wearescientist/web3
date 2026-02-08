@@ -1544,12 +1544,12 @@ function drawPoster(ctx, width, height, config) {
 
   // 12. 故事内容
   ctx.fillStyle = '#eaecef';
-  ctx.font = '14px "Noto Sans SC", sans-serif';
+  ctx.font = 'bold 17px "Noto Sans SC", sans-serif';
   ctx.textAlign = 'left';
   
   const maxWidth = width - 80;
-  const lineHeight = 22;
-  const paraGap = lineHeight * 2;
+  const lineHeight = 28;
+  const paraGap = lineHeight * 1.8;
   
   config.story.forEach((paragraph) => {
     const words = paragraph.split('');
@@ -1926,21 +1926,24 @@ function formatU(n) {
 function formatNumber(n) {
   // 纯数字格式化，不带$符号（用于粉丝数等）
   const num = Number(n) || 0;
+  const isNegative = num < 0;
   const absNum = Math.abs(num);
   
+  let result;
   if (absNum >= 1e12) {
-    return (absNum / 1e12).toFixed(1) + 'T';
+    result = (absNum / 1e12).toFixed(1) + 'T';
+  } else if (absNum >= 1e9) {
+    result = (absNum / 1e9).toFixed(2) + 'B';
+  } else if (absNum >= 1e6) {
+    result = (absNum / 1e6).toFixed(2) + 'M';
+  } else if (absNum >= 1e3) {
+    result = (absNum / 1e3).toFixed(1) + 'K';
+  } else {
+    result = absNum.toFixed(0);
   }
-  if (absNum >= 1e9) {
-    return (absNum / 1e9).toFixed(2) + 'B';
-  }
-  if (absNum >= 1e6) {
-    return (absNum / 1e6).toFixed(2) + 'M';
-  }
-  if (absNum >= 1e3) {
-    return (absNum / 1e3).toFixed(1) + 'K';
-  }
-  return absNum.toFixed(0);
+  
+  // 负数时添加负号
+  return isNegative ? '-' + result : result;
 }
 
 function renderChart() {
