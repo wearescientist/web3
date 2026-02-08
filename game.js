@@ -1363,11 +1363,11 @@ function endGame(endingId) {
 
 function showEndingScreen(title, storyFormatted, netW, rarity, unlockedObjs) {
   // 生成结局海报（海报就是结局的全部展示）
-  generateEndingPoster(title, storyFormatted, netW, rarity);
+  generateEndingPoster(title, storyFormatted, netW, rarity, unlockedObjs);
 }
 
 /** 生成结局海报 */
-function generateEndingPoster(title, story, netW, rarity) {
+function generateEndingPoster(title, story, netW, rarity, unlockedObjs) {
   const canvas = document.getElementById('endingPosterCanvas');
   if (!canvas) return;
   
@@ -1391,7 +1391,8 @@ function generateEndingPoster(title, story, netW, rarity) {
     bgColors: getRarityBgColors(rarity),
     borderWidth: getRarityBorderWidth(rarity),
     hasGlow: rarity !== 'common',
-    hasAnimation: ['epic', 'legendary', 'mythic', 'supreme'].includes(rarity)
+    hasAnimation: ['epic', 'legendary', 'mythic', 'supreme'].includes(rarity),
+    unlockedAchievements: unlockedObjs || []
   };
   
   drawPoster(ctx, width, height, config);
@@ -1496,16 +1497,15 @@ function drawPoster(ctx, width, height, config) {
   ctx.fillText(`${playerId} · ${config.years}年 · ${config.path}`, width/2, y);
   y += 35;
 
-  // 9. 数据卡片
+  // 9. 数据卡片（只显示财富和粉丝，移除存活年数）
   const stats = [
     { icon: '💰', value: formatNumber(config.wealth), label: '财富' },
-    { icon: '👥', value: formatNumber(config.fans), label: '粉丝' },
-    { icon: '⏱️', value: config.years + '年', label: '存活' }
+    { icon: '👥', value: formatNumber(config.fans), label: '粉丝' }
   ];
 
-  const cardWidth = 100;
-  const gap = 15;
-  const startX = (width - (cardWidth * 3 + gap * 2)) / 2;
+  const cardWidth = 120;
+  const gap = 20;
+  const startX = (width - (cardWidth * 2 + gap)) / 2;
 
   stats.forEach((stat, i) => {
     const x = startX + i * (cardWidth + gap);
@@ -1516,15 +1516,15 @@ function drawPoster(ctx, width, height, config) {
     ctx.strokeRect(x, y, cardWidth, 70);
 
     ctx.fillStyle = config.color;
-    ctx.font = 'bold 16px "Noto Sans SC", sans-serif';
+    ctx.font = 'bold 18px "Noto Sans SC", sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText(stat.value, x + cardWidth/2, y + 35);
     
     ctx.fillStyle = '#848e9c';
-    ctx.font = '11px "Noto Sans SC", sans-serif';
+    ctx.font = '12px "Noto Sans SC", sans-serif';
     ctx.fillText(stat.label, x + cardWidth/2, y + 55);
   });
-  y += 100;
+  y += 90;
 
   // 10. 分隔线
   ctx.strokeStyle = config.color + '60';
@@ -1542,46 +1542,106 @@ function drawPoster(ctx, width, height, config) {
   ctx.fillText('📖 我的币圈人生', width/2, y);
   y += 25;
 
-  // 12. 故事内容
+  // 12. 故事内容（居中对齐）
   ctx.fillStyle = '#eaecef';
   ctx.font = 'bold 17px "Noto Sans SC", sans-serif';
-  ctx.textAlign = 'left';
+  ctx.textAlign = 'center';
   
   const maxWidth = width - 80;
   const lineHeight = 28;
-  const paraGap = lineHeight * 1.8;
+  const paraGap = lineHeight * 1.2;
   
   config.story.forEach((paragraph) => {
     const words = paragraph.split('');
     let line = '';
+    const lines = [];
     
+    // 先将段落分割成多行
     for (let i = 0; i < words.length; i++) {
       const testLine = line + words[i];
       const metrics = ctx.measureText(testLine);
       
       if (metrics.width > maxWidth && i > 0) {
-        ctx.fillText(line, 50, y);
+        lines.push(line);
         line = words[i];
-        y += lineHeight;
-        
-        if (y > height - 80) {
-          ctx.fillText('...', 50, y);
-          return;
-        }
       } else {
         line = testLine;
       }
     }
-    
     if (line) {
-      ctx.fillText(line, 50, y);
+      lines.push(line);
+    }
+    
+    // 居中绘制每行
+    for (const lineText of lines) {
+      if (y > height - 100) {
+        ctx.fillText('...', width/2, y);
+        return;
+      }
+      ctx.fillText(lineText, width/2, y);
       y += lineHeight;
     }
     
     y += paraGap;
   });
 
-  // 13. 底部装饰
+  // 13. 本局解锁成就
+  const unlockedAchievements = config.unlockedAchievements || [];
+  if (unlockedAchievements.length > 0 && y < height - 150) {
+    y += 10;
+    
+    // 分隔线
+    ctx.strokeStyle = config.color + '40';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(80, y);
+    ctx.lineTo(width - 80, y);
+    ctx.stroke();
+    y += 20;
+    
+    // 成就标题
+    ctx.fillStyle = config.color;
+    ctx.font = 'bold 13px "Noto Sans SC", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('🏆 本局解锁成就', width/2, y);
+    y += 22;
+    
+    // 成就列表 - 每行显示2个
+    const achievementColors = {
+      common: '#9ca3af',
+      uncommon: '#22c55e',
+      rare: '#3b82f6',
+      epic: '#a855f7',
+      legendary: '#f97316',
+      mythic: '#ef4444',
+      supreme: '#facc15'
+    };
+    
+    const itemsPerRow = 2;
+    const itemWidth = (width - 100) / itemsPerRow;
+    
+    for (let i = 0; i < unlockedAchievements.length && y < height - 100; i++) {
+      const ach = unlockedAchievements[i];
+      const col = i % itemsPerRow;
+      const row = Math.floor(i / itemsPerRow);
+      const itemX = 50 + col * itemWidth;
+      const itemY = y + row * 24;
+      
+      const achColor = achievementColors[ach.rarity] || '#9ca3af';
+      
+      // 成就名称
+      ctx.fillStyle = achColor;
+      ctx.font = '12px "Noto Sans SC", sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(`✦ ${ach.name}`, itemX, itemY);
+    }
+    
+    // 更新 y 到成就列表底部
+    const rows = Math.ceil(Math.min(unlockedAchievements.length, Math.floor((height - 100 - y) / 24)) / itemsPerRow);
+    y += rows * 24 + 10;
+  }
+
+  // 14. 底部装饰
   const bottomY = height - 50;
   
   if (config.rarity === 'supreme') {
@@ -1599,7 +1659,7 @@ function drawPoster(ctx, width, height, config) {
     ctx.fillText('⚡', width/2, bottomY);
   }
 
-  // 14. 底部链接
+  // 15. 底部链接
   ctx.fillStyle = '#848e9c';
   ctx.font = '11px monospace';
   ctx.textAlign = 'center';
@@ -1900,27 +1960,31 @@ function updateUI() {
 }
 
 function formatU(n) {
-  // 使用紧凑货币格式显示
+  // 使用紧凑货币格式显示，保留K,M，>=1B用e+科学计数法(基于B)
   const num = Number(n) || 0;
   const absNum = Math.abs(num);
   const sign = num < 0 ? '-' : '';
   
-  if (absNum >= 1e15) {
-    return sign + '$' + (absNum / 1e15).toFixed(0) + 'Q';
+  // 小于1000直接显示
+  if (absNum < 1e3) {
+    return sign + '$' + absNum.toFixed(0);
   }
-  if (absNum >= 1e12) {
-    return sign + '$' + (absNum / 1e12).toFixed(0) + 'T';
+  
+  // 1K-999M用K,M表示
+  if (absNum >= 1e3 && absNum < 1e9) {
+    if (absNum >= 1e6) {
+      return sign + '$' + (absNum / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+    }
+    return sign + '$' + (absNum / 1e3).toFixed(1).replace(/\.0$/, '') + 'K';
   }
-  if (absNum >= 1e9) {
-    return sign + '$' + (absNum / 1e9).toFixed(0) + 'B';
-  }
-  if (absNum >= 1e6) {
-    return sign + '$' + (absNum / 1e6).toFixed(0) + 'M';
-  }
-  if (absNum >= 1e3) {
-    return sign + '$' + (absNum / 1e3).toFixed(0) + 'K';
-  }
-  return sign + '$' + absNum.toFixed(0);
+  
+  // 大于等于1B(1e9)：转换为以B为单位的科学计数法
+  // 例如 1.5e15 → 1.5e15 / 1e9 = 1.5e6 → 显示为 1.5e+6B
+  const billions = absNum / 1e9;
+  const exponent = Math.floor(Math.log10(billions));
+  const mantissa = billions / Math.pow(10, exponent);
+  const mantissaStr = mantissa.toString().slice(0, 5);
+  return sign + '$' + mantissaStr + 'e+' + exponent + 'B';
 }
 
 function formatNumber(n) {
@@ -2087,6 +2151,8 @@ function bindRestart() {
     };
     game.state = null;
     game.running = false;
+    // 同步决策模式
+    game.decisionMode = savedSettings.decisionMode || 'auto';
     startNewGame(1000, traits);
   });
   // 收起结局海报
@@ -2162,6 +2228,8 @@ function bindRestart() {
     };
     game.state = null;
     game.running = false;
+    // 同步决策模式
+    game.decisionMode = savedSettings.decisionMode || 'auto';
     startNewGame(1000, traits);
   });
   // 结局收起后显示"查看历史"按钮
@@ -2273,6 +2341,8 @@ function bindSettingsUI() {
       const personality = personalitySelect?.value || 'balanced';
       const decisionMode = decisionModeSelect?.value || 'auto';
       savedSettings = { style, philosophy, personality, decisionMode };
+      // 持久化到 localStorage
+      saveSettingsToStorage(savedSettings);
       overlay.classList.remove('show');
       showToast('设置已保存，将在下一局生效');
       console.log('Settings saved:', savedSettings);
@@ -2315,15 +2385,52 @@ function showToast(message) {
 }
 
 /** 全局保存的设置（用于新游戏） */
-let savedSettings = {
-  style: 'balanced',
-  philosophy: 'news',
-  personality: 'balanced'
-};
+let savedSettings = loadSettingsFromStorage();
+
+/** 从 localStorage 加载设置 */
+function loadSettingsFromStorage() {
+  const defaults = {
+    style: 'balanced',
+    philosophy: 'news',
+    personality: 'balanced',
+    decisionMode: 'auto'
+  };
+  try {
+    const stored = localStorage.getItem('memeMaxSettings');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      // 合并默认值，确保新增字段有默认值
+      return { ...defaults, ...parsed };
+    }
+  } catch (e) {
+    console.warn('Failed to load settings from storage:', e);
+  }
+  return defaults;
+}
+
+/** 保存设置到 localStorage */
+function saveSettingsToStorage(settings) {
+  try {
+    localStorage.setItem('memeMaxSettings', JSON.stringify(settings));
+  } catch (e) {
+    console.warn('Failed to save settings to storage:', e);
+  }
+}
 
 function initStartForm() {
   const form = document.getElementById('startForm');
   if (!form) return;
+  
+  // 同步保存的设置到开局表单
+  const initStyle = document.getElementById('initStyle');
+  const initPhilosophy = document.getElementById('initPhilosophy');
+  const initPersonality = document.getElementById('initPersonality');
+  const initDecisionMode = document.getElementById('initDecisionMode');
+  
+  if (initStyle) initStyle.value = savedSettings.style;
+  if (initPhilosophy) initPhilosophy.value = savedSettings.philosophy;
+  if (initPersonality) initPersonality.value = savedSettings.personality;
+  if (initDecisionMode) initDecisionMode.value = savedSettings.decisionMode || 'auto';
   
   form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -2339,6 +2446,8 @@ function initStartForm() {
     
     // 保存设置供后续使用
     savedSettings = { style, philosophy, personality, decisionMode };
+    // 持久化到 localStorage
+    saveSettingsToStorage(savedSettings);
     
     // 根据风格自动计算基础参数
     const styleMap = {
