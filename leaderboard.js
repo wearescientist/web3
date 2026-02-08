@@ -134,13 +134,18 @@ async function submitGameResult(playerData) {
       });
     }
   } else {
-    // 破产榜 - 同玩家保留最新，显示负债
-    await db.collection('bankruptLeaderboard').doc(playerKey).set({
-      name: name,
-      wealth: Math.floor(netWealth),
-      debt: Math.floor(playerData.debt || 0),
-      timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    });
+    // 破产榜 - 同玩家保留负债最多的记录
+    const bankruptRef = db.collection('bankruptLeaderboard').doc(playerKey);
+    const bankruptDoc = await bankruptRef.get();
+    const currentDebt = Math.floor(playerData.debt || 0);
+    if (!bankruptDoc.exists || (bankruptDoc.data().debt || 0) < currentDebt) {
+      await bankruptRef.set({
+        name: name,
+        wealth: Math.floor(netWealth),
+        debt: currentDebt,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
   }
   
   console.log('📊 成绩已上报:', name, formatU(netWealth));
@@ -195,26 +200,27 @@ function escapeHtml(s) {
   return div.innerHTML;
 }
 
-/** 格式化金额 - 排行榜专用紧凑版本（支持T=万亿、Q=千万亿） */
+/** 格式化金额 - 排行榜专用紧凑版本（支持超大数字） */
 function formatU(n) {
   const num = Number(n) || 0;
   const absNum = Math.abs(num);
   const sign = num < 0 ? '-' : '';
   
+  // 使用科学计数法显示超大数字，更紧凑
   if (absNum >= 1e15) {
-    return sign + (absNum / 1e15).toFixed(1) + 'Q'; // 千万亿
+    return sign + (absNum / 1e15).toFixed(0) + 'Q'; // 千万亿
   }
   if (absNum >= 1e12) {
-    return sign + (absNum / 1e12).toFixed(1) + 'T'; // 万亿
+    return sign + (absNum / 1e12).toFixed(0) + 'T'; // 万亿
   }
   if (absNum >= 1e9) {
-    return sign + (absNum / 1e9).toFixed(1) + 'B'; // 十亿
+    return sign + (absNum / 1e9).toFixed(0) + 'B'; // 十亿
   }
   if (absNum >= 1e6) {
-    return sign + (absNum / 1e6).toFixed(1) + 'M'; // 百万
+    return sign + (absNum / 1e6).toFixed(0) + 'M'; // 百万
   }
   if (absNum >= 1e3) {
-    return sign + (absNum / 1e3).toFixed(1) + 'K'; // 千
+    return sign + (absNum / 1e3).toFixed(0) + 'K'; // 千
   }
   
   return sign + absNum.toFixed(0);
