@@ -113,6 +113,14 @@ function startRealtimeListeners() {
     }, err => console.log('破产榜监听失败:', err));
 }
 
+/** 生成安全的 Firestore 文档 ID */
+function sanitizeDocId(id) {
+  if (!id) return 'anonymous';
+  // Firestore 文档ID规则：必须是UTF-8字符，长度1-1500字节，不能包含 /\.*`[]#
+  // 我们将这些特殊字符替换为下划线
+  return id.replace(/[\/\\.*`[\]#]/g, '_').slice(0, 100);
+}
+
 /** 上报本局成绩 */
 async function submitGameResult(playerData) {
   const netWealth = (playerData.wealth || 0) - (playerData.debt || 0);
@@ -120,7 +128,8 @@ async function submitGameResult(playerData) {
   const rawId = playerData.playerId || '';
   const isWallet = rawId.startsWith('0x') && rawId.length === 42;
   const name = isWallet ? formatWallet(rawId) : (rawId.slice(0, 12) || '匿名');
-  const playerKey = isWallet ? rawId.toLowerCase() : name.replace(/[^a-zA-Z0-9]/g, '_');
+  // 修复：使用原始ID生成playerKey，而不是处理后的name
+  const playerKey = isWallet ? rawId.toLowerCase() : sanitizeDocId(rawId || 'anonymous');
   
   if (netWealth > 0) {
     // 财富榜 - 同玩家只保留最高成绩
@@ -134,13 +143,18 @@ async function submitGameResult(playerData) {
       });
     }
   } else {
-    // 破产榜 - 同玩家保留最新，显示负债
-    await db.collection('bankruptLeaderboard').doc(playerKey).set({
-      name: name,
-      wealth: Math.floor(netWealth),
-      debt: Math.floor(playerData.debt || 0),
-      timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    });
+    // 破产榜 - 同玩家保留负债最多的记录
+    const bankruptRef = db.collection('bankruptLeaderboard').doc(playerKey);
+    const bankruptDoc = await bankruptRef.get();
+    const currentDebt = Math.floor(playerData.debt || 0);
+    if (!bankruptDoc.exists || (bankruptDoc.data().debt || 0) < currentDebt) {
+      await bankruptRef.set({
+        name: name,
+        wealth: Math.floor(netWealth),
+        debt: currentDebt,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
   }
   
   console.log('📊 成绩已上报:', name, formatU(netWealth));
@@ -153,40 +167,77 @@ function renderLeaderboards() {
 }
 
 function renderWealthLeaderboard(list) {
-  const el = document.getElementById('wealthLeaderboard');
-  if (!el) return;
+  const els = [
+    document.getElementById('wealthLeaderboard'),
+    document.getElementById('wealthLeaderboardMobile')
+  ].filter(Boolean);
+  
+  if (els.length === 0) return;
   
   if (!list?.length) {
-    el.innerHTML = '<div class="lb-empty">暂无数据<br>来成为第一个传奇！</div>';
+    els.forEach(el => {
+      el.innerHTML = '<div class="lb-empty">暂无数据<br>来成为第一个传奇！</div>';
+    });
     return;
   }
   
+  // 去重：同一玩家名称只保留最高分
+  const seen = new Map();
+  for (const item of list) {
+    const name = item.name || '匿名';
+    if (!seen.has(name) || seen.get(name).wealth < item.wealth) {
+      seen.set(name, item);
+    }
+  }
+  const uniqueList = Array.from(seen.values()).sort((a, b) => b.wealth - a.wealth);
+  
   const medals = ['🥇','🥈','🥉'];
-  el.innerHTML = list.map((item, i) => `
+  const html = uniqueList.map((item, i) => `
     <div class="lb-item ${i<3?'lb-top':''}">
       <span class="lb-rank">${medals[i]||i+1}</span>
       <span class="lb-name">${escapeHtml(item.name)}</span>
       <span class="lb-score">${formatU(item.wealth)}</span>
     </div>
   `).join('');
+  
+  els.forEach(el => el.innerHTML = html);
 }
 
 function renderBankruptLeaderboard(list) {
-  const el = document.getElementById('bankruptLeaderboard');
-  if (!el) return;
+  const els = [
+    document.getElementById('bankruptLeaderboard'),
+    document.getElementById('bankruptLeaderboardMobile')
+  ].filter(Boolean);
+  
+  if (els.length === 0) return;
   
   if (!list?.length) {
-    el.innerHTML = '<div class="lb-empty">暂无破产记录</div>';
+    els.forEach(el => {
+      el.innerHTML = '<div class="lb-empty">暂无破产记录</div>';
+    });
     return;
   }
   
-  el.innerHTML = list.map((item, i) => `
+  // 去重：同一玩家名称只保留最高负债
+  const seen = new Map();
+  for (const item of list) {
+    const name = item.name || '匿名';
+    const debt = item.debt || Math.abs(item.wealth) || 0;
+    if (!seen.has(name) || (seen.get(name).debt || 0) < debt) {
+      seen.set(name, {...item, debt});
+    }
+  }
+  const uniqueList = Array.from(seen.values()).sort((a, b) => (b.debt || 0) - (a.debt || 0));
+  
+  const html = uniqueList.map((item, i) => `
     <div class="lb-item lb-bankrupt">
       <span class="lb-rank">${i+1}</span>
       <span class="lb-name">${escapeHtml(item.name)}</span>
       <span class="lb-debt">-${formatU(item.debt || Math.abs(item.wealth))}</span>
     </div>
   `).join('');
+  
+  els.forEach(el => el.innerHTML = html);
 }
 
 function escapeHtml(s) {
@@ -195,29 +246,31 @@ function escapeHtml(s) {
   return div.innerHTML;
 }
 
-/** 格式化金额 - 排行榜专用紧凑版本（支持T=万亿、Q=千万亿） */
+/** 格式化金额 - 排行榜专用紧凑版本（保留K,M，>=1B用e+格式基于B） */
 function formatU(n) {
   const num = Number(n) || 0;
   const absNum = Math.abs(num);
   const sign = num < 0 ? '-' : '';
   
-  if (absNum >= 1e15) {
-    return sign + (absNum / 1e15).toFixed(1) + 'Q'; // 千万亿
-  }
-  if (absNum >= 1e12) {
-    return sign + (absNum / 1e12).toFixed(1) + 'T'; // 万亿
-  }
-  if (absNum >= 1e9) {
-    return sign + (absNum / 1e9).toFixed(1) + 'B'; // 十亿
-  }
-  if (absNum >= 1e6) {
-    return sign + (absNum / 1e6).toFixed(1) + 'M'; // 百万
-  }
-  if (absNum >= 1e3) {
-    return sign + (absNum / 1e3).toFixed(1) + 'K'; // 千
+  // 小于1000直接显示
+  if (absNum < 1e3) {
+    return sign + absNum.toFixed(0);
   }
   
-  return sign + absNum.toFixed(0);
+  // 1K-999M用K,M表示
+  if (absNum >= 1e3 && absNum < 1e9) {
+    if (absNum >= 1e6) {
+      return sign + (absNum / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+    }
+    return sign + (absNum / 1e3).toFixed(1).replace(/\.0$/, '') + 'K';
+  }
+  
+  // 大于等于1B(1e9)：转换为以B为单位的科学计数法
+  const billions = absNum / 1e9;
+  const exponent = Math.floor(Math.log10(billions));
+  const mantissa = billions / Math.pow(10, exponent);
+  const mantissaStr = mantissa.toString().slice(0, 5);
+  return sign + mantissaStr + 'e+' + exponent + 'B';
 }
 
 /** 格式化钱包地址 */
@@ -227,4 +280,34 @@ function formatWallet(addr) {
 }
 
 // 初始化
-window.addEventListener('DOMContentLoaded', initLeaderboard);
+window.addEventListener('DOMContentLoaded', () => {
+  initLeaderboard();
+  initMobileLeaderboardTabs();
+});
+
+/** 初始化移动端排行榜标签 */
+function initMobileLeaderboardTabs() {
+  const tabs = document.querySelectorAll('.sidebar-tab');
+  const contents = document.querySelectorAll('.tab-content');
+  
+  if (tabs.length === 0) return;
+  
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const target = tab.dataset.tab;
+      
+      // 切换标签状态
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      
+      // 切换内容显示
+      contents.forEach(c => {
+        if (c.dataset.content === target) {
+          c.classList.add('active');
+        } else {
+          c.classList.remove('active');
+        }
+      });
+    });
+  });
+}

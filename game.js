@@ -504,81 +504,189 @@ const PATH_IDS = ['kol', 'job', 'trading', 'launch', 'invest', 'staking', 'airdr
 
 /** ==================== 关键决策点系统 ==================== */
 const DECISION_POOL = [
+  // ===== 市场趋势类决策 =====
   {
     id: 'bull_coming',
     title: '📈 牛市来了？',
     desc: '市场开始躁动，社区里都在喊「牛回速归」，你决定...',
-    condition: (s) => s.year >= 1 && s.week === 6 && Math.random() < 0.6,
+    condition: (s) => s.year >= 1 && Math.random() < 0.7,
     choices: [
-      { emoji: '🚀', text: '全仓梭哈', hint: '高风险高收益', effect: (s) => { s.runRiskRewardMult *= 2.5; s.luck = Math.min(1, s.luck + 0.15); return '你all in了，波动率拉满！'; } },
-      { emoji: '⚖️', text: '半仓试探', hint: '稳健操作', effect: (s) => { s.runRiskRewardMult *= 1.3; return '你选择了稳健，进退有度。'; } },
-      { emoji: '🏃', text: '减仓观望', hint: '保守策略', effect: (s) => { s.runRiskRewardMult *= 0.6; s.rationality = Math.min(1, s.rationality + 0.1); return '你选择了观望，现金为王。'; } },
+      { emoji: '🚀', text: '全仓梭哈', hint: '高风险高收益', effect: (s) => { s.runRiskRewardMult *= 3; s.luck = Math.min(1, s.luck + 0.2); s.wealth *= 1.5; return '你all in了，波动率拉满，资产瞬间暴涨50%！'; } },
+      { emoji: '⚖️', text: '半仓试探', hint: '稳健操作', effect: (s) => { s.runRiskRewardMult *= 1.5; s.wealth *= 1.2; return '你选择了稳健，资产稳步增长20%。'; } },
+      { emoji: '🏃', text: '减仓观望', hint: '保守策略', effect: (s) => { s.runRiskRewardMult *= 0.7; s.rationality = Math.min(1, s.rationality + 0.15); s.capital *= 1.1; return '你选择了观望，现金为王，保住了本金。'; } },
     ]
   },
   {
     id: 'bear_panic',
     title: '📉 暴跌恐慌',
     desc: '市场连续下跌，你的持仓已经亏了30%，你决定...',
-    condition: (s) => getNetWealth(s) < (s.capital * 0.7) && Math.random() < 0.5,
+    condition: (s) => getNetWealth(s) < (s.capital * 0.7) && Math.random() < 0.6,
     choices: [
-      { emoji: '💎', text: '死拿不动', hint: '相信会回本', effect: (s) => { s.strategy = Math.min(1, s.strategy + 0.1); s.runRiskRewardMult *= 0.9; return '你选择了死拿，时间会证明一切。'; } },
-      { emoji: '✂️', text: '割肉止损', hint: '减少损失', effect: (s) => { const loss = (s.wealth || 0) * 0.15; s.wealth -= loss; s.capital *= 0.85; s.rationality = Math.min(1, s.rationality + 0.15); return `你割肉了，损失 ${Math.floor(loss)} U，但保住了本金。`; } },
-      { emoji: '📉', text: '反手做空', hint: '赌继续跌', effect: (s) => { s.runRiskRewardMult *= 2; s.luck = Math.max(0, s.luck - 0.1); return '你反手做空，成败在此一举！'; } },
-    ]
-  },
-  {
-    id: 'gem_project',
-    title: '💎 发现「宝石」项目',
-    desc: '群里有人推荐一个新项目，说是「下一个百倍币」，你决定...',
-    condition: (s) => s.year >= 1 && Math.random() < 0.4,
-    choices: [
-      { emoji: '🎯', text: 'All in干', hint: '要么暴富要么归零', effect: (s) => { s.runRiskRewardMult *= 3; s.luck = Math.max(0, s.luck - 0.2); return '你All in了这个「宝石」项目！'; } },
-      { emoji: '🎲', text: '小仓位玩', hint: '亏了不心疼', effect: (s) => { s.runRiskRewardMult *= 1.2; return '你用小仓位参与，风险可控。'; } },
-      { emoji: '🚫', text: '肯定是骗局', hint: '理性拒绝', effect: (s) => { s.rationality = Math.min(1, s.rationality + 0.15); return '你识破了骗局，躲过一劫。'; } },
-    ]
-  },
-  {
-    id: 'debt_crisis',
-    title: '💸 债务危机',
-    desc: '你负债累累，债主开始催款，你决定...',
-    condition: (s) => (s.debt || 0) > (s.wealth || 0) * 0.5 && Math.random() < 0.6,
-    choices: [
-      { emoji: '🎰', text: '借新还旧', hint: '继续赌', effect: (s) => { s.debt += 50000; s.wealth += 30000; s.riskPreference = Math.min(1, s.riskPreference + 0.2); return '你又借了 50000 U，希望能翻本。'; } },
-      { emoji: '💼', text: '找份工作', hint: '打工还债', effect: (s) => { s.debt = Math.max(0, s.debt - 20000); s.runRiskRewardMult *= 0.5; s.pathWeights.job += 2; return '你决定先打工还债，踏实一点。'; } },
-      { emoji: '🏃', text: '换个城市', hint: '跑路躲债', effect: (s) => { s.debt = Math.floor(s.debt * 0.3); s.social = Math.max(0, s.social - 0.3); return '你选择了跑路，债务减少但声望受损。'; } },
-    ]
-  },
-  {
-    id: 'kol_opportunity',
-    title: '🎤 KOL之路',
-    desc: '你的推文突然小爆，有项目方找你合作，你决定...',
-    condition: (s) => s.mainPath === 'kol' && s.fans > 5000 && Math.random() < 0.5,
-    choices: [
-      { emoji: '💰', text: '接广告', hint: '先赚一笔', effect: (s) => { s.wealth += 10000; s.fans += 2000; return '你接了广告，赚到 10000 U，粉丝增加！'; } },
-      { emoji: '🤝', text: '谈长期合作', hint: '建立关系', effect: (s) => { s.wealth += 5000; s.social = Math.min(1, s.social + 0.2); return '你建立了长期合作关系，人脉增加。'; } },
-      { emoji: '🚫', text: '拒绝割韭菜', hint: '爱惜羽毛', effect: (s) => { s.fans += 5000; s.rationality = Math.min(1, s.rationality + 0.1); return '你拒绝了广告，粉丝更加信任你！'; } },
+      { emoji: '💎', text: '死拿不动', hint: '相信会回本', effect: (s) => { 
+        if (Math.random() < 0.4) { s.wealth *= 1.8; s.strategy = Math.min(1, s.strategy + 0.2); return '死拿成功了！市场反弹，你回本还赚了80%！'; }
+        else { s.wealth *= 0.7; return '死拿失败，继续亏损...但你还在坚持。'; }
+      } },
+      { emoji: '✂️', text: '割肉止损', hint: '减少损失', effect: (s) => { s.wealth *= 0.85; s.capital *= 0.9; s.rationality = Math.min(1, s.rationality + 0.15); return '你割肉了，虽然亏了点但保住了大部分本金。'; } },
+      { emoji: '📉', text: '反手做空', hint: '赌继续跌', effect: (s) => { 
+        if (Math.random() < 0.5) { s.wealth *= 2.2; s.luck = Math.max(0, s.luck - 0.1); return '反手做空成功！你赚翻了！'; }
+        else { s.wealth *= 0.6; s.luck = Math.max(0, s.luck - 0.2); return '市场突然反弹，你做空被套...'; }
+      } },
     ]
   },
   {
     id: 'market_phase',
     title: '🌊 市场转折',
     desc: '市场氛围变了，你觉得接下来会是...',
-    condition: (s) => s.week === 0 && s.year > 0 && Math.random() < 0.7,
+    condition: (s) => Math.random() < 0.6,
     choices: [
-      { emoji: '📈', text: '看多做多', hint: '押注上涨', effect: (s) => { s.runRiskRewardMult *= 1.5; game.marketPhase = 'bull'; game.marketTicksLeft = 6; return '你看多市场，准备迎接牛市！'; } },
-      { emoji: '📉', text: '看空做空', hint: '押注下跌', effect: (s) => { s.runRiskRewardMult *= 1.5; game.marketPhase = 'bear'; game.marketTicksLeft = 6; return '你看空市场，准备做空！'; } },
-      { emoji: '➡️', text: '继续震荡', hint: '观望', effect: (s) => { s.runRiskRewardMult *= 0.8; s.rationality = Math.min(1, s.rationality + 0.1); return '你认为市场还会震荡，保持观望。'; } },
+      { emoji: '📈', text: '看多做多', hint: '押注上涨', effect: (s) => { 
+        game.marketPhase = 'bull'; game.marketTicksLeft = 8; 
+        if (Math.random() < 0.6) { s.wealth *= 1.4; return '你看对了！牛市来了，资产大涨40%！'; }
+        else { s.wealth *= 0.85; return '判断失误，市场继续下跌...'; }
+      } },
+      { emoji: '📉', text: '看空做空', hint: '押注下跌', effect: (s) => { 
+        game.marketPhase = 'bear'; game.marketTicksLeft = 8; 
+        if (Math.random() < 0.5) { s.wealth *= 1.5; return '你看空了，市场暴跌，你赚到了！'; }
+        else { s.wealth *= 0.8; return '市场不跌反涨，你踏空了...'; }
+      } },
+      { emoji: '➡️', text: '继续震荡', hint: '观望', effect: (s) => { s.wealth *= 1.05; s.rationality = Math.min(1, s.rationality + 0.1); return '你选择了观望，避开了波动，小赚5%。'; } },
+    ]
+  },
+  // ===== 逆天改命类决策 =====
+  {
+    id: 'all_or_nothing',
+    title: '🔥 命运抉择',
+    desc: '你获得了一个「要么暴富要么归零」的机会...',
+    condition: (s) => s.year >= 2 && Math.random() < 0.25,
+    choices: [
+      { emoji: '🎲', text: '赌上全部', hint: '50%概率10倍，50%归零', effect: (s) => { 
+        if (Math.random() < 0.5) { s.wealth *= 10; s.luck = 1; return '逆天改命！你赌对了，资产翻10倍！'; }
+        else { s.wealth = 100; s.debt *= 2; return '你赌输了，几乎归零...负债翻倍。'; }
+      } },
+      { emoji: '🛡️', text: '放弃机会', hint: '稳健发展', effect: (s) => { s.wealth *= 1.1; s.rationality = Math.min(1, s.rationality + 0.2); return '你放弃了高风险机会，稳健发展，小赚10%。'; } },
     ]
   },
   {
-    id: 'black_swan',
-    title: '🦢 黑天鹅预警',
-    desc: '你听到风声，可能有大事要发生，你决定...',
-    condition: (s) => s.year >= 2 && Math.random() < 0.3,
+    id: 'insider_info',
+    title: '🔮 内幕消息',
+    desc: '你收到了一条「内幕消息」，说某币会暴涨...',
+    condition: (s) => s.social > 0.5 && Math.random() < 0.3,
     choices: [
-      { emoji: '🛡️', text: '清仓避险', hint: '保住本金', effect: (s) => { s.capital = Math.floor(s.capital * 0.9); s.wealth = Math.floor(s.wealth * 0.95); s.rationality = Math.min(1, s.rationality + 0.2); return '你清仓避险，虽然少赚但保住了大部分本金。'; } },
-      { emoji: '🎰', text: '赌一把大的', hint: '危机也是机会', effect: (s) => { s.runRiskRewardMult *= 3; s.luck = Math.max(0, s.luck - 0.15); return '你决定赌一把，富贵险中求！'; } },
-      { emoji: '🤷', text: '装死不动', hint: '佛系持币', effect: (s) => { s.strategy = Math.min(1, s.strategy + 0.1); return '你选择装死，长期持有不动摇。'; } },
+      { emoji: '💰', text: '梭哈买入', hint: '信内幕', effect: (s) => { 
+        if (Math.random() < 0.35) { s.wealth *= 5; return '内幕是真的！你赚翻了，资产翻5倍！'; }
+        else { s.wealth *= 0.3; return '假消息！你被割韭菜了...'; }
+      } },
+      { emoji: '🎲', text: '小仓位跟', hint: '试探', effect: (s) => { 
+        if (Math.random() < 0.4) { s.wealth *= 1.8; return '消息属实，你小赚一笔！'; }
+        else { s.wealth *= 0.85; return '消息有误，小亏一点。'; }
+      } },
+      { emoji: '🚫', text: '无视消息', hint: '不相信', effect: (s) => { s.rationality = Math.min(1, s.rationality + 0.15); return '你选择了无视，后来才知道那是假消息，躲过一劫。'; } },
+    ]
+  },
+  // ===== 危机处理类决策 =====
+  {
+    id: 'exchange_hacked',
+    title: '💥 交易所危机',
+    desc: '你使用的交易所疑似被黑，资产安全成疑...',
+    condition: (s) => s.wealth > 50000 && Math.random() < 0.2,
+    choices: [
+      { emoji: '🏃', text: '立即提现', hint: '避险', effect: (s) => { s.wealth *= 0.95; s.capital = s.wealth; return '你紧急提现，虽然损失5%手续费但保住了资产。'; } },
+      { emoji: '💎', text: '相信交易所', hint: '持有', effect: (s) => { 
+        if (Math.random() < 0.6) { return '交易所安全度过危机，你的资产没事。'; }
+        else { s.wealth *= 0.3; return '交易所真的被黑了！你损失了70%资产...'; }
+      } },
+      { emoji: '🔄', text: '转去冷钱包', hint: '最安全', effect: (s) => { s.wealth *= 0.98; s.rationality = Math.min(1, s.rationality + 0.25); return '你把资产转到冷钱包，安全但损失2%转账费。'; } },
+    ]
+  },
+  {
+    id: 'debt_crisis',
+    title: '💸 债务危机',
+    desc: '你负债累累，债主开始催款，你决定...',
+    condition: (s) => (s.debt || 0) > (s.wealth || 0) * 0.5 && Math.random() < 0.5,
+    choices: [
+      { emoji: '🔥', text: '最后梭哈', hint: '逆天改命', effect: (s) => { 
+        if (Math.random() < 0.3) { s.debt = 0; s.wealth *= 3; return '奇迹！你翻盘了！债务清零还暴富！'; }
+        else { s.wealth = 0; s.debt *= 1.5; return '彻底崩盘...负债更多了。'; }
+      } },
+      { emoji: '💼', text: '打工还债', hint: '踏实', effect: (s) => { s.debt = Math.max(0, s.debt - 50000); s.runRiskRewardMult *= 0.6; return '你决定踏实打工，债务减少5万。'; } },
+      { emoji: '🏃', text: '跑路', hint: '逃离', effect: (s) => { s.debt = Math.floor(s.debt * 0.2); s.social = Math.max(0, s.social - 0.5); return '你跑路了，债务减免80%但身败名裂。'; } },
+    ]
+  },
+  // ===== 路径专属决策 =====
+  {
+    id: 'kol_viral',
+    title: '🎤  viral时刻',
+    desc: '你的内容突然viral，流量暴涨！',
+    condition: (s) => s.mainPath === 'kol' && Math.random() < 0.5,
+    choices: [
+      { emoji: '💰', text: '疯狂变现', hint: '接广告', effect: (s) => { s.wealth += 50000; s.fans += 10000; return '你疯狂接广告，赚到5万U，粉丝破万！'; } },
+      { emoji: '🚀', text: '打造IP', hint: '长期', effect: (s) => { s.fans += 50000; s.wealth += 20000; return '你专注打造个人IP，粉丝暴涨5万！'; } },
+      { emoji: '🎰', text: '带货发币', hint: '高风险', effect: (s) => { 
+        if (Math.random() < 0.4) { s.wealth *= 2; s.fans += 20000; return '你带货的币暴涨！粉丝和财富双丰收！'; }
+        else { s.fans *= 0.5; s.wealth *= 0.7; return '你推荐的币RUG了，粉丝掉了一半...'; }
+      } },
+    ]
+  },
+  {
+    id: 'trading_bot',
+    title: '🤖 量化机会',
+    desc: '你发现了一个套利机会...',
+    condition: (s) => s.mainPath === 'trading' && Math.random() < 0.5,
+    choices: [
+      { emoji: '💻', text: '梭哈套利', hint: 'all in', effect: (s) => { 
+        if (Math.random() < 0.55) { s.wealth *= 2.5; return '套利成功！你赚大了！'; }
+        else { s.wealth *= 0.6; return '滑点太大，套利失败还亏了...'; }
+      } },
+      { emoji: '📊', text: '小资金测试', hint: '稳健', effect: (s) => { s.wealth *= 1.3; return '小资金套利成功，稳稳赚了30%。'; } },
+      { emoji: '👀', text: '观察不跟', hint: '谨慎', effect: (s) => { s.rationality = Math.min(1, s.rationality + 0.1); return '你观察后发现是陷阱，没参与。'; } },
+    ]
+  },
+  {
+    id: 'airdrop_whale',
+    title: '🎁 空投巨鲸',
+    desc: '你发现一个可能的大毛空投...',
+    condition: (s) => s.mainPath === 'airdrop' && Math.random() < 0.5,
+    choices: [
+      { emoji: '🔥', text: '开100个号', hint: '女巫', effect: (s) => { 
+        if (Math.random() < 0.35) { s.wealth += 200000; return '空投到账！你领到了20万U！'; }
+        else { s.wealth -= 10000; s.debt += 20000; return '被女巫检测了！全部封号还亏Gas！'; }
+      } },
+      { emoji: '🎲', text: '开10个号', hint: '适中', effect: (s) => { s.wealth += 30000; return '你领了3万U，稳稳的幸福。'; } },
+      { emoji: '👤', text: '单号精撸', hint: '安全', effect: (s) => { s.wealth += 8000; s.rationality = Math.min(1, s.rationality + 0.1); return '单号领了8000U，虽然少但安全。'; } },
+    ]
+  },
+  // ===== 财富增值类决策 =====
+  {
+    id: 'wealth_invest',
+    title: '🏦 投资抉择',
+    desc: '你手头有一笔闲钱，想投资...',
+    condition: (s) => s.wealth > 10000 && Math.random() < 0.4,
+    choices: [
+      { emoji: '🏠', text: '买房收租', hint: '稳健', effect: (s) => { s.wealth *= 1.3; s.passiveIncomePerYear += 5000; return '你买了房，资产增值30%还有稳定租金。'; } },
+      { emoji: '🌾', text: 'DeFi挖矿', hint: '收益', effect: (s) => { 
+        if (Math.random() < 0.5) { s.wealth *= 1.8; return '挖矿收益爆炸！你赚翻了！'; }
+        else { s.wealth *= 0.8; return '无常损失把你的收益吞了...'; }
+      } },
+      { emoji: '🎰', text: '冲新土狗', hint: '高风险', effect: (s) => { 
+        if (Math.random() < 0.25) { s.wealth *= 10; return '土狗百倍！你逆天改命！'; }
+        else { s.wealth *= 0.5; return '土狗归零，你亏了一半...'; }
+      } },
+    ]
+  },
+  // ===== 神秘事件 =====
+  {
+    id: 'mystery_event',
+    title: '👻 神秘事件',
+    desc: '一个神秘人联系你，说可以改变你的命运...',
+    condition: (s) => s.year >= 3 && Math.random() < 0.15,
+    choices: [
+      { emoji: '🔮', text: '接受交易', hint: '未知', effect: (s) => { 
+        const roll = Math.random();
+        if (roll < 0.3) { s.wealth *= 5; s.luck = 1; return '神秘人真的是神！你暴富了！'; }
+        else if (roll < 0.6) { s.wealth *= 2; return '神秘人帮你赚了双倍！'; }
+        else { s.wealth = 100; s.debt = 0; return '神秘人骗走了你所有钱...'; }
+      } },
+      { emoji: '🚫', text: '拒绝', hint: '安全', effect: (s) => { return '你拒绝了神秘人，后来听说有人被骗了，你躲过一劫。'; } },
     ]
   },
 ];
@@ -1254,27 +1362,308 @@ function endGame(endingId) {
 }
 
 function showEndingScreen(title, storyFormatted, netW, rarity, unlockedObjs) {
-  const box = document.getElementById('endingBox');
-  const titleEl = document.getElementById('endingTitle');
-  const descEl = document.getElementById('endingDesc');
-  const unEl = document.getElementById('endingUnlocked');
-  const playerIdEl = document.getElementById('endingPlayerId');
-  if (box) box.className = 'ending-box rarity-' + rarity;
-  if (titleEl) titleEl.textContent = title + ' · ' + formatU(netW);
-  if (playerIdEl) {
-    const pid = (game.state && game.state.playerId) ? String(game.state.playerId).trim() : '';
-    if (pid) { playerIdEl.textContent = '玩家 ID: ' + pid; playerIdEl.style.display = 'block'; } else { playerIdEl.style.display = 'none'; playerIdEl.textContent = ''; }
+  // 生成结局海报（海报就是结局的全部展示）
+  generateEndingPoster(title, storyFormatted, netW, rarity, unlockedObjs);
+}
+
+/** 生成结局海报 */
+function generateEndingPoster(title, story, netW, rarity, unlockedObjs) {
+  const canvas = document.getElementById('endingPosterCanvas');
+  if (!canvas) return;
+  
+  const ctx = canvas.getContext('2d');
+  const width = 600;
+  const height = 1000;
+  canvas.width = width;
+  canvas.height = height;
+  
+  const s = game.state;
+  const config = {
+    title: title,
+    rarity: rarity,
+    rarityName: rarity.toUpperCase(),
+    story: story.split('\n\n').filter(line => line.trim()),
+    wealth: netW,
+    fans: s.fans,
+    years: s.year + 1,
+    path: (PATHS.find(p => p.id === s.mainPath) || {}).name || s.mainPath,
+    color: getRarityColor(rarity),
+    bgColors: getRarityBgColors(rarity),
+    borderWidth: getRarityBorderWidth(rarity),
+    hasGlow: rarity !== 'common',
+    hasAnimation: ['epic', 'legendary', 'mythic', 'supreme'].includes(rarity),
+    unlockedAchievements: unlockedObjs || []
+  };
+  
+  drawPoster(ctx, width, height, config);
+}
+
+function getRarityColor(rarity) {
+  const colors = {
+    common: '#9ca3af',
+    uncommon: '#22c55e',
+    rare: '#3b82f6',
+    epic: '#a855f7',
+    legendary: '#f97316',
+    mythic: '#ef4444',
+    supreme: '#facc15'
+  };
+  return colors[rarity] || '#9ca3af';
+}
+
+function getRarityBgColors(rarity) {
+  const bgColors = {
+    common: ['#1a1a1a', '#252525'],
+    uncommon: ['#0a1f0a', '#122812'],
+    rare: ['#0a1629', '#122240'],
+    epic: ['#1a0a2e', '#2d124d'],
+    legendary: ['#1a0f00', '#3d1f00'],
+    mythic: ['#1a0505', '#3d0f0f'],
+    supreme: ['#0a0a00', '#1a1500']
+  };
+  return bgColors[rarity] || ['#1a1a1a', '#252525'];
+}
+
+function getRarityBorderWidth(rarity) {
+  const widths = { common: 2, uncommon: 3, rare: 4, epic: 5, legendary: 6, mythic: 7, supreme: 8 };
+  return widths[rarity] || 2;
+}
+
+function drawPoster(ctx, width, height, config) {
+  const padding = 35;
+  
+  // 1. 背景渐变
+  const gradient = ctx.createLinearGradient(0, 0, 0, height);
+  config.bgColors.forEach((color, i) => {
+    gradient.addColorStop(i / (config.bgColors.length - 1), color);
+  });
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, width, height);
+
+  // 2. 边框
+  ctx.strokeStyle = config.color;
+  ctx.lineWidth = config.borderWidth;
+  ctx.strokeRect(config.borderWidth/2, config.borderWidth/2, 
+                width - config.borderWidth, height - config.borderWidth);
+
+  // 3. 内边框装饰
+  if (config.rarity !== 'common') {
+    ctx.strokeStyle = config.color + '40';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(20, 20, width - 40, height - 40);
   }
-  if (descEl) descEl.textContent = storyFormatted;
-  if (unEl) {
-    if (!unlockedObjs || unlockedObjs.length === 0) {
-      unEl.style.display = 'none';
-      unEl.innerHTML = '';
-    } else {
-      unEl.style.display = 'block';
-      unEl.innerHTML = '<h4>本局解锁成就</h4>' + unlockedObjs.map(a => '<div class="ach-item">' + escapeHtml(a.name) + '：' + escapeHtml(a.desc || '') + '</div>').join('');
+
+  // 4. 光效
+  if (config.hasGlow) {
+    const glowGradient = ctx.createRadialGradient(width/2, height/2, 50, width/2, height/2, 400);
+    glowGradient.addColorStop(0, config.color + '20');
+    glowGradient.addColorStop(1, 'transparent');
+    ctx.fillStyle = glowGradient;
+    ctx.fillRect(0, 0, width, height);
+  }
+
+  let y = 60;
+
+  // 5. 标题
+  ctx.fillStyle = '#eaecef';
+  ctx.font = 'bold 22px "Noto Sans SC", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('🪙 币圈生涯模拟器', width/2, y);
+  y += 50;
+
+  // 6. 结局标题
+  ctx.fillStyle = config.color;
+  ctx.font = `bold ${config.rarity === 'supreme' ? 48 : config.rarity === 'mythic' ? 44 : 40}px "Noto Sans SC", sans-serif`;
+  ctx.textAlign = 'center';
+  
+  if (config.hasGlow) {
+    ctx.shadowColor = config.color;
+    ctx.shadowBlur = 20;
+  }
+  ctx.fillText(config.title, width/2, y);
+  ctx.shadowBlur = 0;
+  y += 40;
+
+  // 7. 稀有度标签
+  ctx.fillStyle = config.color;
+  ctx.font = 'bold 13px "Noto Sans SC", sans-serif';
+  ctx.fillText(config.rarityName, width/2, y);
+  y += 45;
+
+  // 8. 玩家信息
+  ctx.fillStyle = '#848e9c';
+  ctx.font = '13px "Noto Sans SC", sans-serif';
+  const playerId = (game.state.playerId || '匿名').slice(0, 12);
+  ctx.fillText(`${playerId} · ${config.years}年 · ${config.path}`, width/2, y);
+  y += 35;
+
+  // 9. 数据卡片（只显示财富和粉丝，移除存活年数）
+  const stats = [
+    { icon: '💰', value: formatNumber(config.wealth), label: '财富' },
+    { icon: '👥', value: formatNumber(config.fans), label: '粉丝' }
+  ];
+
+  const cardWidth = 120;
+  const gap = 20;
+  const startX = (width - (cardWidth * 2 + gap)) / 2;
+
+  stats.forEach((stat, i) => {
+    const x = startX + i * (cardWidth + gap);
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.fillRect(x, y, cardWidth, 70);
+    ctx.strokeStyle = config.color + '40';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x, y, cardWidth, 70);
+
+    ctx.fillStyle = config.color;
+    ctx.font = 'bold 18px "Noto Sans SC", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(stat.value, x + cardWidth/2, y + 35);
+    
+    ctx.fillStyle = '#848e9c';
+    ctx.font = '12px "Noto Sans SC", sans-serif';
+    ctx.fillText(stat.label, x + cardWidth/2, y + 55);
+  });
+  y += 90;
+
+  // 10. 分隔线
+  ctx.strokeStyle = config.color + '60';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(50, y);
+  ctx.lineTo(width - 50, y);
+  ctx.stroke();
+  y += 30;
+
+  // 11. 故事标题
+  ctx.fillStyle = config.color;
+  ctx.font = 'bold 15px "Noto Sans SC", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('📖 我的币圈人生', width/2, y);
+  y += 25;
+
+  // 12. 故事内容（居中对齐）
+  ctx.fillStyle = '#eaecef';
+  ctx.font = 'bold 17px "Noto Sans SC", sans-serif';
+  ctx.textAlign = 'center';
+  
+  const maxWidth = width - 80;
+  const lineHeight = 28;
+  const paraGap = lineHeight * 1.2;
+  
+  config.story.forEach((paragraph) => {
+    const words = paragraph.split('');
+    let line = '';
+    const lines = [];
+    
+    // 先将段落分割成多行
+    for (let i = 0; i < words.length; i++) {
+      const testLine = line + words[i];
+      const metrics = ctx.measureText(testLine);
+      
+      if (metrics.width > maxWidth && i > 0) {
+        lines.push(line);
+        line = words[i];
+      } else {
+        line = testLine;
+      }
     }
+    if (line) {
+      lines.push(line);
+    }
+    
+    // 居中绘制每行
+    for (const lineText of lines) {
+      if (y > height - 100) {
+        ctx.fillText('...', width/2, y);
+        return;
+      }
+      ctx.fillText(lineText, width/2, y);
+      y += lineHeight;
+    }
+    
+    y += paraGap;
+  });
+
+  // 13. 本局解锁成就
+  const unlockedAchievements = config.unlockedAchievements || [];
+  if (unlockedAchievements.length > 0 && y < height - 150) {
+    y += 10;
+    
+    // 分隔线
+    ctx.strokeStyle = config.color + '40';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(80, y);
+    ctx.lineTo(width - 80, y);
+    ctx.stroke();
+    y += 20;
+    
+    // 成就标题
+    ctx.fillStyle = config.color;
+    ctx.font = 'bold 13px "Noto Sans SC", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('🏆 本局解锁成就', width/2, y);
+    y += 22;
+    
+    // 成就列表 - 每行显示2个
+    const achievementColors = {
+      common: '#9ca3af',
+      uncommon: '#22c55e',
+      rare: '#3b82f6',
+      epic: '#a855f7',
+      legendary: '#f97316',
+      mythic: '#ef4444',
+      supreme: '#facc15'
+    };
+    
+    const itemsPerRow = 2;
+    const itemWidth = (width - 100) / itemsPerRow;
+    
+    for (let i = 0; i < unlockedAchievements.length && y < height - 100; i++) {
+      const ach = unlockedAchievements[i];
+      const col = i % itemsPerRow;
+      const row = Math.floor(i / itemsPerRow);
+      const itemX = 50 + col * itemWidth;
+      const itemY = y + row * 24;
+      
+      const achColor = achievementColors[ach.rarity] || '#9ca3af';
+      
+      // 成就名称
+      ctx.fillStyle = achColor;
+      ctx.font = '12px "Noto Sans SC", sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(`✦ ${ach.name}`, itemX, itemY);
+    }
+    
+    // 更新 y 到成就列表底部
+    const rows = Math.ceil(Math.min(unlockedAchievements.length, Math.floor((height - 100 - y) / 24)) / itemsPerRow);
+    y += rows * 24 + 10;
   }
+
+  // 14. 底部装饰
+  const bottomY = height - 50;
+  
+  if (config.rarity === 'supreme') {
+    ctx.fillStyle = config.color;
+    ctx.font = '50px serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('👑', width/2, bottomY);
+  } else if (config.rarity === 'mythic') {
+    ctx.fillStyle = config.color;
+    ctx.font = '40px serif';
+    ctx.fillText('🔥', width/2, bottomY);
+  } else if (config.rarity === 'legendary') {
+    ctx.fillStyle = config.color;
+    ctx.font = '35px serif';
+    ctx.fillText('⚡', width/2, bottomY);
+  }
+
+  // 15. 底部链接
+  ctx.fillStyle = '#848e9c';
+  ctx.font = '11px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('mememax-edition.vercel.app', width/2, height - 20);
 }
 
 /** 成就：id, name, desc, rarity, check(payload)；payload 为当局结束时 { netWealth, fans, path, endingId, year, week, hadWindfall100, hadWindfall1000, hadCatastrophe, pathSaint, debt } */
@@ -1520,6 +1909,12 @@ function renderAchievements() {
       <div class="achievement-desc">${descStr}</div>
     </div>`;
   }).join('');
+  
+  // 更新预览卡片上的成就数量
+  const previewCount = document.getElementById('previewAchCount');
+  if (previewCount) {
+    previewCount.textContent = `${unlocked.length}/${ACHIEVEMENTS.length} 已解锁`;
+  }
 }
 
 const HISTORY_KEY = 'memeMaxHistory';
@@ -1554,7 +1949,7 @@ function updateUI() {
   const wealthEl = document.getElementById('dispWealth');
   wealthEl.textContent = formatU(netW);
   if (netW < 0) wealthEl.classList.add('negative'); else wealthEl.classList.remove('negative');
-  document.getElementById('dispFans').textContent = formatU(s.fans);
+  document.getElementById('dispFans').textContent = formatNumber(s.fans);
   document.getElementById('dispPath').textContent = (PATHS.find(p => p.id === s.mainPath) || {}).name || s.mainPath;
   const playerIdEl = document.getElementById('dispPlayerId');
   if (playerIdEl) {
@@ -1571,21 +1966,54 @@ function updateUI() {
 }
 
 function formatU(n) {
-  // 使用美元货币格式显示
+  // 使用紧凑货币格式显示，保留K,M，>=1B用e+科学计数法(基于B)
   const num = Number(n) || 0;
   const absNum = Math.abs(num);
   const sign = num < 0 ? '-' : '';
   
-  if (absNum >= 1e9) {
-    return sign + '$' + (absNum / 1e9).toFixed(2) + 'B';
+  // 小于1000直接显示
+  if (absNum < 1e3) {
+    return sign + '$' + absNum.toFixed(0);
   }
-  if (absNum >= 1e6) {
-    return sign + '$' + (absNum / 1e6).toFixed(2) + 'M';
+  
+  // 1K-999M用K,M表示
+  if (absNum >= 1e3 && absNum < 1e9) {
+    if (absNum >= 1e6) {
+      return sign + '$' + (absNum / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+    }
+    return sign + '$' + (absNum / 1e3).toFixed(1).replace(/\.0$/, '') + 'K';
   }
-  if (absNum >= 1e3) {
-    return sign + '$' + (absNum / 1e3).toFixed(1) + 'K';
+  
+  // 大于等于1B(1e9)：转换为以B为单位的科学计数法
+  // 例如 1.5e15 → 1.5e15 / 1e9 = 1.5e6 → 显示为 1.5e+6B
+  const billions = absNum / 1e9;
+  const exponent = Math.floor(Math.log10(billions));
+  const mantissa = billions / Math.pow(10, exponent);
+  const mantissaStr = mantissa.toString().slice(0, 5);
+  return sign + '$' + mantissaStr + 'e+' + exponent + 'B';
+}
+
+function formatNumber(n) {
+  // 纯数字格式化，不带$符号（用于粉丝数等）
+  const num = Number(n) || 0;
+  const isNegative = num < 0;
+  const absNum = Math.abs(num);
+  
+  let result;
+  if (absNum >= 1e12) {
+    result = (absNum / 1e12).toFixed(1) + 'T';
+  } else if (absNum >= 1e9) {
+    result = (absNum / 1e9).toFixed(2) + 'B';
+  } else if (absNum >= 1e6) {
+    result = (absNum / 1e6).toFixed(2) + 'M';
+  } else if (absNum >= 1e3) {
+    result = (absNum / 1e3).toFixed(1) + 'K';
+  } else {
+    result = absNum.toFixed(0);
   }
-  return sign + '$' + absNum.toFixed(0);
+  
+  // 负数时添加负号
+  return isNegative ? '-' + result : result;
 }
 
 function renderChart() {
@@ -1658,7 +2086,9 @@ function bindLastRun() {
 
 /** 仅收起结局弹层，留在本局界面，显示「查看上一局」「再来一局」栏 */
 function dismissEndingOnly() {
+  // 隐藏结局海报界面
   document.getElementById('endingScreen').classList.remove('show');
+  // 显示底部操作栏（包含"显示结局"和"再来一局"按钮）
   const bar = document.getElementById('afterEndBar');
   if (bar) bar.style.display = 'flex';
   const btnPause = document.getElementById('btnPause');
@@ -1677,6 +2107,13 @@ function goToStartScreen() {
 }
 
 function bindRestart() {
+  // 显示结局按钮 - 重新显示海报
+  document.getElementById('btnShowEnding')?.addEventListener('click', () => {
+    const bar = document.getElementById('afterEndBar');
+    if (bar) bar.style.display = 'none';
+    document.getElementById('endingScreen').classList.add('show');
+  });
+  
   // 再来一局 - 直接重新开始，使用默认参数
   document.getElementById('btnRestart').addEventListener('click', () => {
     document.getElementById('endingScreen').classList.remove('show');
@@ -1720,11 +2157,41 @@ function bindRestart() {
     };
     game.state = null;
     game.running = false;
+    // 同步决策模式
+    game.decisionMode = savedSettings.decisionMode || 'auto';
     startNewGame(1000, traits);
   });
+  // 收起结局海报
   document.getElementById('btnEndingDismiss')?.addEventListener('click', () => {
     dismissEndingOnly();
   });
+  
+  // 保存海报按钮
+  document.getElementById('btnDownloadPoster')?.addEventListener('click', () => {
+    const canvas = document.getElementById('endingPosterCanvas');
+    if (canvas) {
+      const link = document.createElement('a');
+      link.download = `mememax-ending-${Date.now()}.png`;
+      link.href = canvas.toDataURL();
+      link.click();
+    }
+  });
+  
+  // 分享按钮
+  document.getElementById('btnShareTwitter')?.addEventListener('click', () => {
+    const s = game.state;
+    if (!s) return;
+    const ending = LIFE_ENDINGS[s.ending] || LIFE_ENDINGS.bankruptcy;
+    const rarity = ENDING_RARITY[s.ending] || 'common';
+    const emoji = {common:'⚪',uncommon:'🟢',rare:'🔵',epic:'🟣',legendary:'🟠',mythic:'🔴',supreme:'🟡'};
+    const netW = getNetWealth(s);
+    
+    const text = `🎉 刚刚在《币圈生涯模拟器》达成了【${ending.title}】！\n\n💰 净资产：${formatU(netW)}\n⏱️ 存活：${s.year + 1}年\n${emoji[rarity]} 稀有度：${rarity.toUpperCase()}\n\n${ending.desc}\n\n👉 mememax-edition.vercel.app`;
+    
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+    window.open(twitterUrl, '_blank');
+  });
+  
   document.getElementById('btnRestartFromBar')?.addEventListener('click', () => {
     const bar = document.getElementById('afterEndBar');
     if (bar) bar.style.display = 'none';
@@ -1767,6 +2234,8 @@ function bindRestart() {
     };
     game.state = null;
     game.running = false;
+    // 同步决策模式
+    game.decisionMode = savedSettings.decisionMode || 'auto';
     startNewGame(1000, traits);
   });
   // 结局收起后显示"查看历史"按钮
@@ -1878,6 +2347,8 @@ function bindSettingsUI() {
       const personality = personalitySelect?.value || 'balanced';
       const decisionMode = decisionModeSelect?.value || 'auto';
       savedSettings = { style, philosophy, personality, decisionMode };
+      // 持久化到 localStorage
+      saveSettingsToStorage(savedSettings);
       overlay.classList.remove('show');
       showToast('设置已保存，将在下一局生效');
       console.log('Settings saved:', savedSettings);
@@ -1920,15 +2391,52 @@ function showToast(message) {
 }
 
 /** 全局保存的设置（用于新游戏） */
-let savedSettings = {
-  style: 'balanced',
-  philosophy: 'news',
-  personality: 'balanced'
-};
+let savedSettings = loadSettingsFromStorage();
+
+/** 从 localStorage 加载设置 */
+function loadSettingsFromStorage() {
+  const defaults = {
+    style: 'balanced',
+    philosophy: 'news',
+    personality: 'balanced',
+    decisionMode: 'auto'
+  };
+  try {
+    const stored = localStorage.getItem('memeMaxSettings');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      // 合并默认值，确保新增字段有默认值
+      return { ...defaults, ...parsed };
+    }
+  } catch (e) {
+    console.warn('Failed to load settings from storage:', e);
+  }
+  return defaults;
+}
+
+/** 保存设置到 localStorage */
+function saveSettingsToStorage(settings) {
+  try {
+    localStorage.setItem('memeMaxSettings', JSON.stringify(settings));
+  } catch (e) {
+    console.warn('Failed to save settings to storage:', e);
+  }
+}
 
 function initStartForm() {
   const form = document.getElementById('startForm');
   if (!form) return;
+  
+  // 同步保存的设置到开局表单
+  const initStyle = document.getElementById('initStyle');
+  const initPhilosophy = document.getElementById('initPhilosophy');
+  const initPersonality = document.getElementById('initPersonality');
+  const initDecisionMode = document.getElementById('initDecisionMode');
+  
+  if (initStyle) initStyle.value = savedSettings.style;
+  if (initPhilosophy) initPhilosophy.value = savedSettings.philosophy;
+  if (initPersonality) initPersonality.value = savedSettings.personality;
+  if (initDecisionMode) initDecisionMode.value = savedSettings.decisionMode || 'auto';
   
   form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -1944,6 +2452,8 @@ function initStartForm() {
     
     // 保存设置供后续使用
     savedSettings = { style, philosophy, personality, decisionMode };
+    // 持久化到 localStorage
+    saveSettingsToStorage(savedSettings);
     
     // 根据风格自动计算基础参数
     const styleMap = {

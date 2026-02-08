@@ -74,19 +74,96 @@
                 touch-action: pan-y;
                 flex-shrink: 0;
             }
+            /* 移动端侧边栏标签 */
+            .sidebar-tabs {
+                display: none;
+                flex-direction: row;
+                gap: 8px;
+                margin-bottom: 10px;
+                flex-shrink: 0;
+                padding: 0 4px;
+            }
+            .sidebar-tab {
+                flex: 1;
+                padding: 8px 12px;
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                background: rgba(0,0,0,0.3);
+                color: var(--text-dim);
+                font-size: 13px;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            .sidebar-tab.active {
+                background: rgba(240,185,11,0.15);
+                border-color: var(--orange);
+                color: var(--text);
+            }
+            .tab-content {
+                display: none;
+                flex: 1;
+                overflow-y: auto;
+                min-height: 0;
+            }
+            .tab-content.active {
+                display: flex;
+                flex-direction: column;
+            }
+            #achievementList.tab-content.active {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+                gap: 8px;
+                align-content: start;
+            }
+            .leaderboard-content {
+                padding: 4px;
+            }
+            .leaderboard-content .lb-section {
+                margin-bottom: 16px;
+            }
+            .leaderboard-content .lb-section h4 {
+                font-size: 12px;
+                color: var(--text-dim);
+                margin-bottom: 8px;
+                padding-bottom: 4px;
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+            }
+            .leaderboard-content .lb-list {
+                max-height: none;
+            }
+            .leaderboard-content .lb-item {
+                padding: 6px 4px;
+                font-size: 12px;
+            }
+            .leaderboard-content .lb-rank {
+                width: 24px;
+                font-size: 12px;
+            }
+            .leaderboard-content .lb-name {
+                flex: 1;
+            }
+            .leaderboard-content .lb-score {
+                color: var(--green);
+                font-weight: 600;
+            }
+            .leaderboard-content .lb-debt {
+                color: var(--red);
+                font-weight: 600;
+            }
         .achievement-list {
             flex: 1;
             overflow-y: auto;
             min-height: 0;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
-            gap: 4px;
+            grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+            gap: 10px;
             align-content: start;
+            padding: 6px;
         }
         .achievement-box {
             aspect-ratio: 1;
-            padding: 3px;
-            border-radius: 4px;
+            padding: 5px;
+            border-radius: 6px;
             border: 1px solid;
             background: rgba(0,0,0,0.25);
             transition: opacity 0.2s, transform 0.15s;
@@ -95,13 +172,15 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            min-height: 0;
+            min-height: 64px;
+            min-width: 64px;
+            overflow: hidden;
         }
         .achievement-box:hover { transform: scale(1.05); }
         .achievement-box.locked { opacity: 0.7; cursor: help; }
         .achievement-box.locked:hover { opacity: 0.95; }
-        .achievement-box .achievement-name { font-weight: 700; font-size: 9px; margin-bottom: 1px; line-height: 1.15; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; word-break: break-all; }
-        .achievement-box .achievement-desc { font-size: 8px; color: var(--text-dim); line-height: 1.2; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; word-break: break-all; }
+        .achievement-box .achievement-name { font-weight: 700; font-size: 9px; margin-bottom: 2px; line-height: 1.2; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; word-break: break-all; }
+        .achievement-box .achievement-desc { font-size: 8px; color: var(--text-dim); line-height: 1.25; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; word-break: break-all; }
         .achievement-box.unlocked .achievement-desc { color: var(--text); }
         .achievement-box.locked .achievement-desc { -webkit-line-clamp: 1; }
         /* 成就稀有度边框色（与结局框一致） */
@@ -164,11 +243,6 @@
         .player-id-badge:not([data-empty="true"]) { color: var(--meme-green); border-color: rgba(0,255,136,0.4); }
         .time-display { margin-left: auto; color: var(--text-dim); font-size: 14px; }
         .speed-label { font-size: 12px; color: var(--text-dim); margin-right: 6px; }
-        .speed-group {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
         .speed-select {
             padding: 6px 10px;
             font-size: 12px;
@@ -413,27 +487,39 @@
         }
         .history-overlay.show { display: flex; }
         .history-modal {
-            background: var(--bg-panel); border: 1px solid #2b3139; border-radius: 12px; padding: 20px; max-width: 560px; width: 100%; max-height: 85vh; overflow: hidden; display: flex; flex-direction: column;
+            background: var(--bg-panel); border: 1px solid #2b3139; border-radius: 12px; padding: 20px; max-width: 560px; width: 100%; max-height: 85vh; display: flex; flex-direction: column; position: relative;
         }
-        .history-modal h3 { margin-bottom: 12px; font-size: 18px; }
-        .history-list { flex: 1; overflow-y: auto; min-height: 0; margin-bottom: 12px; }
+        .history-modal h3 { margin-bottom: 12px; font-size: 18px; flex-shrink: 0; }
+        .history-list { flex: 1; overflow-y: auto; min-height: 200px; max-height: calc(85vh - 100px); margin-bottom: 12px; padding-right: 4px; }
         .history-item {
             padding: 10px 12px; margin-bottom: 6px; background: rgba(0,0,0,0.3); border-radius: 8px; cursor: pointer; font-size: 13px; border-left: 3px solid var(--text-dim);
         }
         .history-item:hover { background: #2a2a35; border-left-color: var(--border-gold); }
         .history-item .hi-title { font-weight: 700; color: var(--text); }
         .history-item .hi-meta { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
-        .history-detail { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
-        .history-detail h4 { margin-bottom: 8px; font-size: 16px; }
-        .history-detail-meta { font-size: 12px; color: var(--text-dim); margin-bottom: 8px; }
-        .history-detail-story { font-size: 13px; line-height: 1.6; color: var(--text); margin-bottom: 12px; padding: 8px; background: rgba(0,0,0,0.2); border-radius: 6px; }
-        .history-detail-log { flex: 1; overflow-y: auto; min-height: 120px; font-size: 12px; padding: 8px; background: rgba(0,0,0,0.3); border-radius: 8px; margin-bottom: 10px; }
+        .history-detail { flex: 1; overflow-y: auto; display: flex; flex-direction: column; max-height: calc(85vh - 80px); }
+        .history-detail h4 { margin-bottom: 8px; font-size: 16px; flex-shrink: 0; }
+        .history-detail-meta { font-size: 12px; color: var(--text-dim); margin-bottom: 8px; flex-shrink: 0; }
+        .history-detail-story { font-size: 13px; line-height: 1.6; color: var(--text); margin-bottom: 12px; padding: 8px; background: rgba(0,0,0,0.2); border-radius: 6px; flex-shrink: 0; }
+        .history-detail-log { flex: 1; overflow-y: auto; min-height: 150px; max-height: 400px; font-size: 12px; padding: 8px; background: rgba(0,0,0,0.3); border-radius: 8px; margin-bottom: 10px; }
         .history-detail-log .log-line { padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
         .history-detail-log .log-line.positive { border-left: 3px solid var(--green); padding-left: 8px; }
         .history-detail-log .log-line.negative { border-left: 3px solid var(--red); padding-left: 8px; }
         .history-detail-log .log-line.mixed { border-left: 3px solid var(--orange); padding-left: 8px; }
         .lastrun-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 2500; padding: 20px; }
         .lastrun-overlay.show { display: flex; }
+        
+        /* 设置面板 */
+        .settings-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 2600; padding: 20px; }
+        .settings-overlay.show { display: flex; }
+        .settings-modal { background: var(--bg-panel); border: 1px solid #2b3139; border-radius: 12px; padding: 20px; max-width: 480px; width: 100%; }
+        .settings-modal h3 { margin-bottom: 16px; font-size: 18px; }
+        .settings-form .form-group { margin-bottom: 16px; }
+        .settings-form label { display: block; margin-bottom: 6px; font-size: 13px; color: var(--text-dim); }
+        .settings-form select { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #2b3139; background: #0b0e11; color: var(--text); font-size: 13px; }
+        .settings-form .form-hint { font-size: 11px; color: var(--orange); margin: 12px 0; }
+        .settings-actions { display: flex; gap: 10px; margin-top: 20px; }
+        .settings-actions .btn { flex: 1; }
         .lastrun-modal { background: var(--bg-panel); border: 1px solid #2b3139; border-radius: 12px; padding: 20px; max-width: 560px; width: 100%; max-height: 85vh; overflow-y: auto; display: flex; flex-direction: column; }
         .lastrun-modal h3 { margin-bottom: 12px; font-size: 18px; flex-shrink: 0; }
         .lastrun-meta { flex-shrink: 0; }
@@ -445,15 +531,335 @@
         .lastrun-log .log-line.negative { border-left: 3px solid var(--red); padding-left: 8px; }
         .lastrun-log .log-line.mixed { border-left: 3px solid var(--orange); padding-left: 8px; }
 
+        /* 排行榜侧边栏 */
+        .leaderboard-sidebar {
+            position: fixed;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 240px;
+            background: rgba(20,21,26,0.95);
+            border: 1px solid #2b3139;
+            border-left: none;
+            border-radius: 0 12px 12px 0;
+            padding: 16px 12px;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+        .leaderboard-sidebar.collapsed { transform: translateY(-50%) translateX(-100%); }
+        .leaderboard-sidebar h3 { margin-bottom: 12px; font-size: 14px; color: var(--text); }
+        .leaderboard-sidebar h4 { margin: 10px 0 6px; font-size: 11px; color: var(--text-dim); }
+        .leaderboard-handle {
+            position: absolute;
+            right: -24px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 60px;
+            background: #2b3139;
+            border-radius: 0 8px 8px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .leaderboard-handle::before { content: "📊"; }
+        .leaderboard-sidebar.collapsed .leaderboard-handle::before { content: "📊"; }
+        .lb-section { margin-bottom: 16px; }
+        .lb-list { max-height: 200px; overflow-y: auto; }
+        .lb-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 0;
+            font-size: 11px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .lb-item:last-child { border-bottom: none; }
+        .lb-rank {
+            width: 18px;
+            text-align: center;
+            font-weight: bold;
+            color: var(--text-dim);
+        }
+        .lb-top .lb-rank { color: var(--orange); }
+        .lb-bankrupt .lb-rank { color: var(--red); }
+        .lb-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 60px; }
+        .lb-score { 
+            color: var(--green); 
+            font-weight: 600; 
+            font-size: 10px; 
+            text-align: right; 
+            min-width: 60px; 
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: -0.3px;
+        }
+        .lb-debt { 
+            color: var(--red); 
+            font-weight: 600; 
+            font-size: 10px; 
+            text-align: right; 
+            min-width: 60px; 
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: -0.3px;
+        }
+        .lb-ending { color: var(--text-dim); font-size: 10px; }
+        .lb-empty { text-align: center; color: var(--text-dim); font-size: 11px; padding: 8px 0; }
+        .leaderboard-content { opacity: 1; transition: opacity 0.3s; }
+        .leaderboard-sidebar.collapsed .leaderboard-content { opacity: 0; pointer-events: none; }
+        .lb-status { font-size: 10px; font-weight: normal; color: var(--text-dim); margin-left: 4px; }
+        .wallet-display { 
+            font-size: 12px; 
+            color: var(--green); 
+            background: rgba(34,197,94,0.1); 
+            padding: 4px 8px; 
+            border-radius: 6px; 
+            border: 1px solid rgba(34,197,94,0.3);
+        }
+        
+        /* 钱包登录区域 */
+        .wallet-section { 
+            background: rgba(245,158,11,0.08); 
+            border: 1px solid rgba(245,158,11,0.3); 
+            border-radius: 12px; 
+            padding: 16px; 
+            margin-bottom: 16px;
+        }
+        .wallet-badge { 
+            font-size: 10px; 
+            background: var(--orange); 
+            color: #000; 
+            padding: 2px 6px; 
+            border-radius: 4px; 
+            margin-left: 6px;
+        }
+        .wallet-buttons { 
+            display: flex; 
+            gap: 10px; 
+            margin-top: 8px; 
+        }
+        .btn-wallet { 
+            flex: 1; 
+            padding: 10px; 
+            font-size: 13px; 
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .btn-wallet:hover { 
+            background: rgba(255,255,255,0.15);
+            border-color: var(--orange);
+        }
+        .wallet-status { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            margin-top: 10px;
+            padding: 8px 12px;
+            background: rgba(34,197,94,0.1);
+            border: 1px solid rgba(34,197,94,0.3);
+            border-radius: 8px;
+        }
+        .wallet-dot { font-size: 10px; }
+        .wallet-address { 
+            flex: 1; 
+            font-size: 13px; 
+            color: var(--green);
+            font-weight: 500;
+        }
+        .btn-disconnect { 
+            font-size: 11px; 
+            padding: 4px 10px; 
+            background: rgba(239,68,68,0.2);
+            border: 1px solid rgba(239,68,68,0.4);
+            color: var(--red);
+        }
+        .btn-disconnect:hover {
+            background: rgba(239,68,68,0.3);
+        }
+        .wallet-hint { 
+            font-size: 11px; 
+            color: var(--orange); 
+            margin-top: 8px; 
+            margin-bottom: 0;
+        }
+        
+        /* 结局海报样式 */
+        .ending-screen {
+            flex-direction: column;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+        }
+        .ending-poster-container {
+            width: 100%;
+            max-width: 500px;
+            max-height: 70vh;
+            margin: 0 auto;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+        }
+        .ending-poster-canvas {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .ending-actions-bar {
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+            justify-content: center;
+            max-width: 520px;
+            margin: 20px auto 0;
+            flex-wrap: nowrap;
+        }
+        .ending-actions-bar .btn {
+            flex: 1;
+            height: 44px;
+            padding: 0 12px;
+            font-size: 13px;
+            background: var(--bg-panel);
+            color: var(--text);
+            border: 1px solid var(--border-gold);
+            border-radius: 8px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            margin: 0;
+            line-height: 1;
+            min-width: 0;
+        }
+        .ending-actions-bar .btn:hover {
+            background: rgba(240, 185, 11, 0.15);
+        }
+        .ending-box {
+            max-width: 600px;
+            margin: 20px auto 0;
+            padding: 20px;
+            background: var(--bg-panel);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        
+        /* 玩家ID区域 */
+        .player-id-section input {
+            background: var(--bg-dark);
+            border-color: #2b3139;
+            color: var(--text);
+        }
+        .player-id-section input:focus {
+            border-color: var(--border-gold);
+            outline: none;
+        }
+        
+        /* 关键决策点弹窗 */
+        .decision-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.92);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 3500;
+            padding: 20px;
+        }
+        .decision-overlay.show { display: flex; }
+        .decision-modal {
+            background: var(--bg-panel);
+            border: 2px solid var(--border-gold);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 480px;
+            width: 100%;
+            animation: decisionSlideIn 0.3s ease;
+        }
+        @keyframes decisionSlideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .decision-modal h3 {
+            font-size: 20px;
+            margin-bottom: 12px;
+            color: var(--orange);
+        }
+        .decision-desc {
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--text);
+            margin-bottom: 16px;
+            padding: 12px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+        }
+        .decision-timer {
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .timer-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--green), var(--orange));
+            width: 100%;
+            transition: width 0.1s linear;
+        }
+        .decision-choices {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .decision-choice-btn {
+            padding: 14px 16px;
+            border: 1px solid #2b3139;
+            border-radius: 10px;
+            background: var(--bg-dark);
+            color: var(--text);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .decision-choice-btn:hover {
+            border-color: var(--border-gold);
+            background: rgba(240,185,11,0.1);
+            transform: translateX(4px);
+        }
+        .decision-choice-btn .emoji {
+            font-size: 18px;
+        }
+        .decision-choice-btn .text {
+            flex: 1;
+        }
+        .decision-choice-btn .hint {
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+        .id-hint {
+            margin-top: 6px;
+            margin-bottom: 0;
+            font-size: 11px;
+        }
+        @media (max-width: 1200px) {
+            .leaderboard-sidebar { width: 200px; }
+        }
+        @media (max-width: 980px) {
+            .leaderboard-sidebar { display: none; }
+        }
+
         @media (max-width: 980px) {
             :root {
                 --mobile-top-bar: 15vh;
                 --mobile-market: 20vh;
-                --mobile-drawer: clamp(48px, 5.2vh, 64px);
+                --mobile-drawer: clamp(56px, 6vh, 72px);
                 --mobile-drawer-open: 68vh;
                 --mobile-gap: 8px;
-                --mobile-drawer-bottom: 18px;
-                --mobile-drawer-space: calc(var(--mobile-drawer) + var(--mobile-gap) + var(--mobile-drawer-bottom) + env(safe-area-inset-bottom));
             }
             body { height: 100dvh; overflow: hidden; }
             body.drawer-open::before {
@@ -474,87 +880,84 @@
                 order: 1;
                 flex: 1;
                 min-height: 0;
-                padding-bottom: var(--mobile-drawer-space);
+                padding-bottom: calc(var(--mobile-drawer) + var(--mobile-gap) + env(safe-area-inset-bottom));
                 gap: var(--mobile-gap);
             }
             .top-bar {
-                height: var(--mobile-top-bar);
-                padding: 4px 8px;
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                grid-auto-rows: minmax(0, auto);
-                row-gap: var(--mobile-gap);
-                column-gap: var(--mobile-gap);
-                align-content: flex-start;
+                min-height: auto;
+                height: auto;
+                padding: 8px;
+                gap: 6px;
+                flex-wrap: wrap;
             }
-            .top-bar .stat {
-                font-size: 12px;
-                min-width: 0;
+            .top-bar .stats-row {
+                display: flex;
+                width: 100%;
+                gap: 12px;
+                justify-content: flex-start;
+                flex-wrap: nowrap;
             }
-            .top-bar .stat:nth-of-type(1) { grid-column: 1; grid-row: 1; }
-            .top-bar .stat:nth-of-type(2) { grid-column: 2; grid-row: 1; }
-            .time-display {
-                font-size: 12px;
-                grid-column: 2;
-                grid-row: 3;
-                margin: 0;
-                text-align: left;
+            .top-bar .stat { 
+                font-size: 12px; 
+                flex-shrink: 0;
+            }
+            .top-bar .stat-value {
+                font-size: 14px;
+                max-width: 80px;
+                overflow: hidden;
+                text-overflow: ellipsis;
                 white-space: nowrap;
-                font-variant-numeric: tabular-nums;
-                justify-self: start;
+                display: inline-block;
+                vertical-align: bottom;
+            }
+            .top-bar .info-row {
+                display: flex;
+                width: 100%;
+                gap: 8px;
+                justify-content: flex-start;
+            }
+            .time-display {
+                font-size: 11px;
+                margin-left: auto;
+                white-space: nowrap;
             }
             .path-badge, .player-id-badge {
-                font-size: 11px;
-                height: 26px;
+                font-size: 10px;
+                height: 24px;
                 padding: 0 8px;
                 display: inline-flex;
                 align-items: center;
-                max-width: 100%;
+                max-width: 40vw;
                 min-width: 0;
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
             }
-            .path-badge { grid-column: 1; grid-row: 2; }
-            .player-id-badge { grid-column: 2; grid-row: 2; }
             .action-bar {
-                grid-column: 1;
-                grid-row: 3;
                 width: 100%;
-                gap: var(--mobile-gap);
+                gap: 6px;
                 align-items: center;
                 flex-wrap: nowrap;
-                justify-content: space-between;
-                min-width: 0;
+                justify-content: flex-start;
             }
-            .speed-group {
-                margin-left: 0;
-                gap: 4px;
-                flex: 0 0 auto;
-            }
-            .action-bar .btn, .action-bar .speed-select {
-                height: 26px;
+            .action-bar .btn {
+                height: 28px;
                 padding: 0 8px;
-                font-size: 12px;
-                min-width: 64px;
-                box-sizing: border-box;
-                line-height: 26px;
-                border-radius: 8px;
-            }
-            .action-bar .btn { margin-top: 0; }
-            .action-bar .speed-select {
-                appearance: none;
-                -webkit-appearance: none;
-                -moz-appearance: none;
-                padding-right: 24px;
-                min-width: 58px;
-            }
-            .speed-label {
-                line-height: 26px;
-                white-space: nowrap;
                 font-size: 11px;
-                min-width: 34px;
-                margin-right: 0;
+                min-width: 60px;
+                flex-shrink: 0;
+            }
+            .action-bar .speed-select {
+                height: 28px;
+                padding: 0 6px;
+                font-size: 11px;
+                min-width: 50px;
+                flex-shrink: 0;
+            }
+            .speed-label { 
+                font-size: 11px;
+                white-space: nowrap;
+                flex-shrink: 0;
             }
             main {
                 min-height: 0;
@@ -573,49 +976,176 @@
                 flex-direction: column;
                 min-height: 0;
             }
-            #eventLog {
-                flex: 1;
-                overflow-y: auto;
-                padding-bottom: var(--mobile-drawer-space);
-            }
+            #eventLog { flex: 1; overflow-y: auto; }
             .after-end-bar {
                 margin-bottom: 0;
                 gap: var(--mobile-gap);
             }
             .achievement-sidebar {
                 position: fixed;
-                left: 16px;
-                right: 16px;
-                bottom: var(--mobile-drawer-bottom);
+                left: 8px;
+                right: 8px;
+                bottom: 8px;
                 height: var(--mobile-drawer);
                 width: auto;
                 max-height: none;
-                border-radius: 22px 22px 16px 16px;
+                border-radius: 16px 16px 12px 12px;
                 z-index: 1200;
                 transition: height 0.25s ease;
                 display: flex;
                 flex-direction: column;
-                padding: 16px 10px 8px;
+                padding: 20px 12px 12px;
                 overflow: hidden;
                 box-sizing: border-box;
                 align-items: stretch;
                 justify-content: flex-start;
-                box-shadow: 0 12px 26px rgba(0,0,0,0.35);
             }
             .achievement-sidebar.is-open { height: var(--mobile-drawer-open); }
-            .achievement-handle { display: block; }
+            
+            /* 拖动条 - 增大识别区域 */
+            .achievement-handle { 
+                display: block;
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                width: 100%;
+                height: 32px;
+                background: transparent;
+                cursor: grab;
+                z-index: 10;
+            }
+            .achievement-handle::before {
+                content: "";
+                position: absolute;
+                top: 8px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 52px;
+                height: 4px;
+                border-radius: 999px;
+                background: rgba(255,255,255,0.5);
+                box-shadow: 0 0 10px rgba(255,255,255,0.2);
+            }
+            .achievement-handle:active {
+                cursor: grabbing;
+            }
+            
+            /* 收起状态 - 双卡片预览 */
             .achievement-sidebar:not(.is-open) {
+                flex-direction: row;
                 align-items: center;
                 justify-content: center;
-                gap: 4px;
+                gap: 12px;
+                padding: 24px 16px 16px;
             }
-            .achievement-sidebar:not(.is-open) .achievement-list { display: none; }
-            .achievement-sidebar:not(.is-open) h3 { margin: 0; }
-            .achievement-list {
-                grid-template-columns: 1fr;
+            .achievement-sidebar:not(.is-open) .sidebar-tabs,
+            .achievement-sidebar:not(.is-open) .tab-content {
+                display: none !important;
+            }
+            
+            /* 预览卡片 */
+            .drawer-preview {
+                display: none;
+            }
+            .achievement-sidebar:not(.is-open) .drawer-preview {
+                display: flex;
+                flex: 1;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+                padding: 16px 12px;
+                background: rgba(255,255,255,0.06);
+                border-radius: 12px;
+                border: 1px solid rgba(255,255,255,0.1);
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            .achievement-sidebar:not(.is-open) .drawer-preview:active {
+                background: rgba(255,255,255,0.1);
+                transform: scale(0.98);
+            }
+            .drawer-preview-icon {
+                font-size: 24px;
+            }
+            .drawer-preview-title {
+                font-size: 13px;
+                font-weight: 600;
+                color: var(--text);
+            }
+            .drawer-preview-sub {
+                font-size: 10px;
+                color: var(--text-dim);
+            }
+            
+            /* 展开状态 */
+            .achievement-sidebar.is-open .drawer-preview {
+                display: none;
+            }
+            .achievement-sidebar.is-open .sidebar-tabs {
+                display: flex;
+                flex-shrink: 0;
+                margin-bottom: 12px;
+            }
+            
+            .sidebar-tabs {
+                display: none;
+                flex-direction: row;
                 gap: 8px;
-                overflow-y: auto;
             }
+            .sidebar-tab {
+                flex: 1;
+                padding: 10px;
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                background: rgba(0,0,0,0.3);
+                color: var(--text-dim);
+                font-size: 13px;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            .sidebar-tab.active {
+                background: rgba(240,185,11,0.15);
+                border-color: var(--orange);
+                color: var(--text);
+            }
+            
+            /* 标签内容区域 - 展开后独占全部空间 */
+            .tab-content {
+                display: none;
+                flex: 1;
+                overflow-y: auto;
+                min-height: 0;
+            }
+            .tab-content.active {
+                display: flex;
+                flex-direction: column;
+            }
+            
+            /* 成就列表 */
+            #achievementList.tab-content.active {
+                display: grid;
+                grid-template-columns: 1fr !important;
+                gap: 10px;
+                align-content: start;
+            }
+            
+            /* 排行榜内容 */
+            .leaderboard-content {
+                padding: 4px;
+            }
+            .leaderboard-content .lb-section {
+                margin-bottom: 16px;
+            }
+            .leaderboard-content .lb-section h4 {
+                font-size: 12px;
+                color: var(--text-dim);
+                margin-bottom: 8px;
+                padding-bottom: 4px;
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+            }
+            
             .achievement-box {
                 aspect-ratio: auto;
                 min-height: 56px;
@@ -627,16 +1157,6 @@
             }
             .achievement-box .achievement-name { font-size: 12px; }
             .achievement-box .achievement-desc { font-size: 11px; }
-
-            .achievement-handle {
-                position: absolute;
-                top: 6px;
-                left: 50%;
-                transform: translateX(-50%);
-                margin: 0;
-                background: rgba(255,255,255,0.6);
-                box-shadow: 0 0 10px rgba(255,255,255,0.15);
-            }
 
             .start-screen {
                 padding-top: calc(16px + env(safe-area-inset-top));
@@ -664,16 +1184,16 @@
     <div class="app">
         <div class="app-left">
         <header class="top-bar">
-            <div class="stat"><span class="stat-label">净资产</span><span class="stat-value wealth" id="dispWealth">0</span> U</div>
+            <div class="stat"><span class="stat-label">净资产</span><span class="stat-value wealth" id="dispWealth">0</span></div>
             <div class="stat"><span class="stat-label">粉丝</span><span class="stat-value fans" id="dispFans">0</span></div>
             <div class="path-badge" id="dispPath">—</div>
             <div class="player-id-badge" id="dispPlayerId" title="玩家ID">—</div>
             <div class="time-display" id="dispTime">第 0 年</div>
             <div class="action-bar">
+                <button type="button" class="btn btn-secondary" id="btnSettings">⚙️ 设置</button>
                 <button type="button" class="btn btn-secondary" id="btnPause" style="display:none;">⏸ 暂停</button>
-                <div class="speed-group">
-                    <label class="speed-label">倍率</label>
-                    <select id="speedSelect" class="speed-select">
+                <label class="speed-label">倍率</label>
+                <select id="speedSelect" class="speed-select">
                     <option value="1">1x</option>
                     <option value="2">2x</option>
                     <option value="3">3x</option>
@@ -687,8 +1207,7 @@
                     <option value="20">20x</option>
                     <option value="50">50x</option>
                     <option value="100">100x</option>
-                    </select>
-                </div>
+                </select>
             </div>
         </header>
         <main>
@@ -700,8 +1219,9 @@
                 <div style="margin-top:6px;font-size:12px;color:var(--text-dim);" id="marketPhase">—</div>
             </div>
             <div class="after-end-bar" id="afterEndBar" style="display:none;">
-                <button type="button" class="btn btn-secondary" id="btnLastRunFromBar">📋 查看上一局</button>
-                <button type="button" class="btn btn-primary" id="btnRestartFromBar">再来一局</button>
+                <button type="button" class="btn btn-secondary" id="btnHistoryFromBar">📜 查看历史</button>
+                <button type="button" class="btn btn-primary" id="btnShowEnding">📜 显示结局</button>
+                <button type="button" class="btn btn-primary" id="btnRestartFromBar">🔄 再来一局</button>
             </div>
             <section class="log-panel">
                 <h3>📜 事件日志</h3>
@@ -711,8 +1231,63 @@
         </div>
         <aside class="achievement-sidebar" id="achievementSidebar">
             <div class="achievement-handle" id="achievementHandle"></div>
-            <h3>🏆 成就</h3>
-            <div id="achievementList" class="achievement-list"></div>
+            
+            <!-- 收起状态预览卡片 -->
+            <div class="drawer-preview" id="previewAchievements">
+                <div class="drawer-preview-icon">🏆</div>
+                <div class="drawer-preview-title">成就</div>
+                <div class="drawer-preview-sub" id="previewAchCount">加载中...</div>
+            </div>
+            <div class="drawer-preview" id="previewLeaderboard">
+                <div class="drawer-preview-icon">📊</div>
+                <div class="drawer-preview-title">排行榜</div>
+                <div class="drawer-preview-sub">点击查看</div>
+            </div>
+            
+            <!-- 展开状态标签切换 -->
+            <div class="sidebar-tabs" id="sidebarTabs">
+                <button type="button" class="sidebar-tab active" data-tab="achievements">🏆 成就</button>
+                <button type="button" class="sidebar-tab" data-tab="leaderboard">📊 排行榜</button>
+            </div>
+            
+            <!-- 成就列表 -->
+            <div id="achievementList" class="achievement-list tab-content active" data-content="achievements"></div>
+            
+            <!-- 排行榜内容 -->
+            <div id="leaderboardContent" class="leaderboard-content tab-content" data-content="leaderboard">
+                <div class="lb-section">
+                    <h4>💰 财富榜 TOP10</h4>
+                    <div id="wealthLeaderboardMobile" class="lb-list">
+                        <div class="lb-empty">加载中...</div>
+                    </div>
+                </div>
+                <div class="lb-section">
+                    <h4>💸 破产榜 TOP10</h4>
+                    <div id="bankruptLeaderboardMobile" class="lb-list">
+                        <div class="lb-empty">加载中...</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- 排行榜侧边栏 -->
+        <aside class="leaderboard-sidebar" id="leaderboardSidebar">
+            <div class="leaderboard-handle" id="leaderboardHandle"></div>
+            <div class="leaderboard-content">
+                <h3>📊 排行榜 <span id="leaderboardStatus" class="lb-status">🟡 连接中...</span></h3>
+                <div class="lb-section">
+                    <h4>💰 财富榜 TOP10</h4>
+                    <div id="wealthLeaderboard" class="lb-list">
+                        <div class="lb-empty">加载中...</div>
+                    </div>
+                </div>
+                <div class="lb-section">
+                    <h4>💸 破产榜 TOP10</h4>
+                    <div id="bankruptLeaderboard" class="lb-list">
+                        <div class="lb-empty">加载中...</div>
+                    </div>
+                </div>
+            </div>
         </aside>
     </div>
 
@@ -721,58 +1296,47 @@
         <p class="subtitle">从韭菜到链上大佬（或归零出局）— MemeMax Edition</p>
         <div class="start-actions">
             <button type="button" class="btn btn-secondary" id="btnHistory">📜 查看历史</button>
-            <button type="button" class="btn btn-secondary" id="btnLastRun" style="display:none;">📋 查看上一局</button>
         </div>
         <form class="start-form" id="startForm">
-            <div class="form-group">
+            <!-- 玩家ID输入（钱包功能暂时禁用） -->
+            <div class="form-group player-id-section">
                 <label>玩家 ID</label>
-                <input type="text" id="initPlayerId" placeholder="选填，用于本局标识" maxlength="32" autocomplete="off">
+                <input type="text" id="initPlayerId" placeholder="输入你的玩家ID（可选）" maxlength="32" autocomplete="off">
+                <p class="form-hint">💡 留空则以匿名身份进行游戏</p>
             </div>
             <div class="form-group">
-                <label>初始本金 (U)</label>
-                <input type="number" id="initCapital" min="1000" max="50000" value="1000" step="1000">
-            </div>
-            <div class="form-group">
-                <label>运气</label>
-                <select id="initLuck">
-                    <option value="0.25">低</option>
-                    <option value="0.5" selected>中</option>
-                    <option value="0.75">高</option>
+                <label>决策模式</label>
+                <select id="initDecisionMode">
+                    <option value="auto" selected>🤖 自动决策</option>
+                    <option value="manual">🎮 手动决策</option>
                 </select>
             </div>
             <div class="form-group">
-                <label>社交能力</label>
-                <select id="initSocial">
-                    <option value="0.25">低</option>
-                    <option value="0.5" selected>中</option>
-                    <option value="0.75">高</option>
+                <label>操作风格</label>
+                <select id="initStyle">
+                    <option value="degen">🎲 梭哈Degen</option>
+                    <option value="balanced" selected>⚖️ 均衡稳健</option>
+                    <option value="diamond">💎 钻石手</option>
                 </select>
             </div>
             <div class="form-group">
-                <label>理性程度</label>
-                <select id="initRationality">
-                    <option value="0.25">低</option>
-                    <option value="0.5" selected>中</option>
-                    <option value="0.75">高</option>
+                <label>市场哲学</label>
+                <select id="initPhilosophy">
+                    <option value="technical">📊 技术派信仰</option>
+                    <option value="news" selected>📰 消息面驱动</option>
+                    <option value="value">💎 价值投资</option>
+                    <option value="nihilism">🌫️ 虚无主义</option>
                 </select>
             </div>
             <div class="form-group">
-                <label>投资策略</label>
-                <select id="initStrategy">
-                    <option value="0.2">短线</option>
-                    <option value="0.5" selected>均衡</option>
-                    <option value="0.8">长线</option>
+                <label>性格特质</label>
+                <select id="initPersonality">
+                    <option value="pragmatist">🔧 实用主义者</option>
+                    <option value="balanced" selected>⚖️ 均衡派</option>
+                    <option value="dreamer">🌟 幻想家</option>
                 </select>
             </div>
-            <div class="form-group">
-                <label>风险偏好</label>
-                <select id="initRisk">
-                    <option value="0.25">厌恶</option>
-                    <option value="0.5" selected>中性</option>
-                    <option value="0.75">偏好</option>
-                </select>
-            </div>
-            <p class="form-hint">路径将根据人物设定自动分配；开局第一条日志会写下你的路径。</p>
+            <p class="form-hint">💡 初始本金固定为 1000 U | 路径将由你的选择自动分配</p>
             <button type="submit" class="btn btn-primary">开始模拟</button>
         </form>
     </div>
@@ -803,40 +1367,113 @@
         </div>
     </div>
 
+    <!-- 设置面板弹窗 -->
+    <div class="settings-overlay" id="settingsOverlay">
+        <div class="settings-modal">
+            <h3>⚙️ 游戏设置</h3>
+            <form class="settings-form" id="settingsForm">
+                <div class="form-group">
+                    <label>决策模式</label>
+                    <select id="settingDecisionMode">
+                        <option value="auto">🤖 自动决策</option>
+                        <option value="manual">🎮 手动决策</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>操作风格</label>
+                    <select id="settingStyle">
+                        <option value="degen">🎲 梭哈Degen</option>
+                        <option value="balanced" selected>⚖️ 均衡稳健</option>
+                        <option value="diamond">💎 钻石手</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>市场哲学</label>
+                    <select id="settingPhilosophy">
+                        <option value="technical">📊 技术派信仰</option>
+                        <option value="news" selected>📰 消息面驱动</option>
+                        <option value="value">💎 价值投资</option>
+                        <option value="nihilism">🌫️ 虚无主义</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>性格特质</label>
+                    <select id="settingPersonality">
+                        <option value="pragmatist">🔧 实用主义者</option>
+                        <option value="balanced" selected>⚖️ 均衡派</option>
+                        <option value="dreamer">🌟 幻想家</option>
+                    </select>
+                </div>
+                <p class="form-hint">💡 修改设置将在下一局生效 | 当前局继续使用原有设定</p>
+                <div class="settings-actions">
+                    <button type="submit" class="btn btn-primary">保存设置</button>
+                    <button type="button" class="btn btn-secondary" id="settingsCancel">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 结局海报展示区域 -->
     <div class="ending-screen" id="endingScreen">
-        <div class="ending-box" id="endingBox">
-            <h2 id="endingTitle"></h2>
-            <p class="ending-player-id" id="endingPlayerId" style="display:none;"></p>
-            <p class="ending-desc" id="endingDesc"></p>
-            <div class="ending-unlocked" id="endingUnlocked" style="display:none;"></div>
-            <div class="ending-actions">
-                <button type="button" class="btn btn-primary" id="btnRestart">再来一局</button>
-                <button type="button" class="btn btn-secondary" id="btnEndingDismiss">收起</button>
-            </div>
+        <div class="ending-poster-container" id="endingPosterContainer">
+            <canvas id="endingPosterCanvas" class="ending-poster-canvas"></canvas>
+        </div>
+        <div class="ending-actions-bar" id="endingActions">
+            <button type="button" class="btn btn-primary" id="btnDownloadPoster">💾 保存海报</button>
+            <button type="button" class="btn btn-secondary" id="btnShareTwitter">🐦 分享</button>
+            <button type="button" class="btn btn-primary" id="btnRestart">🔄 再来一局</button>
+            <button type="button" class="btn btn-secondary" id="btnEndingDismiss">📜 收起</button>
         </div>
     </div>
 
     <script src="events.js"></script>
+    <script src="leaderboard.js"></script>
+    <!-- <script src="web3auth.js"></script> -->
     <script src="game.js"></script>
+
+    <!-- 关键决策点弹窗 -->
+    <div class="decision-overlay" id="decisionOverlay">
+        <div class="decision-modal">
+            <h3 id="decisionTitle">📍 关键时刻</h3>
+            <p class="decision-desc" id="decisionDesc">需要做出选择...</p>
+            <div class="decision-timer" id="decisionTimer">
+                <div class="timer-bar" id="timerBar"></div>
+            </div>
+            <div class="decision-choices" id="decisionChoices">
+                <!-- 动态生成选项 -->
+            </div>
+        </div>
+    </div>
     <script>
+        // 底部抽屉交互
         (() => {
             const sidebar = document.getElementById('achievementSidebar');
             const handle = document.getElementById('achievementHandle');
+            const previewAch = document.getElementById('previewAchievements');
+            const previewLb = document.getElementById('previewLeaderboard');
+            const tabs = document.querySelectorAll('.sidebar-tab');
             if (!sidebar || !handle) return;
-            const title = sidebar.querySelector('h3');
+            
             const mq = window.matchMedia('(max-width: 980px)');
             let startY = 0;
             let currentY = 0;
             let dragging = false;
-            const setOpen = (open) => {
+            
+            const setOpen = (open, tabName = null) => {
                 sidebar.classList.toggle('is-open', open);
                 document.body.classList.toggle('drawer-open', open);
+                // 如果指定了标签，切换到对应标签
+                if (open && tabName) {
+                    tabs.forEach(t => {
+                        t.classList.toggle('active', t.dataset.tab === tabName);
+                    });
+                    document.querySelectorAll('.tab-content').forEach(c => {
+                        c.classList.toggle('active', c.dataset.content === tabName);
+                    });
+                }
             };
-            const dragTargets = [handle, title].filter(Boolean);
-            const onClick = () => {
-                if (!mq.matches) return;
-                setOpen(!sidebar.classList.contains('is-open'));
-            };
+            
+            // 拖动条交互
             const onTouchStart = (e) => {
                 if (!mq.matches) return;
                 dragging = true;
@@ -850,18 +1487,49 @@
             const onTouchEnd = () => {
                 if (!dragging || !mq.matches) return;
                 const delta = currentY - startY;
-                if (delta < -20) setOpen(true);
-                if (delta > 20) setOpen(false);
+                if (delta < -30) setOpen(true);
+                if (delta > 30) setOpen(false);
                 dragging = false;
                 startY = 0;
                 currentY = 0;
             };
-            dragTargets.forEach((el) => {
-                el.addEventListener('click', onClick);
-                el.addEventListener('touchstart', onTouchStart, { passive: true });
-                el.addEventListener('touchmove', onTouchMove, { passive: true });
-                el.addEventListener('touchend', onTouchEnd);
+            
+            handle.addEventListener('touchstart', onTouchStart, { passive: true });
+            handle.addEventListener('touchmove', onTouchMove, { passive: true });
+            handle.addEventListener('touchend', onTouchEnd);
+            handle.addEventListener('click', () => {
+                if (!mq.matches) return;
+                setOpen(!sidebar.classList.contains('is-open'));
             });
+            
+            // 预览卡片点击
+            if (previewAch) {
+                previewAch.addEventListener('click', () => setOpen(true, 'achievements'));
+            }
+            if (previewLb) {
+                previewLb.addEventListener('click', () => setOpen(true, 'leaderboard'));
+            }
+        })();
+        
+        // 排行榜侧边栏交互
+        (() => {
+            const sidebar = document.getElementById('leaderboardSidebar');
+            const handle = document.getElementById('leaderboardHandle');
+            if (!sidebar || !handle) return;
+            
+            // 默认展开（大屏幕）
+            let isOpen = true;
+            
+            handle.addEventListener('click', () => {
+                isOpen = !isOpen;
+                sidebar.classList.toggle('collapsed', !isOpen);
+            });
+            
+            // 移动端默认收起
+            if (window.innerWidth <= 980) {
+                sidebar.classList.add('collapsed');
+                isOpen = false;
+            }
         })();
     </script>
 </body>
