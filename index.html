@@ -74,6 +74,20 @@
                 touch-action: pan-y;
                 flex-shrink: 0;
             }
+        /* 预览卡片 - 默认隐藏（只在移动端收起状态显示） */
+        .drawer-preview {
+            display: none;
+        }
+        /* 电脑端：成就列表始终显示，标签切换隐藏 */
+        #achievementList {
+            display: grid !important;
+        }
+        .sidebar-tabs {
+            display: none !important;
+        }
+        #leaderboardContent {
+            display: none !important;
+        }
             /* 移动端侧边栏标签 */
             .sidebar-tabs {
                 display: none;
@@ -857,7 +871,7 @@
             :root {
                 --mobile-top-bar: 15vh;
                 --mobile-market: 20vh;
-                --mobile-drawer: clamp(56px, 6vh, 72px);
+                --mobile-drawer: clamp(48px, 5vh, 60px);
                 --mobile-drawer-open: 68vh;
                 --mobile-gap: 8px;
             }
@@ -886,23 +900,18 @@
             .top-bar {
                 min-height: auto;
                 height: auto;
-                padding: 8px;
+                padding: 6px 8px;
                 gap: 6px;
                 flex-wrap: wrap;
-            }
-            .top-bar .stats-row {
-                display: flex;
-                width: 100%;
-                gap: 12px;
-                justify-content: flex-start;
-                flex-wrap: nowrap;
+                align-content: flex-start;
             }
             .top-bar .stat { 
-                font-size: 12px; 
+                font-size: 11px; 
                 flex-shrink: 0;
+                order: 1;
             }
             .top-bar .stat-value {
-                font-size: 14px;
+                font-size: 13px;
                 max-width: 80px;
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -910,54 +919,55 @@
                 display: inline-block;
                 vertical-align: bottom;
             }
-            .top-bar .info-row {
-                display: flex;
-                width: 100%;
-                gap: 8px;
-                justify-content: flex-start;
+            .path-badge, .player-id-badge {
+                font-size: 10px;
+                height: 22px;
+                padding: 0 8px;
+                display: inline-flex;
+                align-items: center;
+                max-width: 45vw;
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                order: 2;
             }
             .time-display {
                 font-size: 11px;
                 margin-left: auto;
                 white-space: nowrap;
-            }
-            .path-badge, .player-id-badge {
-                font-size: 10px;
-                height: 24px;
-                padding: 0 8px;
-                display: inline-flex;
-                align-items: center;
-                max-width: 40vw;
-                min-width: 0;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
+                color: var(--text-dim);
+                order: 3;
+                width: auto;
             }
             .action-bar {
+                display: flex;
                 width: 100%;
                 gap: 6px;
                 align-items: center;
                 flex-wrap: nowrap;
                 justify-content: flex-start;
+                order: 4;
             }
             .action-bar .btn {
-                height: 28px;
+                height: 26px;
                 padding: 0 8px;
                 font-size: 11px;
-                min-width: 60px;
+                min-width: 56px;
                 flex-shrink: 0;
             }
             .action-bar .speed-select {
-                height: 28px;
+                height: 26px;
                 padding: 0 6px;
                 font-size: 11px;
-                min-width: 50px;
+                min-width: 48px;
                 flex-shrink: 0;
             }
             .speed-label { 
                 font-size: 11px;
                 white-space: nowrap;
                 flex-shrink: 0;
+                margin-right: 4px;
             }
             main {
                 min-height: 0;
@@ -994,7 +1004,7 @@
                 transition: height 0.25s ease;
                 display: flex;
                 flex-direction: column;
-                padding: 20px 12px 12px;
+                padding: 16px 10px 8px;
                 overflow: hidden;
                 box-sizing: border-box;
                 align-items: stretch;
@@ -1010,7 +1020,7 @@
                 left: 0;
                 right: 0;
                 width: 100%;
-                height: 32px;
+                height: 24px;
                 background: transparent;
                 cursor: grab;
                 z-index: 10;
@@ -1018,14 +1028,14 @@
             .achievement-handle::before {
                 content: "";
                 position: absolute;
-                top: 8px;
+                top: 6px;
                 left: 50%;
                 transform: translateX(-50%);
-                width: 52px;
-                height: 4px;
+                width: 40px;
+                height: 3px;
                 border-radius: 999px;
                 background: rgba(255,255,255,0.5);
-                box-shadow: 0 0 10px rgba(255,255,255,0.2);
+                box-shadow: 0 0 8px rgba(255,255,255,0.2);
             }
             .achievement-handle:active {
                 cursor: grabbing;
@@ -1036,8 +1046,8 @@
                 flex-direction: row;
                 align-items: center;
                 justify-content: center;
-                gap: 12px;
-                padding: 24px 16px 16px;
+                gap: 8px;
+                padding: 18px 10px 8px;
             }
             .achievement-sidebar:not(.is-open) .sidebar-tabs,
             .achievement-sidebar:not(.is-open) .tab-content {
@@ -1054,29 +1064,34 @@
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                gap: 6px;
-                padding: 16px 12px;
+                gap: 2px;
+                padding: 6px 4px;
                 background: rgba(255,255,255,0.06);
-                border-radius: 12px;
+                border-radius: 10px;
                 border: 1px solid rgba(255,255,255,0.1);
                 cursor: pointer;
                 transition: all 0.2s;
+                min-height: 0;
             }
             .achievement-sidebar:not(.is-open) .drawer-preview:active {
                 background: rgba(255,255,255,0.1);
                 transform: scale(0.98);
             }
             .drawer-preview-icon {
-                font-size: 24px;
+                font-size: 18px;
+                line-height: 1;
             }
             .drawer-preview-title {
-                font-size: 13px;
+                font-size: 12px;
                 font-weight: 600;
                 color: var(--text);
+                line-height: 1.2;
             }
             .drawer-preview-sub {
-                font-size: 10px;
+                font-size: 9px;
                 color: var(--text-dim);
+                line-height: 1.2;
+                white-space: nowrap;
             }
             
             /* 展开状态 */
