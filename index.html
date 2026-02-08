@@ -78,16 +78,6 @@
         .drawer-preview {
             display: none;
         }
-        /* 电脑端：成就列表始终显示，标签切换隐藏 */
-        #achievementList {
-            display: grid !important;
-        }
-        .sidebar-tabs {
-            display: none !important;
-        }
-        #leaderboardContent {
-            display: none !important;
-        }
             /* 移动端侧边栏标签 */
             .sidebar-tabs {
                 display: none;
@@ -223,6 +213,11 @@
             border: 2px solid var(--border-gold);
             border-radius: 12px;
             font-family: 'JetBrains Mono', monospace;
+        }
+        .top-bar .stats-row,
+        .top-bar .info-row,
+        .top-bar .action-row {
+            display: contents;
         }
         .stat {
             display: flex;
@@ -901,14 +896,22 @@
                 min-height: auto;
                 height: auto;
                 padding: 6px 8px;
-                gap: 6px;
-                flex-wrap: wrap;
-                align-content: flex-start;
+                gap: 4px;
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
             }
-            .top-bar .stat { 
-                font-size: 11px; 
-                flex-shrink: 0;
-                order: 1;
+            /* 第一行：资产、粉丝、时间 */
+            .top-bar .stats-row {
+                display: flex;
+                gap: 12px;
+                align-items: center;
+            }
+            .top-bar .stats-row .stat {
+                font-size: 11px;
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
             }
             .top-bar .stat-value {
                 font-size: 13px;
@@ -916,10 +919,21 @@
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
-                display: inline-block;
-                vertical-align: bottom;
             }
-            .path-badge, .player-id-badge {
+            .top-bar .stats-row .time-display {
+                font-size: 11px;
+                margin-left: auto;
+                white-space: nowrap;
+                color: var(--text-dim);
+            }
+            /* 第二行：路径、ID */
+            .top-bar .info-row {
+                display: flex;
+                gap: 8px;
+                align-items: center;
+            }
+            .top-bar .info-row .path-badge,
+            .top-bar .info-row .player-id-badge {
                 font-size: 10px;
                 height: 22px;
                 padding: 0 8px;
@@ -930,24 +944,34 @@
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
-                order: 2;
             }
-            .time-display {
-                font-size: 11px;
-                margin-left: auto;
-                white-space: nowrap;
-                color: var(--text-dim);
-                order: 3;
-                width: auto;
-            }
-            .action-bar {
+            /* 第三行：控制按钮 */
+            .top-bar .action-row {
                 display: flex;
-                width: 100%;
                 gap: 6px;
                 align-items: center;
                 flex-wrap: nowrap;
                 justify-content: flex-start;
-                order: 4;
+            }
+            .action-row .btn {
+                height: 26px;
+                padding: 0 8px;
+                font-size: 11px;
+                min-width: 56px;
+                flex-shrink: 0;
+            }
+            .action-row .speed-select {
+                height: 26px;
+                padding: 0 6px;
+                font-size: 11px;
+                min-width: 48px;
+                flex-shrink: 0;
+            }
+            .action-row .speed-label { 
+                font-size: 11px;
+                white-space: nowrap;
+                flex-shrink: 0;
+                margin-right: 4px;
             }
             .action-bar .btn {
                 height: 26px;
@@ -1043,9 +1067,9 @@
             
             /* 收起状态 - 双卡片预览 */
             .achievement-sidebar:not(.is-open) {
-                flex-direction: row;
-                align-items: center;
-                justify-content: center;
+                flex-direction: row !important;
+                align-items: center !important;
+                justify-content: center !important;
                 gap: 8px;
                 padding: 18px 10px 8px;
             }
@@ -1055,11 +1079,8 @@
             }
             
             /* 预览卡片 */
-            .drawer-preview {
-                display: none;
-            }
             .achievement-sidebar:not(.is-open) .drawer-preview {
-                display: flex;
+                display: flex !important;
                 flex: 1;
                 flex-direction: column;
                 align-items: center;
@@ -1095,20 +1116,28 @@
             }
             
             /* 展开状态 */
+            .achievement-sidebar.is-open {
+                display: flex !important;
+                flex-direction: column !important;
+            }
             .achievement-sidebar.is-open .drawer-preview {
-                display: none;
+                display: none !important;
             }
             .achievement-sidebar.is-open .sidebar-tabs {
-                display: flex;
+                display: flex !important;
+                flex-direction: row;
+                gap: 8px;
                 flex-shrink: 0;
                 margin-bottom: 12px;
             }
             
-            .sidebar-tabs {
-                display: none;
-                flex-direction: row;
-                gap: 8px;
+            /* 收起状态隐藏标签和内容 */
+            .achievement-sidebar:not(.is-open) .sidebar-tabs,
+            .achievement-sidebar:not(.is-open) .tab-content {
+                display: none !important;
             }
+            
+            /* 标签样式 */
             .sidebar-tab {
                 flex: 1;
                 padding: 10px;
@@ -1126,34 +1155,45 @@
                 color: var(--text);
             }
             
-            /* 标签内容区域 - 展开后独占全部空间 */
-            .tab-content {
-                display: none;
+            /* 标签内容区域 - 展开状态：非active完全隐藏 */
+            .achievement-sidebar.is-open .tab-content {
+                display: none !important;
+                flex: 0;
+                overflow: hidden;
+                min-height: 0;
+            }
+            .achievement-sidebar.is-open .tab-content.active {
+                display: flex !important;
                 flex: 1;
                 overflow-y: auto;
                 min-height: 0;
             }
-            .tab-content.active {
-                display: flex;
-                flex-direction: column;
-            }
             
-            /* 成就列表 */
-            #achievementList.tab-content.active {
-                display: grid;
+            /* 成就列表 - 展开状态 */
+            .achievement-sidebar.is-open #achievementList {
+                display: none !important;
+            }
+            .achievement-sidebar.is-open #achievementList.tab-content.active {
+                display: grid !important;
                 grid-template-columns: 1fr !important;
                 gap: 10px;
                 align-content: start;
             }
             
-            /* 排行榜内容 */
-            .leaderboard-content {
+            /* 排行榜内容 - 展开状态 */
+            .achievement-sidebar.is-open #leaderboardContent {
+                display: none !important;
+            }
+            .achievement-sidebar.is-open #leaderboardContent.tab-content.active {
+                display: block !important;
+            }
+            .achievement-sidebar.is-open .leaderboard-content {
                 padding: 4px;
             }
-            .leaderboard-content .lb-section {
+            .achievement-sidebar.is-open .leaderboard-content .lb-section {
                 margin-bottom: 16px;
             }
-            .leaderboard-content .lb-section h4 {
+            .achievement-sidebar.is-open .leaderboard-content .lb-section h4 {
                 font-size: 12px;
                 color: var(--text-dim);
                 margin-bottom: 8px;
@@ -1199,12 +1239,16 @@
     <div class="app">
         <div class="app-left">
         <header class="top-bar">
-            <div class="stat"><span class="stat-label">净资产</span><span class="stat-value wealth" id="dispWealth">0</span></div>
-            <div class="stat"><span class="stat-label">粉丝</span><span class="stat-value fans" id="dispFans">0</span></div>
-            <div class="path-badge" id="dispPath">—</div>
-            <div class="player-id-badge" id="dispPlayerId" title="玩家ID">—</div>
-            <div class="time-display" id="dispTime">第 0 年</div>
-            <div class="action-bar">
+            <div class="top-row stats-row">
+                <div class="stat"><span class="stat-label">净资产</span><span class="stat-value wealth" id="dispWealth">0</span></div>
+                <div class="stat"><span class="stat-label">粉丝</span><span class="stat-value fans" id="dispFans">0</span></div>
+                <div class="time-display" id="dispTime">第 0 年</div>
+            </div>
+            <div class="top-row info-row">
+                <div class="path-badge" id="dispPath">—</div>
+                <div class="player-id-badge" id="dispPlayerId" title="玩家ID">—</div>
+            </div>
+            <div class="top-row action-row">
                 <button type="button" class="btn btn-secondary" id="btnSettings">⚙️ 设置</button>
                 <button type="button" class="btn btn-secondary" id="btnPause" style="display:none;">⏸ 暂停</button>
                 <label class="speed-label">倍率</label>
