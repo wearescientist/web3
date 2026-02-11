@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 币圈生涯模拟器 - 主逻辑
  * 闲置自动模拟，时间流逝 + 事件驱动，多路径资源与结局
  */
@@ -39,6 +39,9 @@ const MARKET_DURATION_MIN = 3;    // 市场相位最少持续月数
 const MARKET_DURATION_MAX = 14;
 
 /** 0.5% 暴雷事件池：资产降低 80%～150%，随机展示不同叙事 */
+// 全局变量声明
+let hardcoreMode = null; // 硬核模式实例
+
 const CATASTROPHE_EVENTS = [
   { name: '黑天鹅暴雷', logTemplate: '遭遇黑天鹅，资产蒸发一大截，损失 {loss} U。' },
   { name: '交易所暴雷', logTemplate: '常驻的交易所突然暴雷，资产大半无法提现，损失 {loss} U。' },
@@ -334,6 +337,161 @@ function getNetWealth(state) {
 }
 
 /** 根据初始设定计算「坏结局倾向」0~1：运气差、理性低、风险偏好高 → 更容易坏/悲剧结局 */
+
+/** 
+ * 玩家事件配置（用于群聊@消息）
+ * 注意：实际数据从 chat-player-events.js 加载 (PLAYER_AT_EVENTS)
+ * 这里保留空对象作为fallback
+ */
+const PLAYER_EVENTS = {}; // 数据由外部文件提供
+
+/** 
+ * 触发玩家@事件（决策结果/爆仓/大盈利等）
+ * 新逻辑：
+ * - 决策失败：强制触发 1-3 条羞辱
+ * - 决策成功：50% 概率触发 1 条赞美
+ * - 其他事件：使用 PLAYER_AT_EVENTS 配置
+ */
+function triggerPlayerEvent(eventType, forceTrigger = false, isSuccess = false) {
+  // 使用新的数据源
+  const events = (typeof PLAYER_AT_EVENTS !== 'undefined') ? PLAYER_AT_EVENTS : PLAYER_EVENTS;
+  const event = events[eventType];
+  if (!event) return;
+  
+  // 决策类事件特殊处理
+  if (eventType === 'decisionFail') {
+    if (isSuccess) {
+      // 决策成功：50% 触发 1 条赞美
+      if (Math.random() >= 0.5) return;
+      const praises = event.praises || [];
+      if (praises.length === 0) return;
+      const text = praises[Math.floor(Math.random() * praises.length)];
+      const user = generateRandomUserForAt();
+      addSpecialChatMessage({
+        atPlayer: true,
+        user: user,
+        text: text,
+        playerId: game.state.playerId || '玩家'
+      });
+    } else {
+      // 决策失败：强制触发 1-3 条羞辱
+      const insults = event.insults || [];
+      if (insults.length === 0) return;
+      
+      const count = 1 + Math.floor(Math.random() * 3); // 1-3条
+      for (let i = 0; i < count; i++) {
+        const text = insults[Math.floor(Math.random() * insults.length)];
+        const user = generateRandomUserForAt();
+        setTimeout(() => {
+          addSpecialChatMessage({
+            atPlayer: true,
+            user: user,
+            text: text,
+            playerId: game.state.playerId || '玩家'
+          });
+        }, i * 800); // 每条间隔800ms，连续输出
+      }
+    }
+    return;
+  }
+  
+  // 其他事件（爆仓/大赚/大亏）使用原有逻辑但新数据源
+  const texts = event.insults || event.praises || [];
+  if (texts.length === 0) return;
+  
+  // 检查概率（强制触发时跳过）
+  if (!forceTrigger && event.chance && Math.random() > event.chance) return;
+  
+  // 检查是否近期已触发过
+  const now = Date.now();
+  const recentEvents = game.playerEventHistory.filter(e => e.type === eventType && now - e.time < 5000);
+  if (recentEvents.length > 0) return; // 5秒内不重复触发
+  
+  // 记录事件
+  game.playerEventHistory.push({ type: eventType, time: now });
+  if (game.playerEventHistory.length > 50) {
+    game.playerEventHistory = game.playerEventHistory.slice(-20);
+  }
+  
+  // 生成消息
+  const text = texts[Math.floor(Math.random() * texts.length)];
+  const user = generateRandomUserForAt();
+  addSpecialChatMessage({
+    atPlayer: true,
+    user: user,
+    text: text,
+    playerId: game.state.playerId || '玩家'
+  });
+}
+
+/** 聊天名字池（350个随机名字，不按人格分配） */
+const CHAT_NAME_POOL = [
+  // 历史人物
+  '黄帝', '炎帝', '大禹', '商汤', '周文王', '周武王', '姜子牙', '周公', '老子', '孔子',
+  '孙子', '墨子', '孟子', '庄子', '屈原', '韩非子', '商鞅', '鬼谷子', '秦始皇', '李斯',
+  '汉高祖', '项羽', '汉武帝', '张骞', '司马迁', '王昭君', '汉光武帝', '张衡', '蔡伦', '华佗',
+  '张仲景', '曹操', '刘备', '诸葛亮', '关羽', '孙权', '司马懿', '王羲之', '陶渊明', '祖冲之',
+  '花木兰', '隋文帝', '唐太宗', '武则天', '李白', '杜甫', '白居易', '苏轼', '岳飞', '成吉思汗',
+  '朱元璋',
+  // 科幻/抽象
+  '闪电路由', '像素幽灵', '量子孤勇', '零度冰点', '夜航星', '雾都浪子', '破晓之前', '蒸汽骑士', '暗物质', '霓虹狙击手',
+  'UrbanExplorer', 'EchoChamber', 'StaticFlow', 'DriftWood', 'NovaEra', 'SilentTrigger', 'MidnightOil', 'VoidWalker', 'Zenith', 'ColdFusion',
+  '离子风暴', '矢量轨迹', '时间褶皱', '次元旅者', '熵减者', '临界点', '匿光者', '代码诗人', '超弦', '边缘清醒',
+  '雾锁寒江', '枕边月亮', '时间琥珀', '遗忘海岸线', '第十七个梦', '北方的信风', '深海低语', '无人区玫瑰', '第三行星', '守夜灯塔',
+  'PaleFire', 'WhisperingPines', 'AutumnLeaves', 'DistantShore', 'PaperMoon', 'SevenSisters', 'GlassButterfly', 'EchoofSilence', 'FadingEcho', 'MidnightSun',
+  '山雾来信', '雪落无声', '旧日寓言', '潮汐印记', '星图旅人', '空谷回音', '悬日时刻', '镜中剧场', '逆流的钟', '云层之上',
+  // 程序员/极客
+  '递归错误', '404NotBorn', '内存不足', '异步加载中', '第一代鼠标', '硅基生命体', 'Hello_World', '无限循环', 'Root权限', '协议未知',
+  'BufferOverflow', 'SyntaxSugar', 'NullPointer', 'InfiniteLoop', 'KernelPanic', 'GitCommit', 'SSH隧道', 'API网关', '量子比特', '开源夜猫',
+  '一行代码', '爬虫侠', '数据沼泽', '回滚人生', '优雅停机', '后端诗人', '云端漫步', '算法偏见', '线程安全', '编译人生',
+  // 搞怪/无厘头
+  '忧郁的炸鸡', '话痨小蘑菇', '失眠的熊猫', '会飞的煎蛋', '柠檬味汽油', '拖延症冠军', '悲伤的菠萝', '急需充电', '天线打结', '有只猫在打我',
+  'FlyingPudding', 'CrazyCucumber', 'SleepySloth', 'MischievousMuffin', 'BananaPhone', 'SassySasquatch', 'DancingPickle', 'ConfusedPotato', 'UnicornBurp', 'NinjaPanda',
+  '奶茶鉴定家', '废话输出机', '咸鱼想翻身', 'Wi-Fi信号满格', '薯片收割者', '人间小透明', '膝盖中了一箭', '快乐修狗', '今晚不熬夜', '一口吃掉月亮',
+  // 诗意/文艺
+  '诗酒趁年华', '秉烛游', '松间明月', '枕上诗书', '忽而春风', '行舟绿水前', '隔山灯火', '长夜有星辰', '云中谁寄锦书来', '一川烟草',
+  'StarryRivers', 'PagesUnturned', 'InkandQuill', 'WhisperofWind', 'DewdropSonnet', 'VelvetNight', 'ForgottenMelody', 'PaintedSky', 'SonnetinaTeacup', '山月不知心底事',
+  '梦里花落知多少', '江上清风游', '烟雨任平生', '小楼一夜听春雨', '云卷云舒', '一叶知秋凉', '南风知我意', '浮生半日闲', '陌上花开缓缓归',
+  // 网络ID
+  'Lemon不酸', 'Sleepy考拉', '北极星Polaris', 'Karma定律', 'Rainy星期五', 'Virus杀不死我', 'Alpha小白', 'Data诗人', 'Zero摄氏度', 'Zen禅意',
+  'Echo回音', 'Cloud九', 'Omega结局', 'Logic失控', 'Phoenix涅槃', 'Pixel画家', 'Magic失灵', 'Coffee成瘾', 'Sugar超标', 'Matrix矩阵',
+  'Gravity失效', 'Captain船长', 'Neon霓虹', 'Cookie碎了', 'Lucky不Lucky', 'Lonely星球', 'Chaos秩序', 'Code即信仰', 'Tempo节奏', 'Mojito莫吉托',
+  // 霸气/强者
+  '执棋者', '山海皆可平', '万川归海', '只手摘星辰', '规则制定者', '绝对零度', '不朽传说', '君临天下', '笑看风云', '逆鳞',
+  'IronWill', 'ThroneSeeker', 'Unbreakable', 'PhoenixKing', 'AlphaWolf', 'StormBringer', 'FinalSay', 'PathMaker', 'ZeroToOne', 'Supreme',
+  '江湖我独行', '一手遮天', '乾坤在手', '九天揽月', '万剑归宗', '帝霸', '只手遮天', '威震天', '不败神话', '龙傲天',
+  // 币圈相关
+  '比特币猎人', '区块链布道者', '一路向北', '割韭菜大师', '钻石手', 'FOMO晚期', '冷钱包保管员', '私钥即生命', 'Gas费屠夫', '跨链桥水工',
+  'CryptoPioneer', 'SmartContract', 'DeFiFarmer', 'BullRunRider', 'WhaleWatcher', 'SatsStacker', 'AltcoinAlchemist', 'NodeRunner', 'ToTheMoon', 'NotYourKeys',
+  '信仰充值', '牛市长明灯', '合约赌徒', '现货党永不输', '定投战神', '空投猎手', 'Web3原住民', '元宇宙房东', 'NFT收藏家', '归零艺术家',
+  // 氛围/意境
+  '404星系', '可乐不加糖', '代码有禅意', '晚风快递员', '离线梦境', '宇宙回声', '柠檬伏特加', '黄昏收集者', '机械浪漫', '蒸汽波脑电',
+  'DigitalNomad', 'GhostInShell', 'ElectricSheep', 'LastOfUs', 'RainOnTinRoof', 'BrokenCompiler', 'TeaAndSympathy', 'ForgotPassword', 'FifthElement', 'LibraryGhost',
+  '水泥森林', '二手时间', '过期罐头', '失眠症候群', '反向浪漫', '固体香水', '热带气压', '低速飞行', '人造月光', '自动诗人',
+  // 孤独/边缘
+  'SilentMajority', 'ForgottenHero', 'DigitalDust', 'EchoLocation', 'PaperTiger', 'LostSignal', 'FadingStar', 'ChaosTheory', 'ParallelWorld', 'VoiceInTheWire',
+  '镜中我', '熵增日常', '非必要浪漫', '像素情书', '延迟满足', '云端备份', '温柔代码', '离线缓存', '午后飞行', '宇宙的尘埃',
+  'WirelessDream', 'AnalogHeart', 'StaticAge', 'PaperWings', 'ElectricDreams', 'ClockworkOrange', 'SolarEclipse', 'MidnightExpress', 'EternalSunshine', 'VanishingPoint'
+];
+
+/** 生成用于@消息的随机用户 */
+function generateRandomUserForAt() {
+  // 从名字池随机选择名字
+  const name = CHAT_NAME_POOL[Math.floor(Math.random() * CHAT_NAME_POOL.length)];
+  const level = Math.floor(Math.random() * 60) + 10; // Lv 10-70
+  
+  // 根据等级获取样式
+  const style = getLevelStyle(level);
+  
+  return {
+    name: name,
+    level: level,
+    nameColor: style.name,
+    levelColor: style.level,
+    glow: style.glow
+  };
+}
+
 function getTraitBadBias(state) {
   const luck = state.luck != null ? state.luck : 0.5;
   const rationality = state.rationality != null ? state.rationality : 0.5;
@@ -463,7 +621,7 @@ let game = {
   marketPhase: 'sideway',
   marketTicksLeft: 0,
   lastRunSummary: null,
-  decisionMode: 'auto', // 'auto' | 'manual'
+  decisionMode: 'hardcore', // 'auto' | 'hardcore'
   pendingDecision: null,
   decisionTimer: null,
   decisionTimeLeft: 0,
@@ -496,6 +654,7 @@ function getDefaultState() {
     hadWindfall100: false,
     hadWindfall1000: false,
     hadCatastrophe: false,
+    hadNegativeWealth: false, // 是否有过负资产（用于硬核幸存者成就）
     playerId: '',
   };
 }
@@ -749,9 +908,10 @@ function showDecisionModal(decision) {
   decision.choices.forEach((choice, index) => {
     const btn = document.createElement('button');
     btn.className = 'decision-choice-btn';
+    const labels = ['A', 'B', 'C', 'D'];
     btn.innerHTML = `
-      <span class="emoji">${choice.emoji}</span>
-      <span class="text">${choice.text}<br><span class="hint">${choice.hint}</span></span>
+      <span class="choice-label">${labels[index]}</span>
+      <span class="text">${choice.text}</span>
     `;
     btn.onclick = () => resolveDecision(index);
     choices.appendChild(btn);
@@ -759,8 +919,29 @@ function showDecisionModal(decision) {
   
   overlay.classList.add('show');
   
-  // 启动倒计时
-  game.decisionTimeLeft = game.decisionTimeout;
+  // 绑定收起/展开按钮
+  const toggleBtn = document.getElementById('decisionToggle');
+  const content = document.getElementById('decisionContent');
+  if (toggleBtn && content) {
+    // 重置为展开状态
+    content.classList.remove('collapsed');
+    toggleBtn.textContent = '−';
+    
+    // 移除旧的事件监听器（通过克隆）
+    const newToggle = toggleBtn.cloneNode(true);
+    toggleBtn.parentNode.replaceChild(newToggle, toggleBtn);
+    
+    // 绑定新事件
+    newToggle.onclick = () => {
+      const isCollapsed = content.classList.toggle('collapsed');
+      overlay.classList.toggle('collapsed', isCollapsed);
+      newToggle.textContent = isCollapsed ? '+' : '−';
+    };
+  }
+  
+  // 启动倒计时（硬核模式30秒，普通模式10秒）
+  const timeout = game.decisionMode === 'hardcore' ? 30000 : game.decisionTimeout;
+  game.decisionTimeLeft = timeout;
   if (game.decisionTimer) clearInterval(game.decisionTimer);
   
   game.decisionTimer = setInterval(() => {
@@ -773,6 +954,396 @@ function showDecisionModal(decision) {
       resolveDecision(Math.floor(Math.random() * decision.choices.length));
     }
   }, 100);
+}
+
+/** 检查并触发硬核模式决策（每年1、4、7、10月触发） */
+function checkAndTriggerHardcoreDecision() {
+  // 只有硬核模式才触发季度决策
+  if (game.decisionMode !== 'hardcore') {
+    console.log('[HardcoreDecision] 非硬核模式，跳过');
+    return false;
+  }
+  // 硬核模式未初始化或不满足条件
+  if (typeof hardcoreMode === 'undefined' || !hardcoreMode) {
+    console.log('[HardcoreDecision] hardcoreMode未初始化');
+    return false;
+  }
+  if (!game.running || game.state.ended) {
+    console.log('[HardcoreDecision] 游戏未运行或已结束');
+    return false;
+  }
+  if (game.pendingDecision) {
+    console.log('[HardcoreDecision] 已有待处理决策');
+    return true; // 已有待处理的决策
+  }
+  
+  const s = game.state;
+  
+  // 只在1、4、7、10月触发（week 0, 3, 6, 9）
+  const hardcoreMonths = [0, 3, 6, 9]; // 对应1、4、7、10月
+  if (!hardcoreMonths.includes(s.week)) {
+    console.log(`[HardcoreDecision] 当前月份${s.week+1}不在决策月份`);
+    return false;
+  }
+  
+  // 使用年月组合作为key，确保每个触发点只触发一次
+  const triggerKey = `hardcore_${s.year}_${s.week}`;
+  if (!s.usedDecisions) s.usedDecisions = [];
+  if (s.usedDecisions.includes(triggerKey)) {
+    console.log(`[HardcoreDecision] ${triggerKey} 已触发过`);
+    return false;
+  }
+  
+  console.log(`[HardcoreDecision] 尝试触发决策 ${triggerKey}...`);
+  
+  // 尝试触发决策
+  const decision = hardcoreMode.triggerDecision();
+  if (!decision) {
+    console.log('[HardcoreDecision] hardcoreMode.triggerDecision() 返回null');
+    return false;
+  }
+  
+  console.log('[HardcoreDecision] 成功触发:', decision.title);
+  
+  // 标记已触发
+  s.usedDecisions.push(triggerKey);
+  
+  game.pendingDecision = decision;
+  
+  // 硬核模式：强制手动选择
+  showHardcoreDecisionModal(decision);
+  return true; // 暂停tick，等待玩家决策
+}
+
+/** 检查并触发月度小随机事件（非决策月份每月一次） */
+function checkAndTriggerSmallEvent() {
+  // 只有硬核模式才触发小事件
+  if (game.decisionMode !== 'hardcore') return null;
+  // 硬核模式未初始化
+  if (typeof hardcoreMode === 'undefined' || !hardcoreMode) return null;
+  if (!game.running || game.state.ended) return null;
+  
+  const s = game.state;
+  
+  // 决策月份不触发小事件（1,4,7,10月 = week 0,3,6,9）
+  const decisionMonths = [0, 3, 6, 9];
+  if (decisionMonths.includes(s.week)) return null;
+  
+  // 使用年月作为key，确保每月只触发一次
+  const monthKey = `smallevent_${s.year}_${s.week}`;
+  if (!s.usedDecisions) s.usedDecisions = [];
+  if (s.usedDecisions.includes(monthKey)) return null;
+  
+  // 触发小事件
+  const event = hardcoreMode.triggerSmallEvent();
+  if (!event) return null;
+  
+  // 标记已触发
+  s.usedDecisions.push(monthKey);
+  
+  return event;
+}
+
+/** 应用小随机事件效果 */
+function applySmallEventEffect(event) {
+  const s = game.state;
+  const effect = event.effect;
+  
+  // 应用财富变化
+  if (effect.absoluteChange !== undefined) {
+    s.wealth = (s.wealth || 0) + effect.absoluteChange;
+  }
+  
+  // 记录日志（使用 pushLog，传递硬核小事件颜色标记）
+  const absChange = effect?.absoluteChange || 0;
+  
+  // 格式化日志文本（优先使用logTemplate，与普通事件格式一致）
+  let logText;
+  if (event.logTemplate) {
+    const coin = typeof COINS !== 'undefined' ? COINS[Math.floor(Math.random() * COINS.length)] : 'BTC';
+    const coinDisplay = typeof COIN_CN !== 'undefined' && COIN_CN[coin] ? COIN_CN[coin] : coin;
+    logText = event.logTemplate
+      .replace(/\{amount\}/g, formatU(Math.abs(absChange)))
+      .replace(/\{loss\}/g, formatU(Math.abs(absChange)))
+      .replace(/\{coin\}/g, coinDisplay);
+  } else {
+    // 使用desc字段显示完整故事描述，如果没有desc则使用name
+    const description = event.desc || event.name || '发生了一件小事';
+    const changeText = absChange >= 0 ? '收益' : '亏损';
+    logText = `${description}，${changeText} ${formatU(Math.abs(absChange))} U。`;
+  }
+  
+  // 直接写入日志，不经过 pushLog 的 outcome 拼接
+  const timeStr = `第${s.year + 1}年${s.week + 1}月`;
+  // 根据事件类型和实际效果判断日志类型
+  let logType;
+  if (event.type === 'positive') {
+    logType = 'hardcore-positive';
+  } else if (event.type === 'negative') {
+    logType = 'hardcore-negative';
+  } else {
+    // fallback：根据实际收益判断
+    logType = absChange >= 0 ? 'hardcore-positive' : 'hardcore-negative';
+  }
+  
+  s.eventLog.unshift({ 
+    time: timeStr, 
+    text: logText, 
+    type: logType, 
+    netWealth: getNetWealth(s) 
+  });
+  if (s.eventLog.length > 500) s.eventLog.pop();
+  renderLog();
+  
+  // 触发群聊消息（如果是负面事件，可能触发侮辱）
+  if (event.type === 'negative' && Math.random() < 0.5) {
+    triggerPlayerEvent('bigLoss', false);
+  }
+}
+
+/** 显示硬核模式决策弹窗 */
+function showHardcoreDecisionModal(decision) {
+  game.paused = true;
+  if (game.tickInterval) { clearInterval(game.tickInterval); game.tickInterval = null; }
+  
+  const overlay = document.getElementById('decisionOverlay');
+  const title = document.getElementById('decisionTitle');
+  const desc = document.getElementById('decisionDesc');
+  const choices = document.getElementById('decisionChoices');
+  const timerBar = document.getElementById('timerBar');
+  
+  title.textContent = decision.title;
+  
+  // 添加事件类型标签
+  const typeMap = {
+    'global': '🌍 全局',
+    'trading': '📈 交易',
+    'kol': '📢 KOL',
+    'job': '💼 工作',
+    'launch': '🚀 发币',
+    'invest': '💰 投资',
+    'staking': '🔒 质押'
+  };
+  const source = decision.source || 'global';
+  const path = decision.path || source;
+  const typeLabel = typeMap[path] || typeMap[source] || '📌 决策';
+  desc.textContent = decision.desc;
+  
+  choices.innerHTML = '';
+  decision.choices.forEach((choice, index) => {
+    const btn = document.createElement('button');
+    btn.className = 'decision-choice-btn';
+    const labels = ['A', 'B', 'C', 'D'];
+    btn.innerHTML = `
+      <span class="choice-label">${labels[index]}</span>
+      <span class="text">${choice.text}</span>
+    `;
+    btn.onclick = () => resolveHardcoreDecision(index);
+    choices.appendChild(btn);
+  });
+  
+  overlay.classList.add('show');
+  
+  // 绑定收起/展开按钮
+  const toggleBtn = document.getElementById('decisionToggle');
+  const content = document.getElementById('decisionContent');
+  if (toggleBtn && content) {
+    // 重置为展开状态
+    content.classList.remove('collapsed');
+    toggleBtn.textContent = '−';
+    
+    // 移除旧的事件监听器（通过克隆）
+    const newToggle = toggleBtn.cloneNode(true);
+    toggleBtn.parentNode.replaceChild(newToggle, toggleBtn);
+    
+    // 绑定新事件
+    newToggle.onclick = () => {
+      const isCollapsed = content.classList.toggle('collapsed');
+      overlay.classList.toggle('collapsed', isCollapsed);
+      newToggle.textContent = isCollapsed ? '+' : '−';
+    };
+  }
+  
+  // 启动倒计时（硬核模式30秒，普通模式10秒）
+  const timeout = game.decisionMode === 'hardcore' ? 30000 : game.decisionTimeout;
+  game.decisionTimeLeft = timeout;
+  if (game.decisionTimer) clearInterval(game.decisionTimer);
+  
+  game.decisionTimer = setInterval(() => {
+    game.decisionTimeLeft -= 100;
+    const pct = (game.decisionTimeLeft / timeout) * 100;
+    timerBar.style.width = pct + '%';
+    
+    if (game.decisionTimeLeft <= 0) {
+      // 超时自动随机选择
+      resolveHardcoreDecision(Math.floor(Math.random() * decision.choices.length));
+    }
+  }, 100);
+}
+
+/** 自动处理硬核模式决策（自动模式） */
+function autoResolveHardcoreDecision(decision) {
+  const s = game.state;
+  
+  // 根据人物特性选择
+  const rationality = s.rationality || 0.5;
+  const riskPreference = s.riskPreference || 0.5;
+  
+  // 计算每个选项的权重
+  const weights = decision.choices.map((c, i) => {
+    let weight = 1;
+    if (i === 0) weight = riskPreference * 2 + (1 - rationality);
+    else if (i === decision.choices.length - 1) weight = rationality * 2;
+    else weight = 1;
+    return Math.max(0.1, weight);
+  });
+  
+  // 加权随机选择
+  const totalWeight = weights.reduce((a, b) => a + b, 0);
+  let random = Math.random() * totalWeight;
+  let choiceIndex = 0;
+  for (let i = 0; i < weights.length; i++) {
+    random -= weights[i];
+    if (random <= 0) {
+      choiceIndex = i;
+      break;
+    }
+  }
+  
+  // 直接应用决策结果（不弹窗）
+  const result = hardcoreMode.resolveDecision(choiceIndex);
+  if (result) {
+    const { isCorrect, effect, explanation, decision: d, choice } = result;
+    const currentWealth = s.wealth || 0;
+    const effectCalc = hardcoreMode.calculateDecisionEffect(effect, currentWealth);
+    
+    if (effect.wealthPct) {
+      s.wealth = currentWealth + effectCalc.absoluteChange;
+    }
+    
+    // 记录日志
+    const timeStr = `第${s.year + 1}年${s.week + 1}月`;
+    const resultText = isCorrect ? '正确' : '错误';
+    s.eventLog.unshift({ 
+      time: timeStr, 
+      text: `[硬核决策] ${d.title}: ${choice.text} (自动·${resultText}) → ${explanation}`, 
+      type: isCorrect ? 'good' : 'bad', 
+      netWealth: getNetWealth(s) 
+    });
+    
+    // 触发@玩家事件：选错触发羞辱(1-3条)，选对50%触发赞美
+    triggerPlayerEvent('decisionFail', true, isCorrect);
+    
+    // 自动模式也显示结算弹窗（短暂延迟让玩家看到）
+    setTimeout(() => {
+      showHardcoreConsequenceModal(result);
+    }, 300);
+  }
+  
+  game.pendingDecision = null;
+  updateUI();
+  renderLog();
+}
+
+/** 显示决策结算弹窗 */
+function showHardcoreConsequenceModal(result) {
+  console.log('[showHardcoreConsequenceModal] result:', result);
+  
+  const { decision, choice, isCorrect, effect, explanation, commonSenseScore } = result;
+  
+  const overlay = document.getElementById('hardcoreConsequenceOverlay');
+  const icon = document.getElementById('consequenceIcon');
+  const title = document.getElementById('consequenceTitle');
+  const decisionTitle = document.getElementById('consequenceDecisionTitle');
+  const choiceText = document.getElementById('consequenceChoiceText');
+  const wealthEl = document.getElementById('consequenceWealth');
+  const explanationEl = document.getElementById('consequenceExplanation');
+  const effectEl = document.getElementById('consequenceEffect');
+  const senseEl = document.getElementById('consequenceSense');
+  
+  if (!overlay) {
+    console.error('[showHardcoreConsequenceModal] overlay not found');
+    // 没有弹窗时直接恢复游戏
+    game.pendingDecision = null;
+    game.paused = false;
+    startTickLoop();
+    return;
+  }
+  
+  // 设置图标和标题
+  icon.textContent = isCorrect ? '✅' : '❌';
+  title.textContent = isCorrect ? '决策正确' : '决策错误';
+  title.style.color = isCorrect ? '#0ecb81' : '#f6465d';
+  
+  // 设置内容
+  decisionTitle.textContent = `📍 ${decision?.title || '未知决策'}`;
+  choiceText.textContent = `你的选择：${choice?.emoji || ''} ${choice?.text || '未知选择'}`;
+  
+  // 设置当前净资产
+  const s = game.state;
+  const netWealth = getNetWealth(s);
+  if (wealthEl) {
+    wealthEl.textContent = `💼 当前净资产：${formatU(netWealth)}`;
+  }
+  
+  // 设置效果（安全处理）
+  let effectText = '0';
+  if (effect?.preview) {
+    effectText = effect.preview;
+  } else if (typeof effect?.absoluteChange === 'number') {
+    effectText = effect.absoluteChange >= 0 
+      ? `+${effect.absoluteChange.toFixed(0)}` 
+      : effect.absoluteChange.toFixed(0);
+  }
+  effectEl.textContent = `${isCorrect ? '💰' : '💸'} 财富变化：${effectText} U`;
+  effectEl.className = `consequence-effect ${isCorrect ? 'positive' : 'negative'}`;
+  
+  // 设置解释说明（为什么对/错）
+  if (explanationEl) {
+    const explainText = explanation || decision?.explanation || '';
+    if (explainText) {
+      explanationEl.innerHTML = `<strong>${isCorrect ? '✅ 为什么正确' : '❌ 为什么错误'}</strong><br>${explainText}`;
+      explanationEl.style.display = 'block';
+    } else {
+      explanationEl.innerHTML = '';
+      explanationEl.style.display = 'none';
+    }
+  }
+  
+  // 设置常识分数
+  senseEl.textContent = `🧠 常识分数：${commonSenseScore || 50}/100`;
+  
+  // 显示弹窗
+  overlay.classList.add('show');
+  console.log('[showHardcoreConsequenceModal] 弹窗已显示');
+  
+  // 绑定继续按钮（使用 cloneNode 确保清除旧事件）
+  let btnContinue = document.getElementById('btnContinueGame');
+  if (btnContinue) {
+    const newBtn = btnContinue.cloneNode(true);
+    btnContinue.parentNode.replaceChild(newBtn, btnContinue);
+    newBtn.onclick = () => {
+      console.log('[showHardcoreConsequenceModal] 继续按钮被点击');
+      overlay.classList.remove('show');
+      // 恢复游戏
+      game.pendingDecision = null;
+      game.paused = false;
+      startTickLoop();
+    };
+  }
+  
+  // ESC键关闭弹窗
+  const onKeyDown = (e) => {
+    if (e.key === 'Escape' && overlay.classList.contains('show')) {
+      console.log('[showHardcoreConsequenceModal] ESC关闭弹窗');
+      overlay.classList.remove('show');
+      game.pendingDecision = null;
+      game.paused = false;
+      startTickLoop();
+      document.removeEventListener('keydown', onKeyDown);
+    }
+  };
+  document.addEventListener('keydown', onKeyDown);
 }
 
 /** 自动决策（自动模式） */
@@ -827,17 +1398,9 @@ function applyDecision(decision, choiceIndex, isAuto) {
   s.usedDecisions.push(decision.id);
   
   // 应用效果
-  const result = choice.effect(s);
+  choice.effect(s);
   
-  // 记录日志
-  const timeStr = `第${s.year + 1}年${s.week + 1}月`;
-  const modeText = isAuto ? '(自动)' : '(手动)';
-  s.eventLog.unshift({ 
-    time: timeStr, 
-    text: `[决策] ${decision.title}: ${choice.text} ${modeText} → ${result}`, 
-    type: 'mixed', 
-    netWealth: getNetWealth(s) 
-  });
+  // 旧决策系统不再记录日志（避免与硬核模式决策混淆）
   
   game.pendingDecision = null;
   
@@ -849,6 +1412,74 @@ function applyDecision(decision, choiceIndex, isAuto) {
   
   updateUI();
   renderLog();
+}
+
+/** 处理硬核模式决策选择 */
+function resolveHardcoreDecision(choiceIndex) {
+  console.log('[resolveHardcoreDecision] 选择索引:', choiceIndex);
+  
+  if (game.decisionTimer) {
+    clearInterval(game.decisionTimer);
+    game.decisionTimer = null;
+  }
+  
+  const overlay = document.getElementById('decisionOverlay');
+  if (overlay) overlay.classList.remove('show');
+  
+  if (typeof hardcoreMode === 'undefined' || !hardcoreMode) {
+    console.error('[resolveHardcoreDecision] hardcoreMode 未初始化');
+    return;
+  }
+  
+  const result = hardcoreMode.resolveDecision(choiceIndex);
+  if (!result) return;
+  
+  const s = game.state;
+  const { isCorrect, effect, explanation, decision, choice } = result;
+  
+  // 应用效果到游戏状态（effect已由引擎计算好，包含absoluteChange）
+  const currentWealth = s.wealth || 0;
+  if (effect && effect.absoluteChange !== undefined) {
+    s.wealth = currentWealth + effect.absoluteChange;
+    console.log('[决策结果] 财富变化:', currentWealth, '->', s.wealth, '(变化:', effect.absoluteChange.toFixed(2), ')');
+  } else {
+    console.warn('[决策结果] effect格式异常:', effect);
+  }
+  
+  // 记录日志（使用 pushLog，传递硬核决策颜色标记）
+  const resultIcon = isCorrect ? '✅' : '❌';
+  // 新格式使用choice.result显示收益，旧格式使用effect.wealthPct
+  const effectDisplay = choice?.result || (effect?.wealthPct ? `${effect.wealthPct > 0 ? '+' : ''}${(effect.wealthPct * 100).toFixed(0)}%` : '');
+  const decisionIcon = decision?.icon || '🎯';
+  const outcomeText = `${decisionIcon} ${decision.title}: ${choice.text} ${resultIcon} ${effectDisplay} | ${explanation}`;
+  
+  pushLog(
+    { name: '硬核决策', type: isCorrect ? 'positive' : 'negative' },
+    outcomeText,
+    null,
+    { isHardcoreDecision: true, isCorrect }
+  );
+  
+  // 触发@玩家事件：选错触发羞辱(1-3条)，选对50%触发赞美
+  triggerPlayerEvent('decisionFail', true, isCorrect);
+  
+  // 清空待处理决策
+  game.pendingDecision = null;
+  
+  // 更新UI
+  updateUI();
+  renderLog();
+  
+  // 显示结算弹窗（弹窗关闭后才会恢复游戏）
+  try {
+    showHardcoreConsequenceModal(result);
+  } catch (err) {
+    console.error('[resolveHardcoreDecision] 显示结算弹窗失败:', err);
+    // 出错时直接恢复游戏
+    game.pendingDecision = null;
+    game.paused = false;
+    startTickLoop();
+  }
 }
 
 /** 根据人物设定计算各路径的权重（0~1），用于加权随机抽一条路径 */
@@ -884,7 +1515,53 @@ function pickPathByWeights(weights) {
 
 function startNewGame(initCapital, traits) {
   const speedEl = document.getElementById('speedSelect');
-  if (speedEl) game.speed = Math.max(1, Math.min(100, parseInt(speedEl.value, 10) || 5));
+  // 保存上一局的速度选择（如果存在）
+  const previousSpeed = game.speed || 5;
+  
+  if (speedEl) {
+    // 根据模式设置倍率选择器选项
+    if (game.decisionMode === 'hardcore') {
+      // 硬核模式：只保留1x和2x选项
+      speedEl.innerHTML = '<option value="1">1x</option><option value="2">2x</option>';
+      // 恢复上一局速度（如果在可用范围内）
+      if (previousSpeed <= 2) {
+        speedEl.value = String(previousSpeed);
+        game.speed = previousSpeed;
+      } else {
+        speedEl.value = '1';
+        game.speed = 1;
+      }
+    } else {
+      // 普通模式：恢复所有选项
+      speedEl.innerHTML = `
+        <option value="1">1x</option>
+        <option value="2">2x</option>
+        <option value="3">3x</option>
+        <option value="4">4x</option>
+        <option value="5">5x</option>
+        <option value="6">6x</option>
+        <option value="7">7x</option>
+        <option value="8">8x</option>
+        <option value="9">9x</option>
+        <option value="10">10x</option>
+        <option value="20">20x</option>
+        <option value="50">50x</option>
+        <option value="100">100x</option>
+      `;
+      // 恢复上一局速度（如果在可用范围内）
+      if (previousSpeed >= 1 && previousSpeed <= 100 && [1,2,3,4,5,6,7,8,9,10,20,50,100].includes(previousSpeed)) {
+        speedEl.value = String(previousSpeed);
+        game.speed = previousSpeed;
+      } else {
+        speedEl.value = '5';
+        game.speed = 5;
+      }
+    }
+    // 绑定速度改变事件
+    speedEl.onchange = () => {
+      game.speed = parseInt(speedEl.value, 10) || 1;
+    };
+  }
   const weights = computePathWeights(traits || {});
   const path = pickPathByWeights(weights);
   const state = getDefaultState();
@@ -907,12 +1584,25 @@ function startNewGame(initCapital, traits) {
   state.philosophy = traits && traits.philosophy ? traits.philosophy : 'news'; // 市场哲学: technical/news/value/nihilism
   state.personality = traits && traits.personality ? traits.personality : 'balanced'; // 性格特质: pragmatist/balanced/dreamer
   // 该路径 5% 先天圣体（全正面）、5% 倒霉圣体（全负面+一直借钱）
-  const saintRoll = Math.random();
-  if (saintRoll < 0.05) state.pathSaint = 'blessed';
-  else if (saintRoll < 0.10) state.pathSaint = 'cursed';
-  else state.pathSaint = null;
+  // 硬核模式下禁用圣体触发
+  if (game.decisionMode === 'hardcore') {
+    state.pathSaint = null;
+  } else {
+    const saintRoll = Math.random();
+    if (saintRoll < 0.05) state.pathSaint = 'blessed';
+    else if (saintRoll < 0.10) state.pathSaint = 'cursed';
+    else state.pathSaint = null;
+  }
   game.state = state;
   game.running = true;
+  game.playerEventHistory = []; // 初始化玩家事件历史（用于群聊@消息）
+  game.chatInitialized = false; // 聊天系统初始化标志
+  
+  // 初始化硬核模式（如果存在）
+  if (typeof HardcoreMode !== 'undefined') {
+    hardcoreMode = new HardcoreMode(state);
+    hardcoreMode.start();
+  }
   game.marketPhase = MARKET_PHASES[Math.floor(Math.random() * MARKET_PHASES.length)];
   game.marketTicksLeft = MARKET_DURATION_MIN + Math.floor(Math.random() * (MARKET_DURATION_MAX - MARKET_DURATION_MIN));
   game.marketHistory = [0.5 + Math.random() * 0.5];
@@ -928,6 +1618,7 @@ function startNewGame(initCapital, traits) {
   if (btnPause) { btnPause.style.display = ''; btnPause.textContent = '⏸ 暂停'; }
   updateUI();
   renderLog();
+  initChatSystem(); // 初始化群聊系统
   runTick();
   startTickLoop();
 }
@@ -957,9 +1648,20 @@ function runTick() {
   }
   const isLastMonth = (s.year === MAX_YEARS - 1 && s.week === TICKS_PER_YEAR - 2);
   
-  // 检查是否需要触发决策点
-  if (checkAndTriggerDecision()) {
+  // 检查是否需要触发普通决策点（每年第6月）- 非硬核模式才触发
+  if (game.decisionMode !== 'hardcore' && checkAndTriggerDecision()) {
     return; // 有决策正在处理，暂停tick
+  }
+  
+  // 检查是否需要触发硬核模式决策（每年1、4、7、10月，即week 0, 3, 6, 9）
+  if (checkAndTriggerHardcoreDecision()) {
+    return; // 有决策正在处理，暂停tick
+  }
+  
+  // 检查是否需要触发月度小随机事件（非决策月份）
+  const smallEvent = checkAndTriggerSmallEvent();
+  if (smallEvent) {
+    applySmallEventEffect(smallEvent);
   }
   
   // 时间推进：1 tick = 1 月
@@ -993,8 +1695,15 @@ function runTick() {
   const monthIncome = (s.passiveIncomePerYear / TICKS_PER_YEAR) * (game.marketPhase === 'bull' ? 1.2 : game.marketPhase === 'bear' ? 0.8 : 1);
   s.wealth += monthIncome;
   s.capital = Math.max(0, s.capital + monthIncome * 0.5);
+  
+  // 检测负资产（用于硬核幸存者成就）
+  if (s.wealth < 0) {
+    s.hadNegativeWealth = true;
+  }
 
-  // 每月必触发一个事件；0.01% 千倍、0.1% 百倍暴富
+  // 非硬核模式才触发普通随机事件
+  if (game.decisionMode !== 'hardcore') {
+    // 每月必触发一个事件；0.01% 千倍、0.1% 百倍暴富
   const windfallRoll = Math.random();
   if (windfallRoll < 0.0001 && (s.wealth || 0) > 0) {
     s.hadWindfall1000 = true;
@@ -1052,6 +1761,7 @@ function runTick() {
       const ev = pickRandomEvent(s);
       if (ev) triggerEvent(ev);
     }
+  }
   }
 
   // 最后一个月且总资产低于 100 万：50% 概率资产亏完或负债
@@ -1159,7 +1869,9 @@ function applyEventEffect(ev, choiceIndex) {
 
   function applyGain(gain) {
     if (gain <= 0) return;
-    let g = gain * saintGainMult * runRR;
+    // 最小收益阈值：至少10U，避免显示"<$1"
+    const MIN_GAIN = 10;
+    let g = Math.max(gain, MIN_GAIN) * saintGainMult * runRR;
     const luck = s.luck != null ? s.luck : 0.5;
     const luckMultiplier = 0.72 + luck * 0.32;
     const scaledGain = g * Math.max(0.65, Math.min(1.05, luckMultiplier));
@@ -1169,7 +1881,9 @@ function applyEventEffect(ev, choiceIndex) {
   }
   function applyLoss(loss) {
     if (loss <= 0) return;
-    let L = loss * saintLossMult * runRR;
+    // 最小亏损阈值：至少10U，避免显示"<$1"
+    const MIN_LOSS = 10;
+    let L = Math.max(loss, MIN_LOSS) * saintLossMult * runRR;
     const luck = s.luck != null ? s.luck : 0.5;
     const luckMultiplier = 1 + (0.5 - luck) * 0.75;
     const scaledLoss = L * Math.max(0.85, Math.min(1.4, luckMultiplier));
@@ -1240,7 +1954,13 @@ function applyEventEffect(ev, choiceIndex) {
     applyLoss(loss);
   }
   if (ev.fansPct) applyFans(Math.floor(s.fans * ev.fansPct));
-  if (ev.fansAbs) applyFans(ev.fansAbs || 0);
+  if (ev.fansAbs) {
+    // 粉丝增减在 5000-100000 之间随机
+    const minFans = 5000;
+    const maxFans = 100000;
+    const randomFans = Math.floor(minFans + Math.random() * (maxFans - minFans));
+    applyFans(randomFans);
+  }
   if (ev.exp) s.exp += ev.exp;
 
   if (ev.specialEnding) endGame(ev.specialEnding);
@@ -1255,7 +1975,7 @@ function applyEventEffect(ev, choiceIndex) {
   return result;
 }
 
-function pushLog(ev, outcome, result) {
+function pushLog(ev, outcome, result, options = {}) {
   const s = game.state;
   const timeStr = `第${s.year + 1}年${s.week + 1}月`;
   let text;
@@ -1274,7 +1994,46 @@ function pushLog(ev, outcome, result) {
     if (result && (result.gain > 0 || result.loss > 0)) parts.push(result.gain > 0 ? '，收益 +' + formatU(result.gain) : '，亏损 ' + formatU(result.loss));
     text = parts.join('');
   }
-  s.eventLog.unshift({ time: timeStr, text, type: ev.type || 'negative', netWealth: getNetWealth(s) });
+  
+  // 确定日志类型（用于颜色标记）
+  let logType = ev.type || 'negative';
+  
+  // 根据实际收益修正颜色（适用于 mixed 和未分类事件）
+  // 自动模式：根据实际收益判断颜色（绿色=赚，红色=亏）
+  if (result) {
+    const hasGain = (result.gain || 0) > 0;
+    const hasLoss = (result.loss || 0) > 0;
+    const hasDebt = (result.debtAdd || 0) > 0;
+    
+    if (hasGain && !hasLoss && !hasDebt) {
+      logType = 'positive';
+    } else if ((hasLoss || hasDebt) && !hasGain) {
+      logType = 'negative';
+    } else if (hasGain && (hasLoss || hasDebt)) {
+      // 既有收益又有亏损，比较大小
+      const net = (result.gain || 0) - (result.loss || 0) - (result.debtAdd || 0);
+      logType = net >= 0 ? 'positive' : 'negative';
+    }
+  }
+  
+  // 硬核决策特殊标记
+  if (options.isHardcoreDecision) {
+    logType = options.isCorrect ? 'hardcore-correct' : 'hardcore-wrong';
+  }
+  // 硬核小事件标记
+  else if (options.isHardcoreSmallEvent) {
+    if (ev.type === 'positive') {
+      logType = 'hardcore-positive';
+    } else if (ev.type === 'negative') {
+      logType = 'hardcore-negative';
+    } else {
+      // fallback：根据实际收益判断
+      const netResult = (result?.gain || 0) - (result?.loss || 0);
+      logType = netResult >= 0 ? 'hardcore-positive' : 'hardcore-negative';
+    }
+  }
+  
+  s.eventLog.unshift({ time: timeStr, text, type: logType, netWealth: getNetWealth(s) });
   if (s.eventLog.length > 500) s.eventLog.pop();
   renderLog();
 }
@@ -1283,9 +2042,37 @@ function renderLog() {
   const s = game.state;
   if (!s) return;
   const el = document.getElementById('eventLog');
+  if (!el) return;
+  if (!Array.isArray(s.eventLog)) return;
+  
   el.innerHTML = s.eventLog.map(e => {
     const netStr = e.netWealth != null ? formatU(e.netWealth) : '—';
-    return `<div class="log-entry ${e.type}"><span class="log-net">${netStr}</span><span class="time">${e.time}</span>${e.text}</div>`;
+    let typeClass = e.type;
+    let style = '';
+    
+    // 硬核决策特殊颜色（金色/红色 + 左边框）
+    if (e.type === 'hardcore-correct') {
+      style = 'color: #f0b90b; border-left: 3px solid #f0b90b; padding-left: 8px;';
+    } else if (e.type === 'hardcore-wrong') {
+      style = 'color: #f6465d; border-left: 3px solid #f6465d; padding-left: 8px;';
+    }
+    // 硬核小事件颜色（字体颜色 + 左边框）
+    else if (e.type === 'hardcore-positive') {
+      style = 'color: #0ecb81; border-left: 3px solid #0ecb81; padding-left: 8px;';
+    } else if (e.type === 'hardcore-negative') {
+      style = 'color: #f6465d; border-left: 3px solid #f6465d; padding-left: 8px;';
+    }
+    // 普通事件颜色（字体颜色 + 左边框）
+    else if (e.type === 'positive' || e.type === 'good') {
+      style = 'color: #0ecb81; border-left: 3px solid #0ecb81; padding-left: 8px;';
+    } else if (e.type === 'negative' || e.type === 'bad') {
+      style = 'color: #f6465d; border-left: 3px solid #f6465d; padding-left: 8px;';
+    } else {
+      // 默认白色（处理任何未分类的类型）
+      style = 'color: #e6e6e6; border-left: 3px solid #888888; padding-left: 8px;';
+    }
+    
+    return `<div class="log-entry ${typeClass}" style="${style}"><span class="log-net">${netStr}</span><span class="time">${e.time}</span>${e.text}</div>`;
   }).join('');
 }
 
@@ -1340,6 +2127,7 @@ function endGame(endingId) {
   payload.countWealth1e7 = counts.wealth1e7 || 0;
   payload.countWealth1e8 = counts.wealth1e8 || 0;
   payload.countWealth1e9 = counts.wealth1e9 || 0;
+  payload.hardcoreGamesFinished = counts.hardcoreGamesFinished || 0;
   const unlockedIds = checkAndUnlockAchievements(payload);
   const unlockedAchievementObjs = unlockedIds.map(id => ACHIEVEMENTS.find(a => a.id === id)).filter(Boolean);
   game.lastRunSummary = {
@@ -1359,6 +2147,33 @@ function endGame(endingId) {
   document.getElementById('endingScreen').classList.add('show');
   const btnPause = document.getElementById('btnPause');
   if (btnPause) btnPause.style.display = 'none';
+  
+  // 上报排行榜（异步，不阻塞）
+  try {
+    const payload = {
+      wealth: s.wealth || 0,
+      debt: s.debt || 0,
+      playerId: s.playerId || '',
+      hcTotalDecisions: 0,
+      hcCorrectRate: 0
+    };
+    // 硬核模式：获取决策统计数据
+    if (game.decisionMode === 'hardcore' && typeof hardcoreMode !== 'undefined' && hardcoreMode) {
+      const stats = hardcoreMode.getStats ? hardcoreMode.getStats() : {};
+      payload.hcTotalDecisions = stats.totalDecisions || 0;
+      payload.hcCorrectRate = stats.totalDecisions > 0 ? (stats.correctDecisions / stats.totalDecisions) : 0;
+      // 上报硬核榜（本地）
+      if (typeof submitHardcoreResult === 'function') {
+        submitHardcoreResult(payload);
+      }
+    }
+    // 上报普通榜（Firebase）
+    if (typeof submitGameResult === 'function') {
+      submitGameResult(payload).catch(() => {});
+    }
+  } catch (e) {
+    console.log('排行榜上报失败:', e);
+  }
 }
 
 function showEndingScreen(title, storyFormatted, netW, rarity, unlockedObjs) {
@@ -1384,7 +2199,6 @@ function generateEndingPoster(title, story, netW, rarity, unlockedObjs) {
     rarityName: rarity.toUpperCase(),
     story: story.split('\n\n').filter(line => line.trim()),
     wealth: netW,
-    fans: s.fans,
     years: s.year + 1,
     path: (PATHS.find(p => p.id === s.mainPath) || {}).name || s.mainPath,
     color: getRarityColor(rarity),
@@ -1497,33 +2311,11 @@ function drawPoster(ctx, width, height, config) {
   ctx.fillText(`${playerId} · ${config.years}年 · ${config.path}`, width/2, y);
   y += 35;
 
-  // 9. 数据卡片（只显示财富和粉丝，移除存活年数）
-  const stats = [
-    { icon: '💰', value: formatNumber(config.wealth), label: '财富' },
-    { icon: '👥', value: formatNumber(config.fans), label: '粉丝' }
-  ];
-
-  const cardWidth = 120;
-  const gap = 20;
-  const startX = (width - (cardWidth * 2 + gap)) / 2;
-
-  stats.forEach((stat, i) => {
-    const x = startX + i * (cardWidth + gap);
-    ctx.fillStyle = 'rgba(0,0,0,0.3)';
-    ctx.fillRect(x, y, cardWidth, 70);
-    ctx.strokeStyle = config.color + '40';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(x, y, cardWidth, 70);
-
-    ctx.fillStyle = config.color;
-    ctx.font = 'bold 18px "Noto Sans SC", sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(stat.value, x + cardWidth/2, y + 35);
-    
-    ctx.fillStyle = '#848e9c';
-    ctx.font = '12px "Noto Sans SC", sans-serif';
-    ctx.fillText(stat.label, x + cardWidth/2, y + 55);
-  });
+  // 9. 财富显示（单行大字）
+  ctx.fillStyle = config.color;
+  ctx.font = 'bold 56px "Noto Sans SC", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('💰 ' + formatNumber(config.wealth), width/2, y + 50);
   y += 90;
 
   // 10. 分隔线
@@ -1673,9 +2465,6 @@ const ACHIEVEMENTS = [
   { id: 'wealth_100m', name: '亿万身家', desc: '单局净资产达到 1 亿 U', rarity: 'legendary', check: p => Number(p.netWealth) >= 1e8 },
   { id: 'wealth_1b', name: '十亿身家', desc: '单局净资产达到 10 亿 U', rarity: 'mythic', check: p => Number(p.netWealth) >= 1e9 },
   { id: 'wealth_50m', name: '五千万', desc: '单局净资产达到 5000 万 U', rarity: 'epic', check: p => Number(p.netWealth) >= 5e7 },
-  { id: 'fans_100k', name: '小有名气', desc: '单局粉丝达到 10 万', rarity: 'uncommon', check: p => Number(p.fans) >= 1e5 },
-  { id: 'fans_500k', name: '大 V', desc: '单局粉丝达到 50 万', rarity: 'rare', check: p => Number(p.fans) >= 5e5 },
-  { id: 'fans_1m', name: '顶流', desc: '单局粉丝达到 100 万', rarity: 'epic', check: p => Number(p.fans) >= 1e6 },
   { id: 'path_kol', name: 'KOL 之路', desc: '以 KOL 博主路径完成一局', rarity: 'common', check: p => p.path === 'kol' },
   { id: 'path_job', name: '打工人', desc: '以项目打工路径完成一局', rarity: 'common', check: p => p.path === 'job' },
   { id: 'path_trading', name: '炒币成瘾', desc: '以炒币路径完成一局', rarity: 'common', check: p => p.path === 'trading' },
@@ -1712,9 +2501,8 @@ const ACHIEVEMENTS = [
   { id: 'ending_weird', name: '离奇人生', desc: '达成任意离奇/科幻结局', rarity: 'epic', check: p => (LIFE_ENDINGS[p.endingId] || {}).class === 'weird' },
   { id: 'ending_peak', name: '人生巅峰', desc: '达成任意巅峰类结局', rarity: 'legendary', check: p => (LIFE_ENDINGS[p.endingId] || {}).class === 'peak' },
   { id: 'net_negative', name: '资不抵债', desc: '以负净资产结束一局', rarity: 'uncommon', check: p => Number(p.netWealth) < 0 },
-  { id: 'zero_fans', name: '路人甲', desc: '以 0 粉丝结束一局', rarity: 'common', check: p => Number(p.fans ?? 0) <= 0 },
   { id: 'gone_zero', name: '归零', desc: '以净资产≤0 结束一局（归零或负债即算）', rarity: 'common', check: p => Number(p.netWealth) <= 0 },
-  { id: 'rich_and_famous', name: '又富又红', desc: '单局净资产≥100 万且粉丝≥10 万', rarity: 'epic', check: p => Number(p.netWealth) >= 1e6 && Number(p.fans) >= 1e5 },
+  { id: 'wealth_1m_fast', name: '快速致富', desc: '单局净资产≥100 万', rarity: 'epic', check: p => Number(p.netWealth) >= 1e6 },
   { id: 'early_exit', name: '及时止损', desc: '2 年内达成上岸或戒断类结局', rarity: 'rare', check: p => { const y = (Number(p.year) || 0) * TICKS_PER_YEAR + (Number(p.week) || 0); return y <= 24 && ['exit_ashore', 'quit_forever'].includes(p.endingId); } },
   { id: 'chain_whale_ending', name: '链上巨鲸', desc: '达成链上巨鲸结局', rarity: 'epic', check: p => p.endingId === 'chain_whale' },
   { id: 'dao_founder_ending', name: 'DAO 创始人', desc: '达成 DAO 创始人结局', rarity: 'legendary', check: p => p.endingId === 'dao_founder' },
@@ -1820,6 +2608,18 @@ const ACHIEVEMENTS = [
   { id: 'ending_multi_chain', name: '多链分身', desc: '达成多链分身结局', rarity: 'epic', check: p => p.endingId === 'multi_chain_self' },
   { id: 'ending_nft_afterlife', name: 'NFT升天', desc: '达成NFT升天结局', rarity: 'uncommon', check: p => p.endingId === 'nft_afterlife' },
   { id: 'ending_contract_god', name: '合约之神', desc: '达成智能合约之神结局', rarity: 'legendary', check: p => p.endingId === 'smart_contract_god' },
+  
+  // ----- 硬核模式专属成就 -----
+  { id: 'hardcore_first', name: '硬核玩家', desc: '完成一局硬核模式', rarity: 'uncommon', check: p => p.isHardcore === true },
+  { id: 'hardcore_1m', name: '硬核百万富翁', desc: '硬核模式净资产达到 100 万 U', rarity: 'epic', check: p => p.isHardcore === true && Number(p.netWealth) >= 1e6 },
+  { id: 'hardcore_10m', name: '硬核千万大佬', desc: '硬核模式净资产达到 1000 万 U', rarity: 'legendary', check: p => p.isHardcore === true && Number(p.netWealth) >= 1e7 },
+  { id: 'hardcore_100m', name: '硬核亿万身家', desc: '硬核模式净资产达到 1 亿 U', rarity: 'mythic', check: p => p.isHardcore === true && Number(p.netWealth) >= 1e8 },
+  { id: 'hardcore_perfect', name: '硬核完美', desc: '硬核模式连续 12 次决策全部正确', rarity: 'legendary', check: p => p.isHardcore === true && Number(p.hardcoreCorrectCount || 0) >= 12 },
+  { id: 'hardcore_no_debt', name: '硬核零负债', desc: '硬核模式以零负债通关', rarity: 'rare', check: p => p.isHardcore === true && Number(p.debt ?? 0) <= 0 },
+  { id: 'hardcore_survivor', name: '硬核幸存者', desc: '硬核模式从负资产回到正资产', rarity: 'epic', check: p => p.isHardcore === true && p.hadNegativeWealth === true && Number(p.netWealth) > 0 },
+  { id: 'hardcore_5games', name: '硬核老手', desc: '累计完成 5 局硬核模式', rarity: 'rare', check: p => Number(p.hardcoreGamesFinished || 0) >= 5 },
+  { id: 'hardcore_20games', name: '硬核专家', desc: '累计完成 20 局硬核模式', rarity: 'epic', check: p => Number(p.hardcoreGamesFinished || 0) >= 20 },
+  { id: 'hardcore_freedom', name: '硬核自由', desc: '硬核模式达成财富自由结局', rarity: 'mythic', check: p => p.isHardcore === true && p.endingId === 'freedom' },
 ];
 
 const ACHIEVEMENT_KEY = 'memeMaxAchievements';
@@ -1841,6 +2641,10 @@ function updateCounts(netWealth) {
   if (Number(netWealth) >= 1e9) c.wealth1e9 = (c.wealth1e9 || 0) + 1;
   if (Number(netWealth) >= 1e8) c.wealth1e8 = (c.wealth1e8 || 0) + 1;
   if (Number(netWealth) >= 1e7) c.wealth1e7 = (c.wealth1e7 || 0) + 1;
+  // 硬核模式计数
+  if (game.decisionMode === 'hardcore') {
+    c.hardcoreGamesFinished = (c.hardcoreGamesFinished || 0) + 1;
+  }
   try { localStorage.setItem(COUNTS_KEY, JSON.stringify(c)); } catch (err) { return; }
   return c;
 }
@@ -1862,7 +2666,7 @@ function unlockAchievement(id) {
 
 function buildAchievementPayload(s) {
   // 数值统一转为 Number，避免 undefined/字符串导致成就判定失败（如路人甲、归零等）
-  return {
+  const payload = {
     netWealth: Number(getNetWealth(s)),
     fans: Number(s.fans) || 0,
     path: s.mainPath,
@@ -1875,6 +2679,21 @@ function buildAchievementPayload(s) {
     pathSaint: s.pathSaint || null,
     debt: Number(s.debt) || 0,
   };
+  
+  // 硬核模式相关数据
+  payload.isHardcore = game.decisionMode === 'hardcore';
+  if (payload.isHardcore && typeof hardcoreMode !== 'undefined' && hardcoreMode) {
+    const stats = hardcoreMode.getStats ? hardcoreMode.getStats() : {};
+    payload.hardcoreCorrectCount = stats.correctDecisions || 0;
+    payload.hardcoreTotalDecisions = stats.totalDecisions || 0;
+  } else {
+    payload.hardcoreCorrectCount = 0;
+    payload.hardcoreTotalDecisions = 0;
+  }
+  // 检查是否有过负资产（用于硬核幸存者成就）
+  payload.hadNegativeWealth = (s.wealth < 0) || (payload.netWealth < 0 && s.hadNegativeWealth === true);
+  
+  return payload;
 }
 
 /** 检查并解锁成就，返回本局新解锁的成就 id 列表 */
@@ -1949,7 +2768,6 @@ function updateUI() {
   const wealthEl = document.getElementById('dispWealth');
   wealthEl.textContent = formatU(netW);
   if (netW < 0) wealthEl.classList.add('negative'); else wealthEl.classList.remove('negative');
-  document.getElementById('dispFans').textContent = formatNumber(s.fans);
   document.getElementById('dispPath').textContent = (PATHS.find(p => p.id === s.mainPath) || {}).name || s.mainPath;
   const playerIdEl = document.getElementById('dispPlayerId');
   if (playerIdEl) {
@@ -1959,9 +2777,38 @@ function updateUI() {
   }
   const timeEl = document.getElementById('dispTime');
   if (timeEl) timeEl.textContent = `第 ${s.year + 1}/${MAX_YEARS} 年 ${s.week + 1} 月`;
-  document.getElementById('marketPhase').textContent = 
-    game.marketPhase === 'bull' ? '🐂 牛市' : game.marketPhase === 'bear' ? '🐻 熊市' : '➡️ 横盘';
+  const phaseEl = document.getElementById('phaseName');
+  const phaseIcon = document.getElementById('phaseIcon');
+  const phaseMoodFear = document.getElementById('phaseMoodFear');
+  
+  // 市场阶段图标
+  if (phaseIcon) {
+    phaseIcon.textContent = game.marketPhase === 'bull' ? '🐂' : game.marketPhase === 'bear' ? '🐻' : '➡️';
+  }
+  
+  // 市场阶段 + 年份
+  if (phaseEl) {
+    const phaseName = game.marketPhase === 'bull' ? '牛市' : game.marketPhase === 'bear' ? '熊市' : '横盘';
+    phaseEl.textContent = `${phaseName}·第${s.year + 1}年`;
+  }
+  
+  // 情绪 + 恐惧指数（简化左侧显示）
+  if (phaseMoodFear) {
+    // 计算恐惧/贪婪指数
+    const baseIndex = game.marketPhase === 'bull' ? 75 : game.marketPhase === 'bear' ? 25 : 50;
+    const volatilityImpact = Math.min(15, (game.simVolatility || 20) / 3);
+    const fearGreed = Math.max(0, Math.min(100, baseIndex + (Math.random() - 0.5) * volatilityImpact * 2));
+    
+    let moodIcon, moodText;
+    if (fearGreed >= 75) { moodIcon = '😎'; moodText = '贪婪'; }
+    else if (fearGreed >= 50) { moodIcon = '🙂'; moodText = '乐观'; }
+    else if (fearGreed >= 25) { moodIcon = '😰'; moodText = '恐惧'; }
+    else { moodIcon = '😱'; moodText = '极度恐惧'; }
+    
+    phaseMoodFear.textContent = `${moodIcon} ${moodText} ${Math.round(fearGreed)}`;
+  }
   renderChart();
+  renderMiniChart();
   renderLog();
 }
 
@@ -1971,9 +2818,11 @@ function formatU(n) {
   const absNum = Math.abs(num);
   const sign = num < 0 ? '-' : '';
   
-  // 小于1000直接显示
+  // 小于1000直接显示（等于0显示$0，小于1显示<$1，1-999显示整数）
   if (absNum < 1e3) {
-    return sign + '$' + absNum.toFixed(0);
+    if (absNum === 0) return '$0';
+    if (absNum < 1) return sign + '<$1';
+    return sign + '$' + Math.round(absNum);
   }
   
   // 1K-999M用K,M表示
@@ -2028,6 +2877,72 @@ function renderChart() {
   line.style.clipPath = `polygon(0 100%, ${pts}, 100% 100%)`;
 }
 
+/** 绘制右侧迷你行情图 */
+function renderMiniChart() {
+  const canvas = document.getElementById('miniMarketChart');
+  if (!canvas || !game.marketHistory.length) return;
+  
+  const ctx = canvas.getContext('2d');
+  const width = canvas.width;
+  const height = canvas.height;
+  const h = game.marketHistory;
+  
+  // 清空画布
+  ctx.clearRect(0, 0, width, height);
+  
+  if (h.length < 2) return;
+  
+  // 计算范围
+  const min = Math.min(...h);
+  const max = Math.max(...h);
+  const range = max - min || 0.001;
+  
+  // 确定颜色
+  const trend = h[h.length - 1] - h[h.length - 2];
+  const color = trend >= 0 ? '#0ecb81' : '#f6465d';
+  
+  // 绘制折线
+  ctx.beginPath();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  
+  for (let i = 0; i < h.length; i++) {
+    const x = (i / (h.length - 1)) * width;
+    const y = height - ((h[i] - min) / range) * (height - 6) - 3;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  
+  // 绘制渐变填充
+  ctx.beginPath();
+  for (let i = 0; i < h.length; i++) {
+    const x = (i / (h.length - 1)) * width;
+    const y = height - ((h[i] - min) / range) * (height - 6) - 3;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.lineTo(width, height);
+  ctx.lineTo(0, height);
+  ctx.closePath();
+  
+  const gradient = ctx.createLinearGradient(0, 0, 0, height);
+  gradient.addColorStop(0, trend >= 0 ? 'rgba(14,203,129,0.3)' : 'rgba(246,70,93,0.3)');
+  gradient.addColorStop(1, trend >= 0 ? 'rgba(14,203,129,0.05)' : 'rgba(246,70,93,0.05)');
+  ctx.fillStyle = gradient;
+  ctx.fill();
+  
+  // 绘制最新点
+  const lastX = width;
+  const lastY = height - ((h[h.length - 1] - min) / range) * (height - 6) - 3;
+  ctx.beginPath();
+  ctx.fillStyle = color;
+  ctx.arc(lastX - 2, lastY, 2, 0, Math.PI * 2);
+  ctx.fill();
+}
+
 function renderPathList() {
   const el = document.getElementById('pathList');
   if (!el) return;
@@ -2050,15 +2965,23 @@ function bindSpeedSelect() {
 function bindPause() {
   const btn = document.getElementById('btnPause');
   if (!btn) return;
-  btn.addEventListener('click', () => {
-    if (game.paused) {
-      game.paused = false;
+  
+  // 移除旧的事件监听器（通过克隆节点）
+  const newBtn = btn.cloneNode(true);
+  btn.parentNode.replaceChild(newBtn, btn);
+  
+  newBtn.addEventListener('click', () => {
+    const g = game;
+    if (!g) return;
+    
+    if (g.paused) {
+      g.paused = false;
       startTickLoop();
-      btn.textContent = '⏸ 暂停';
+      newBtn.textContent = '⏸ 暂停';
     } else {
-      game.paused = true;
-      if (game.tickInterval) { clearInterval(game.tickInterval); game.tickInterval = null; }
-      btn.textContent = '▶ 继续';
+      g.paused = true;
+      if (g.tickInterval) { clearInterval(g.tickInterval); g.tickInterval = null; }
+      newBtn.textContent = '▶ 继续';
     }
   });
 }
@@ -2093,6 +3016,31 @@ function dismissEndingOnly() {
   if (bar) bar.style.display = 'flex';
   const btnPause = document.getElementById('btnPause');
   if (btnPause) btnPause.style.display = 'none';
+  
+  // 触发结局聊天（10条消息，每秒1条）
+  startEndingChat();
+}
+
+/** 触发结局聊天 - 10条消息，每秒1条 */
+function startEndingChat() {
+  const container = document.getElementById('chatMessages');
+  if (!container) return;
+  
+  // 清空现有消息
+  container.innerHTML = '';
+  
+  // 根据财富确定结局类型
+  const wealth = getNetWealth(game.state);
+  let category = 'normal';
+  if (wealth > 1000000) category = 'rich';
+  else if (wealth < 0) category = 'bankrupt';
+  
+  // 发送10条结局消息
+  for (let i = 0; i < 10; i++) {
+    setTimeout(() => {
+      addEndingChatMessage(i);
+    }, i * 1000); // 每秒1条
+  }
 }
 
 /** 进入开局设置页（隐藏结局栏、显示开始页） */
@@ -2114,53 +3062,7 @@ function bindRestart() {
     document.getElementById('endingScreen').classList.add('show');
   });
   
-  // 再来一局 - 直接重新开始，使用默认参数
-  document.getElementById('btnRestart').addEventListener('click', () => {
-    document.getElementById('endingScreen').classList.remove('show');
-    const bar = document.getElementById('afterEndBar');
-    if (bar) bar.style.display = 'none';
-    // 使用保存的设置开始新游戏
-    const styleMap = {
-      degen: { riskPreference: 0.85, rationality: 0.3, strategy: 0.2, social: 0.6, luck: 0.5 },
-      balanced: { riskPreference: 0.5, rationality: 0.5, strategy: 0.5, social: 0.5, luck: 0.5 },
-      diamond: { riskPreference: 0.3, rationality: 0.7, strategy: 0.9, social: 0.4, luck: 0.5 }
-    };
-    const baseTraits = styleMap[savedSettings.style] || styleMap.balanced;
-    const philosophyMap = {
-      technical: { luckMod: 0, rationalityMod: 0.15 },
-      news: { luckMod: 0.05, rationalityMod: -0.05 },
-      value: { luckMod: -0.05, rationalityMod: 0.1 },
-      nihilism: { luckMod: -0.1, rationalityMod: 0 }
-    };
-    const philEffects = philosophyMap[savedSettings.philosophy] || philosophyMap.news;
-    const personalityMap = {
-      pragmatist: { weirdMod: -0.08 },
-      balanced: { weirdMod: 0 },
-      dreamer: { weirdMod: 0.12 }
-    };
-    const personalityEffects = personalityMap[savedSettings.personality] || personalityMap.balanced;
-    // 获取保存的玩家ID
-    let savedPlayerId = '';
-    try { savedPlayerId = localStorage.getItem('memeMaxPlayerId') || ''; } catch (e) {}
-    
-    const traits = {
-      luck: Math.max(0, Math.min(1, baseTraits.luck + philEffects.luckMod)),
-      social: baseTraits.social,
-      rationality: Math.max(0, Math.min(1, baseTraits.rationality + philEffects.rationalityMod)),
-      strategy: baseTraits.strategy,
-      riskPreference: baseTraits.riskPreference,
-      style: savedSettings.style,
-      philosophy: savedSettings.philosophy,
-      personality: savedSettings.personality,
-      weirdMod: personalityEffects.weirdMod,
-      playerId: savedPlayerId
-    };
-    game.state = null;
-    game.running = false;
-    // 同步决策模式
-    game.decisionMode = savedSettings.decisionMode || 'auto';
-    startNewGame(1000, traits);
-  });
+  // 再来一局按钮已移除，从游戏界面底部栏(afterEndBar)的按钮重新开始
   // 收起结局海报
   document.getElementById('btnEndingDismiss')?.addEventListener('click', () => {
     dismissEndingOnly();
@@ -2399,7 +3301,7 @@ function loadSettingsFromStorage() {
     style: 'balanced',
     philosophy: 'news',
     personality: 'balanced',
-    decisionMode: 'auto'
+    decisionMode: 'hardcore'
   };
   try {
     const stored = localStorage.getItem('memeMaxSettings');
@@ -2507,6 +3409,612 @@ function initStartForm() {
     startNewGame(capital, traits);
   });
 }
+
+
+// ==================== CHAT SYSTEM ====================
+
+/**
+ * 结局聊天消息库 - 完全随机，不同结局不同语气
+ */
+const ENDING_CHAT_MESSAGES = {
+  // 财富自由 - 恭喜、求带、质疑、羡慕、各种都有（100条）
+  rich: [
+    // 恭喜类（25条）
+    '大佬！带带弟弟！', '这就是传说中的巨鲸吗？', '牛批！求分享经验！',
+    '接高手气运！', '这操作太神了', '羡慕了', '学习了大佬', '这还是人吗',
+    '今晚吃好的庆祝一下', '我什么时候才能像你一样', '富哥加个好友', '穿越牛熊的神',
+    '这财富自由我也想要', '今晚饭局算我的！', '真正的交易大师', '这就是永远的神',
+    '实名羡慕了', '这就是传说中的财富传说', '太强了哥', '高手在民间',
+    '恭喜发财！', '赚麻了吧', '这操作可以', '这就是专业', '膜拜大佬',
+    // 求带类（20条）
+    '能不能带带弟弟', '带带弟弟吧大佬', '哥下面买啥？', '接下来看什么方向？',
+    '富哥V我50带带', '求带飞', '跟着哥有肉吃', '哥太稳了', '学到很多',
+    '下次带我一起玩', '能不能拉我进群？', '大佬带带我', '我也想财富自由',
+    '求指导', '求分享财富密码', '哥是不是有内部消息？', '能不能给个准信？',
+    '大佬吃什么我吃什么', '跟着大佬走', '求带上车',
+    // 质疑类（15条）
+    '看到你赚比我赚还难受', '是不是有内幕消息？', '真的假的，这么能赚',
+    '我不信，肯定是P的', '这运气也太好了吧', '是不是有什么秘诀？',
+    '凭什么你能赚这么多？', '是不是提前知道消息了？', '这收益不正常吧',
+    '是不是洗钱？', '是不是的项目方？', '这收益率假的吧',
+    '我不相信有人能这么赚', '肯定是假的', 'P图技术不错',
+    // 羡慕嫉妒（20条）
+    '酸了酸了', '我是柠檬精', '羡慕嫉妒恨', '为什么不是我', '我也想要',
+    '眼红', '嫉妒使我面目全非', '我也想这样', '这就是我梦寐以求的',
+    '有钱人的快乐我想象不到', '这就是人生赢家吗', '我也想体验这种感觉',
+    '这就是传说中的财务自由吗', '我酸了', '羡慕这个词我说累了',
+    '我也想这样活着', '这就是差距啊', '人比人气死人', '羡慕的眼泪',
+    '我也想有这样的结局',
+    // 其他（20条）
+    'respect！', '这波在大气层', '天秀', '神仙操作', '教科书级别的',
+    '这就是顶级理解', '悟了', '开窍了', '格局打开', '境界不一样',
+    '这就是认知差距', '学到了', '受教了', '这就是高手', '这就是差距',
+    '这才是正确的打开方式', '这就是人生', '我也想这样', '太牛了',
+    '完美收官'
+  ],
+  // 破产 - 大量羞辱（80%）+ 少量鼓励（20%）（100条）
+  bankrupt: [
+    // 羞辱类 - 嘲笑（20条）
+    '哈哈哈还有人破产？', '这都能输完？退群吧', '送外卖去吧你',
+    '又一个被收割的韭菜', '纯纯赌狗下场', '这就是合约战神？',
+    '笑死，这都能亏完', '财富自由反向自由', '推特关注了，当个笑话',
+    '这操作给我整笑了', '看到你破产比我赚钱还开心', '怎么总是你在亏啊',
+    '哈哈哈笑死我了', '这也太惨了吧', '活久见', '长见识了',
+    '这就是传说中的一夜归零？', '人才', '666这都能亏完', '绝了',
+    // 羞辱类 - 毒舌（25条）
+    '亏钱货别玩了，回家种地吧', '这脑子不适合玩这个',
+    '怎么这么菜啊服了', '新手就是新手交学费了吧', '币圈不适合你真的',
+    '你这水平别玩了回家种地吧', '菜鸡早说了你不适合玩这个', '交智商税了吧傻逼',
+    '纯纯赌狗这下满意了吧', '这就是你的决策？笑死', '笨蛋这都能选错',
+    '傻逼被收割了吧', '犯见这么低级的错误', '这智商别玩金融了，打工去吧',
+    '家人们快来看这个爆仓的傻逼', '合约玩家归宿了？笑死', '退群吧别丢人了',
+    '币圈不需要你这种菜鸡', '菜到没朋友', '回家吧',
+    '别再送了', '这就是韭菜', '割的就是你', '亏成这样还活着？',
+    '没救了',
+    // 羞辱类 - 超级痛骂（20条）
+    '别玩了你不配', '删游戏吧你不适合', '去找个厂上班吧', '你就是鲜葱！',
+    '你这是在玩火？不你在送钱', '别来害人了，滚吧', '这钱丢的，我都为你难过',
+    '你这不叫交易，叫捐款', '别说你认识我', '你真的很适合被割韭菜',
+    '太惨了，惨到我都想笑', '你的存在就是别人的安慰', '这水平别玩了，打工去吧',
+    '破产清零，你的专长', '别挣扎了，没救了', '这就是命，你就是韭菜命',
+    '还玩？家里有矿啊？', '你这选择太让人失望了', '几年学费白交了',
+    '认清现实吧废物',
+    // 羞辱类 - 人身攻击（15条）
+    '你就是颗韭菜', '割的就是你这种人', '赶紧滚吧', '你在玩你妈呢？',
+    '回家吧，回家种田吧', '妈个鸡再跟你我是狗', '这脑子别玩币了，真的',
+    '你就是天生韭菜命', '看到你亏比我赚还爽', '退群吧，真的，别丢人了',
+    '这操作我家狗都比你强', '智商欠费就别充值了', '币圈不适合你，去送外卖吧',
+    '你怎么还活着？', '亏成这样还有脸玩？',
+    // 少量鼓励（20条）
+    '没事，下一局再来', '别灰心，还有机会', '加油，相信自己', '不要放弃',
+    '失败是成功之母', '下次一定行', '吸取教训', '总结经验', '再接再厉',
+    '东山再起', '卷土重来', '相信自己', '你可以的', '别气馁', '加油',
+    '还有机会', '下一局赢回来', '坚持就是胜利', '永不言弃', '站起来'
+  ],
+  // 普通结局 - 躺平摆烂为主（70%）+ 少量羞辱鼓励（30%）（100条）
+  normal: [
+    // 躺平摆烂类（40条）
+    '还行吧，至少没亏', '稳稳的幸福', '保住本金就赢了大半', '结束了，下一局加油',
+    '五年了，时间过得真快', '这局算正常发挥', '小赚小亏，正常',
+    '还好没归零', '这就是币圈，有赢有输', '没暴富但也没破产', '算计合格',
+    '平平无奇的五年', '结局散花！', '还在群里的都是有故事的人', '总结经验，下次再战',
+    '这局值了', '成长了不少吧', '才是开始，加油', '别放弃，下一局',
+    '平凡但珍贵的经历', '就这样吧', '佛系', '躺平了', '摆烂',
+    '无所谓了', '爱咋咋地', '随缘', '看淡一切', '不赚不亏就是最好的',
+    '平平淡淡才是真', '知足常乐', '佛系玩家', '躺平青年', '摆烂大师',
+    '就这样吧，下一局', '随缘玩法', '一切随缘', '无所谓', '看淡',
+    '平平淡淡的结局', '佛系收场',
+    // 感慨类（20条）
+    '五年了，不容易', '时间过得真快', '有收获就好', '经历就是财富',
+    '这就是人生', '币圈五年，人间十年', '学到了很多', '成长了',
+    '这就是经历', '值得纪念', '不容易', '辛苦了', '好歹没亏',
+    '知足了', '满足了', '还可以', '挺不错的', '圆满了', '告一段落了',
+    '新的开始',
+    // 少量羞辱（15条）
+    '比我强，我还在套着...', '下一局打算怎么玩？', '还在群里说明还有梦想',
+    '至少比破产强', '没亏就是赚', '你还算聪明的', '知道见好就收',
+    '不贪心是好事', '稳健派', '保守玩家', '谨慎点好', '稳扎稳打',
+    '不冒险是对的', '安全第一', '留得青山在',
+    // 少量鼓励（15条）
+    '下一局一起？', '加油', '你可以的', '相信自己', '继续努力',
+    '下一局会更好', '坚持就是胜利', '永不放弃', '再接再厉', '东山再起',
+    '未来可期', '前途无量', '大有可为', '潜力股', '下一局起飞',
+    // 其他（10条）
+    '这就是普通人的生活', '大多数人都是这样', '正常结局', '标准结局',
+    '意料之中', '情理之中', '平平淡淡', '就这样吧', '圆满收工', '剧终'
+  ],
+};
+/**
+ * 结局聊天使用的人格列表（排除特殊人格）
+ */
+const ENDING_CHAT_PERSONAS = [
+  'degen', 'hodler', 'analyst', 'insider', 'mystic', 
+  'noob', 'fudder', 'airdrop', 'memer', 'leverage',
+  'maxi', 'dca', 'panic', 'whale', 'defi', 
+  'nft', 'quant', 'builder', 'kol'
+];
+
+/**
+ * 聊天人格配置 V3 - 20个人格，每个人格12个昵称
+ */
+const CHAT_PERSONAS_V3 = {
+  degen: {
+    names: ['梭哈是一种智慧', '全仓梭哈', '卖房梭哈哥', '借钱也要梭', '梭哈老祖', '一把梭', '梭哈永不眠', '满仓猛干', '归零小能手', '梭哈小王子', 'AllInEveryDay', '富一次就够了'],
+    color: '#ff6b6b'
+  },
+  hodler: {
+    names: ['钻石手永不为奴', '拿住就是胜利', 'HODL到100万', '死了都不卖', '十年老钻石手', '拿住党领袖', '手是钻石做的', '不卖到10万刀', '纸手退散', 'HODLFOREVER', '信仰拿住', '割是不可能割的'],
+    color: '#51cf66'
+  },
+  analyst: {
+    names: ['技术分析永不眠', '图表画线师', 'MACD金叉信号', '斐波那契大师', 'K线魔术师', '指标之王', '布林带高手', '趋势线专家', 'RSI背离猎人', 'ChartMaster', '技术分析小学生', '画图专业户'],
+    color: '#339af0'
+  },
+  insider: {
+    names: ['内部消息大佬', '庄家跟单员', '老鼠仓专家', '内幕交易王', '机构操盘手', ' whale alert', '链上追踪者', '聪明钱跟随', '老鼠仓小能手', '内幕小王子', '庄家监控员', '机构动向追踪'],
+    color: '#845ef7'
+  },
+  mystic: {
+    names: ['易经炒币大师', '占星预测师', '塔罗牌分析师', '风水看盘师', '神秘学交易者', '能量场分析师', '命理预测师', '玄学交易法', '星象分析师', '卦象解盘师', '神秘预测家', '能量流分析师'],
+    color: '#e599f7'
+  },
+  noob: {
+    names: ['刚入圈小白', '新手问问题', '亏钱学习者', '币圈小学生', '韭菜练习生', '新韭菜报到', '币圈萌新', '入门学习者', '小白求指导', '新手交易员', '币圈初学者', '虚心求教者'],
+    color: '#ffd43b'
+  },
+  fudder: {
+    names: ['FUD传播者', '唱空大师', '利空分析师', '崩盘预测师', '看跌死多头', '空军总司令', '利空消息王', '唱空小能手', '崩盘预言家', '空军一号', 'FUD制造机', '利空散布者'],
+    color: '#ff8787'
+  },
+  airdrop: {
+    names: ['撸毛专家', '空投猎人', '羊毛党领袖', '零撸大师', '空投狙击手', '撸毛小能手', '羊毛收割机', '空投收集者', '零撸高手', '撸毛小王子', '羊毛专家', '空投猎手'],
+    color: '#69db7c'
+  },
+  memer: {
+    names: ['梗图制造机', '表情包大师', '段子手', '币圈搞笑王', 'meme创作者', ' jokes maker', '幽默分析师', '段子制造机', '梗图小王子', '搞笑担当', 'meme猎手', '欢乐传播者'],
+    color: '#ffa94d'
+  },
+  leverage: {
+    names: ['125倍杠杆王', '合约战神', '爆仓小王子', '杠杆魔术师', '合约交易王', '高杠杆赌徒', '爆仓专业户', '合约狙击手', '杠杆小能手', '合约小王子', '爆仓艺术家', '杠杆之王'],
+    color: '#ff6b6b'
+  },
+  maxi: {
+    names: ['比特币最大主义者', 'ETH信仰者', '山寨币猎人', '主流币守护者', '比特币原教旨', '以太坊信仰', '币圈传教士', '加密货币布道者', '区块链信仰者', '去中心化战士', '加密货币原住民', '币圈理想主义者'],
+    color: '#f06595'
+  },
+  dca: {
+    names: ['定投小能手', '定投理财师', '定投策略家', '定投信仰者', '定投大师', '定投小王子', '定投专家', '定投分析师', '定投实践者', '定投策略师', '定投猎手', '定投达人'],
+    color: '#22b8cf'
+  },
+  panic: {
+    names: ['恐慌抛售者', 'FOMO焦虑症患者', '追高杀低王', '恐慌交易者', '情绪交易者', '冲动交易者', '恐慌小能手', 'FOMO大师', '追涨杀跌王', '情绪化交易者', '恐慌小王子', '冲动型选手'],
+    color: '#ff8787'
+  },
+  whale: {
+    names: ['巨鲸观察者', '大户追踪者', '鲸鱼警报员', '巨鲸分析师', '大户监控员', '鲸鱼探测器', '巨鲸猎手', '大户分析师', '鲸鱼追踪器', '巨鲸监控员', '大户观察者', '鲸鱼分析师'],
+    color: '#748ffc'
+  },
+  defi: {
+    names: ['DeFi农夫', '流动性挖矿者', '收益农场主', 'DeFi研究员', '挖矿小能手', 'DeFi分析师', '流动性提供者', '收益优化师', 'DeFi科学家', '挖矿专家', 'DeFi猎手', '收益收割机'],
+    color: '#9775fa'
+  },
+  nft: {
+    names: ['NFT收藏家', '图片炒家', '小图片爱好者', 'NFT交易员', '数字收藏家', 'JPEG投资者', 'NFT猎手', '图片收藏家', 'NFT flipper', '数字艺术爱好者', 'NFT投资者', '图片交易员'],
+    color: '#da77f2'
+  },
+  quant: {
+    names: ['量化交易员', '算法交易师', '高频交易王', '量化策略师', '程序化交易员', '量化分析师', '算法策略师', '量化小能手', '程序交易员', '量化研究师', '算法交易员', '量化小王子'],
+    color: '#4dabf7'
+  },
+  builder: {
+    names: ['区块链开发者', '智能合约工程师', 'DApp开发者', '协议开发者', 'Web3建设者', '区块链工程师', '合约审计师', '基础设施者', '开发者 advocate', '技术建设者', '代码贡献者', '协议设计者'],
+    color: '#3bc9db'
+  },
+  kol: {
+    names: ['推特 influencers', 'YouTube分析师', '微博大V', '抖音分析师', '知乎大V', '小红书博主', 'B站UP主', '知识星球主', '付费群群主', '推特分析师', '社交媒体大V', '内容创作者'],
+    color: '#ff922b'
+  }
+};
+
+/**
+ * 等级颜色配置
+ */
+const LEVEL_COLORS = {
+  novice: { name: '#E5E7EB', level: '#9CA3AF', glow: 'none' },                    // Lv 1-9
+  beginner: { name: '#4ADE80', level: '#22C55E', glow: '0 0 8px rgba(74,222,128,0.3)' },      // Lv 10-19
+  intermediate: { name: '#60A5FA', level: '#3B82F6', glow: '0 0 8px rgba(96,165,250,0.3)' },  // Lv 20-29
+  advanced: { name: '#A78BFA', level: '#8B5CF6', glow: '0 0 8px rgba(167,139,250,0.3)' },     // Lv 30-39
+  expert: { name: '#F472B6', level: '#EC4899', glow: '0 0 10px rgba(244,114,182,0.4)' },      // Lv 40-49
+  master: { name: '#FB923C', level: '#F97316', glow: '0 0 10px rgba(251,146,60,0.4)' },       // Lv 50-59
+  legendary: { name: '#EF4444', level: '#DC2626', glow: '0 0 12px rgba(239,68,68,0.5)' },     // Lv 60-79
+  mythic: { name: '#EAB308', level: '#CA8A04', glow: '0 0 15px rgba(234,179,8,0.6)' },        // Lv 80-99
+  creator: { name: '#FFD700', level: '#FFA500', glow: '0 0 20px rgba(255,215,0,0.8)' },       // Lv 100
+};
+
+/**
+ * 名人配置
+ */
+/** 名人配置由 chat-celebrities.js 提供 */
+
+/**
+ * 群聊消息数据库
+ */
+const CHAT_DATABASE = {
+  bull: [
+    { user: '梭哈是一种智慧', text: '牛市来了，梭哈！' },
+    { user: '全仓梭哈', text: '满仓干就完了！' },
+    { user: '卖房梭哈哥', text: '这波看到10万刀' },
+    { user: '钻石手永不为奴', text: '拿住，别动！' },
+    { user: 'HODL到100万', text: '打死不卖' },
+    { user: '技术分析永不眠', text: '突破阻力位了' },
+    { user: '内部消息大佬', text: '有大机构进场' },
+    { user: '刚入圈小白', text: '现在还能买吗？' },
+    { user: 'FUD传播者', text: '假的，要崩盘了' },
+    { user: '撸毛专家', text: '先挖矿再说' },
+    { user: '梗图制造机', text: '表情包.jpg' },
+    { user: '125倍杠杆王', text: '开多了，冲！' },
+  ],
+  bear: [
+    { user: '梭哈是一种智慧', text: '完了，爆仓了...' },
+    { user: '归零小能手', text: '又归零了' },
+    { user: '割肉小王子', text: '割肉离场了' },
+    { user: '纸手退散', text: '扛不住了，卖！' },
+    { user: 'FUD传播者', text: '早就说会崩' },
+    { user: '恐慌抛售者', text: '快逃啊！' },
+    { user: '抄底小能手', text: '可以抄底了吗？' },
+    { user: '定投小能手', text: '继续定投，不慌' },
+    { user: '抄底小能手', text: '再等等，还没到底' },
+    { user: '巨鲸观察者', text: '大户在出货' },
+    { user: '恐慌抛售者', text: '不要慌，是技术调整' },
+    { user: '合约战神', text: '做空赚麻了' },
+  ],
+  sideway: [
+    { user: '梭哈是一种智慧', text: '横盘，无聊...' },
+    { user: '钻石手永不为奴', text: '拿住，等突破' },
+    { user: '技术分析永不眠', text: '在箱体震荡' },
+    { user: '刚入圈小白', text: '这币怎么不动啊？' },
+    { user: '撸毛专家', text: '去撸空投吧' },
+    { user: '梗图制造机', text: '横盘表情包.jpg' },
+    { user: '定投小能手', text: '定投就对了' },
+    { user: '巨鲸观察者', text: '大户在洗盘' },
+    { user: 'DeFi农夫', text: '挖矿去，不盯盘了' },
+    { user: 'NFT收藏家', text: '看看小图片' },
+    { user: '量化交易员', text: '网格交易收割' },
+    { user: '区块链开发者', text: '专心写代码' },
+  ]
+};
+
+/**
+ * 根据等级获取颜色样式
+ * @param {number} level - 等级 1-100
+ */
+function getLevelStyle(level) {
+  if (level >= 100) return LEVEL_COLORS.creator;
+  if (level >= 80) return LEVEL_COLORS.mythic;
+  if (level >= 60) return LEVEL_COLORS.legendary;
+  if (level >= 50) return LEVEL_COLORS.master;
+  if (level >= 40) return LEVEL_COLORS.expert;
+  if (level >= 30) return LEVEL_COLORS.advanced;
+  if (level >= 20) return LEVEL_COLORS.intermediate;
+  if (level >= 10) return LEVEL_COLORS.beginner;
+  return LEVEL_COLORS.novice;
+}
+
+/**
+ * 生成随机用户数据
+ * @param {string} personaId - 人格ID
+ */
+function generateRandomUser(personaId) {
+  // 从名字池随机选择名字（人格只用于兼容旧代码）
+  const nameData = CHAT_NAME_POOL[Math.floor(Math.random() * CHAT_NAME_POOL.length)];
+  const level = Math.floor(Math.random() * 100) + 1;
+  const style = getLevelStyle(level);
+  
+  return {
+    name: nameData,
+    level,
+    nameColor: style.name,
+    levelColor: style.level,
+    glow: style.glow
+  };
+}
+
+/**
+ * 获取随机结局聊天消息
+ * @param {string} category - 结局类型: 'rich' | 'bankrupt' | 'normal'
+ * @returns {Object} {persona, text}
+ */
+function getRandomEndingMessage(category) {
+  const messages = ENDING_CHAT_MESSAGES[category] || ENDING_CHAT_MESSAGES.normal;
+  const text = messages[Math.floor(Math.random() * messages.length)];
+  const persona = ENDING_CHAT_PERSONAS[Math.floor(Math.random() * ENDING_CHAT_PERSONAS.length)];
+  return { persona, text };
+}
+
+/**
+ * 生成@消息（名人或玩家）
+ * @param {string} type - 'celebrity' | 'player'
+ * @param {string} id - 名人ID或事件类型
+ */
+function generateAtMessage(type, id, interactionType = 'normal') {
+  if (type === 'celebrity') {
+    const celeb = CELEBRITIES[id];
+    if (!celeb) return null;
+    
+    // 新的名人系统支持多种互动类型
+    let texts;
+    if (celeb.messages) {
+      // 使用新的 messages 结构
+      texts = celeb.messages[interactionType] || celeb.messages.normal || [];
+    } else if (celeb.msgs) {
+      // 兼容旧的 msgs 结构
+      texts = celeb.msgs;
+    }
+    if (!texts || texts.length === 0) return null;
+    
+    const text = texts[Math.floor(Math.random() * texts.length)];
+    
+    return {
+      isCelebrity: true,
+      user: celeb,
+      text: text
+    };
+  } else if (type === 'player') {
+    // 玩家@事件现在由 triggerPlayerEvent 直接处理
+    return null;
+  }
+  return null;
+}
+
+/**
+ * 添加特殊群聊消息（@消息）
+ */
+function addSpecialChatMessage(msgData) {
+  const container = document.getElementById('chatMessages');
+  if (!container) return;
+  
+  const div = document.createElement('div');
+  div.className = 'chat-msg chat-at-msg';
+  
+  if (msgData.isCelebrity) {
+    // 名人发言
+    const celeb = msgData.user;
+    div.innerHTML = `
+      <span class="chat-level" style="color:${celeb.color};text-shadow:${celeb.glow};font-weight:800">Lv ${celeb.level}</span>
+      <span class="chat-name" style="color:${celeb.color};text-shadow:${celeb.glow};font-weight:700">${celeb.avatar} ${celeb.name}:</span>
+      <span class="chat-text" style="color:${celeb.color};font-weight:600">${msgData.text}</span>
+    `;
+  } else if (msgData.atPlayer) {
+    // @玩家
+    const user = msgData.user;
+    const playerId = msgData.playerId || '玩家';
+    // 如果 text 已包含 @，则不再添加；否则添加 @playerId
+    const text = msgData.text.startsWith('@') ? msgData.text : `@${playerId} ${msgData.text}`;
+    div.innerHTML = `
+      <span class="chat-level" style="color:${user.levelColor};text-shadow:${user.glow}">Lv ${user.level}</span>
+      <span class="chat-name" style="color:${user.nameColor};text-shadow:${user.glow}">${user.name}:</span>
+      <span class="chat-text">${text}</span>
+    `;
+  }
+  
+  container.appendChild(div);
+  
+  // 保持最近40条消息
+  while (container.children.length > 40) {
+    container.removeChild(container.firstChild);
+  }
+  
+  // 自动滚动
+  requestAnimationFrame(() => {
+    container.scrollTo({ top: container.scrollHeight, behavior: 'auto' });
+  });
+}
+
+/**
+ * 添加结局群聊消息 - 完全随机版
+ * @param {number} index - 消息索引 (0-9)
+ */
+function addEndingChatMessage(index) {
+  const container = document.getElementById('chatMessages');
+  if (!container) return;
+  
+  // 判断结局类型
+  const wealth = getNetWealth(game.state);
+  let category = 'normal';
+  if (wealth > 1000000) category = 'rich';
+  else if (wealth < 0) category = 'bankrupt';
+  
+  // 随机获取消息和人格
+  const { persona, text } = getRandomEndingMessage(category);
+  const userData = generateRandomUser(persona);
+  
+  // 创建消息元素
+  const div = document.createElement('div');
+  div.className = 'chat-msg';
+  div.innerHTML = `
+    <span class="chat-level" style="color:${userData.levelColor};text-shadow:${userData.glow}">Lv ${userData.level}</span>
+    <span class="chat-name" style="color:${userData.nameColor};text-shadow:${userData.glow}">${userData.name}:</span>
+    <span class="chat-text">${text}</span>
+  `;
+  
+  container.appendChild(div);
+  
+  // 保持最近10条结局消息
+  while (container.children.length > 10) {
+    container.removeChild(container.firstChild);
+  }
+  
+  // 自动滚动到底部显示最新消息
+  requestAnimationFrame(() => {
+    container.scrollTo({ top: container.scrollHeight, behavior: 'auto' });
+  });
+}
+
+/** 初始化群聊系统 */
+function initChatSystem() {
+  if (game.chatInitialized) return;
+  game.chatInitialized = true;
+  game.chatInterval = null;
+  
+  // 游戏进行中：1-2秒一条（更热闹）
+  startChatLoop(1000, 2000); // 1-2秒一条
+}
+
+/** 启动群聊循环 */
+function startChatLoop(minDelay, maxDelay) {
+  if (game.chatTimeout) clearTimeout(game.chatTimeout);
+  
+  const loop = () => {
+    // 游戏结束时停止聊天，但决策时不影响
+    if (game.state?.ended) return;
+    addChatMessage();
+    const nextDelay = minDelay + Math.random() * (maxDelay - minDelay);
+    game.chatTimeout = setTimeout(loop, nextDelay);
+  };
+  
+  loop();
+}
+
+/** 添加一条群聊消息 */
+function addChatMessage(isEnding = false) {
+  const container = document.getElementById('chatMessages');
+  if (!container) return;
+  
+  // 10% 概率触发名人@消息（游戏进行中）
+  if (!isEnding && Math.random() < 0.1) {
+    const celebrities = ['cz', 'elon', 'trump', 'vitalik', 'justin', 'niunaishu', 'lxiaolai', 'bao2', 'shenyu', 'saylor', 'hayes', 'cobie', 'zhusu', 'xumingxing', 'heyi'];
+    const celebId = celebrities[Math.floor(Math.random() * celebrities.length)];
+    const celebMsg = generateAtMessage('celebrity', celebId);
+    if (celebMsg) {
+      addSpecialChatMessage(celebMsg);
+      // 名人发言后，3-4条网友@名人互动
+      const interactionCount = 3 + Math.floor(Math.random() * 2); // 3或4条
+      const celeb = celebMsg.user;
+      const interactions = [
+        `@{celeb.name} 哥，带带！`,
+        `@{celeb.name} 说得好！`,
+        `@{celeb.name} 真的假的？`,
+        `@{celeb.name} 大佬牛逼！`,
+        `@{celeb.name} 求内幕消息！`,
+        `@{celeb.name} 我跟你了！`,
+        `@{celeb.name} 什么时候拉盘？`,
+        `@{celeb.name} 接下来买什么？`,
+        `@{celeb.name} 财富密码？`,
+        `@{celeb.name} 能加群吗？`,
+        `@{celeb.name} 说得太对了！`,
+        `@{celeb.name} 大师！`,
+        `@{celeb.name} 教主！`,
+        `@{celeb.name} 偶像！`,
+        `@{celeb.name} 这都能说中？`,
+        `@{celeb.name} 你怎么看现在的行情？`
+      ];
+      for (let i = 0; i < interactionCount; i++) {
+        setTimeout(() => {
+          const user = generateRandomUserForAt();
+          const text = interactions[Math.floor(Math.random() * interactions.length)].replace('{celeb.name}', celeb.name);
+          addSpecialChatMessage({
+            atPlayer: true,
+            user: user,
+            text: text,
+            playerId: celeb.name
+          });
+        }, 500 + i * 600); // 间隔600ms，依次出现
+      }
+      return;
+    }
+  }
+  
+  addRegularChatMessage(isEnding);
+}
+
+/**
+ * 添加普通群聊消息
+ */
+function addRegularChatMessage(isEnding = false) {
+  const container = document.getElementById('chatMessages');
+  if (!container) return;
+  
+  let msg;
+  let userData = null;
+  
+  if (isEnding) {
+    // 结局消息 - 使用 ENDING_CHAT_MESSAGES
+    const wealth = getNetWealth(game.state);
+    let category = 'normal';
+    if (wealth > 1000000) category = 'rich';
+    else if (wealth < 0) category = 'bankrupt';
+    
+    const { persona, text } = getRandomEndingMessage(category);
+    userData = generateRandomUser(persona);
+    msg = { text };
+  } else {
+    // 游戏进行中 - 从名字池随机选名字，从人格随机选话术
+    const personas = (typeof CHAT_PERSONAS !== 'undefined') ? CHAT_PERSONAS : CHAT_PERSONAS_V3;
+    const personaIds = Object.keys(personas);
+    const personaId = personaIds[Math.floor(Math.random() * personaIds.length)];
+    const persona = personas[personaId];
+    
+    // 随机选择一条话术（从人格）
+    const messages = persona.messages || ['这行情看不懂'];
+    const text = messages[Math.floor(Math.random() * messages.length)];
+    
+    // 生成用户数据（名字从名字池，等级决定颜色）
+    const name = CHAT_NAME_POOL[Math.floor(Math.random() * CHAT_NAME_POOL.length)];
+    const level = Math.floor(Math.random() * 80) + 10; // Lv 10-90
+    const style = getLevelStyle(level);
+    
+    userData = {
+      name: name,
+      level: level,
+      nameColor: style.name,
+      levelColor: style.level,
+      glow: style.glow
+    };
+    msg = { text };
+  }
+  
+  // 避免重复（最近3条不重复同一条）
+  const recentTexts = Array.from(container.children).slice(-3).map(el => el.textContent);
+  if (recentTexts.includes(`${userData.name}:${msg.text}`)) {
+    return addRegularChatMessage(isEnding);
+  }
+  
+  const div = document.createElement('div');
+  div.className = 'chat-msg';
+  div.innerHTML = `
+    <span class="chat-level" style="color:${userData.levelColor};text-shadow:${userData.glow}">Lv ${userData.level}</span>
+    <span class="chat-name" style="color:${userData.nameColor};text-shadow:${userData.glow}">${userData.name}:</span>
+    <span class="chat-text">${msg.text}</span>
+  `;
+  
+  container.appendChild(div);
+  
+  // 保持最近40条消息
+  while (container.children.length > 40) {
+    container.removeChild(container.firstChild);
+  }
+  
+  // 自动滚动
+  requestAnimationFrame(() => {
+    container.scrollTo({ top: container.scrollHeight, behavior: 'auto' });
+  });
+}
+
+/**
+ * 根据昵称查找人格ID
+ * @param {string} name - 用户昵称
+ */
+function findPersonaByName(name) {
+  const personas = (typeof CHAT_PERSONAS !== 'undefined') ? CHAT_PERSONAS : CHAT_PERSONAS_V3;
+  for (const [id, persona] of Object.entries(personas)) {
+    if (persona.names.includes(name)) {
+      return id;
+    }
+  }
+  return null;
+}
+
+// ==================== END OF CHAT SYSTEM ====================
 
 window.addEventListener('DOMContentLoaded', () => {
   // 恢复保存的玩家ID

@@ -16,7 +16,11 @@ const FIREBASE_CONFIG = {
 
 let leaderboardEnabled = false;
 let db = null;
-let leaderboardCache = { wealth: [], bankrupt: [], lastUpdate: 0 };
+let leaderboardCache = { wealth: [], bankrupt: [], hardcore: [], lastUpdate: 0 };
+
+// 硬核模式7日榜（本地存储）
+const HARDCORE_LB_KEY = 'lb_hardcore_7d';
+const HARDCORE_LB_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7天毫秒数
 
 /** 初始化排行榜 */
 async function initLeaderboard() {
@@ -31,8 +35,11 @@ async function initLeaderboard() {
     leaderboardEnabled = true;
     console.log('✅ Firebase 排行榜已连接');
     
-    // 先加载本地缓存
+    // 先加载本地缓存（包括硬核榜）
     loadLocalCache();
+    
+    // 渲染本地缓存的榜单（包括硬核榜）
+    renderLeaderboards();
     
     // 实时监听榜单
     startRealtimeListeners();
@@ -77,7 +84,14 @@ function loadFirebaseSDK() {
 function loadLocalCache() {
   try {
     const saved = localStorage.getItem('lb_cache_v2');
-    if (saved) leaderboardCache = JSON.parse(saved);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      leaderboardCache = { ...leaderboardCache, ...parsed };
+      // 确保 hardcore 数组存在
+      if (!leaderboardCache.hardcore) leaderboardCache.hardcore = [];
+    }
+    // 加载硬核榜
+    loadHardcoreLeaderboard();
   } catch(e){}
 }
 
@@ -86,6 +100,131 @@ function saveLocalCache() {
   try {
     localStorage.setItem('lb_cache_v2', JSON.stringify(leaderboardCache));
   } catch(e){}
+}
+
+/** 加载硬核模式7日榜 */
+function loadHardcoreLeaderboard() {
+  try {
+    const saved = localStorage.getItem(HARDCORE_LB_KEY);
+    if (saved) {
+      const data = JSON.parse(saved);
+      const now = Date.now();
+      // 过滤7天内的记录
+      leaderboardCache.hardcore = (data.entries || []).filter(e => 
+        (now - e.timestamp) < HARDCORE_LB_MAX_AGE
+      ).sort((a, b) => b.wealth - a.wealth).slice(0, 10);
+    }
+  } catch(e) {
+    leaderboardCache.hardcore = [];
+  }
+}
+
+/** 保存硬核模式7日榜 */
+function saveHardcoreLeaderboard() {
+  try {
+    const data = {
+      entries: leaderboardCache.hardcore,
+      lastUpdate: Date.now()
+    };
+    localStorage.setItem(HARDCORE_LB_KEY, JSON.stringify(data));
+  } catch(e) {}
+}
+
+/** 上报硬核模式成绩 */
+async function submitHardcoreResult(playerData) {
+  const netWealth = (playerData.wealth || 0) - (playerData.debt || 0);
+  const rawId = playerData.playerId || '';
+  const name = rawId.slice(0, 12) || '匿名';
+  const correctRate = playerData.hcCorrectRate || 0;
+  const totalDecisions = playerData.hcTotalDecisions || 0;
+  
+  const entry = {
+    name: name,
+    wealth: Math.floor(netWealth),
+    correctRate: Math.round(correctRate * 100),
+    totalDecisions: totalDecisions,
+    timestamp: Date.now()
+  };
+  
+  // 1. 保存到本地（作为备份）
+  leaderboardCache.hardcore.push(entry);
+  
+  // 去重：同一玩家只保留最高分
+  const seen = new Map();
+  for (const item of leaderboardCache.hardcore) {
+    if (!seen.has(item.name) || seen.get(item.name).wealth < item.wealth) {
+      seen.set(item.name, item);
+    }
+  }
+  
+  leaderboardCache.hardcore = Array.from(seen.values())
+    .sort((a, b) => b.wealth - a.wealth)
+    .slice(0, 10);
+  
+  saveHardcoreLeaderboard();
+  renderHardcoreLeaderboard(leaderboardCache.hardcore);
+  
+  // 2. 提交到 Firebase 云端
+  if (db && leaderboardEnabled) {
+    try {
+      await submitHardcoreToFirebase(entry);
+    } catch (e) {
+      console.warn('Firebase 提交失败，已保存本地:', e);
+    }
+  }
+  
+  console.log('🏆 硬核成绩已上报:', name, formatU(netWealth), `正确率${entry.correctRate}%`);
+}
+
+/** 提交硬核成绩到 Firebase */
+async function submitHardcoreToFirebase(entry) {
+  // 检查是否已有该玩家的记录
+  const existing = await db.collection('hardcore_leaderboard')
+    .where('name', '==', entry.name)
+    .get();
+  
+  if (!existing.empty) {
+    // 更新：只保留更高分
+    const doc = existing.docs[0];
+    const currentData = doc.data();
+    if (entry.wealth > currentData.wealth) {
+      await doc.ref.update(entry);
+      console.log('📝 云端记录已更新:', entry.name);
+    }
+  } else {
+    // 新增记录
+    await db.collection('hardcore_leaderboard').add(entry);
+    console.log('➕ 云端记录已添加:', entry.name);
+  }
+}
+
+/** 渲染硬核模式排行榜 */
+function renderHardcoreLeaderboard(list) {
+  const els = [
+    document.getElementById('hardcoreLeaderboard'),
+    document.getElementById('hardcoreLeaderboardMobile')
+  ].filter(Boolean);
+  
+  if (els.length === 0) return;
+  
+  if (!list?.length) {
+    els.forEach(el => {
+      el.innerHTML = '<div class="lb-empty">暂无硬核记录<br>来成为第一个硬核传奇！</div>';
+    });
+    return;
+  }
+  
+  const medals = ['🥇','🥈','🥉'];
+  const html = list.map((item, i) => `
+    <div class="lb-item ${i<3?'lb-top':''}" style="${i<3?'background:rgba(240,185,11,0.1);':''}">
+      <span class="lb-rank">${medals[i]||i+1}</span>
+      <span class="lb-name">${escapeHtml(item.name)}</span>
+      <span class="lb-score">${formatU(item.wealth)}</span>
+      <span class="lb-status" style="font-size:10px;color:#888;margin-left:4px;">${item.correctRate}%</span>
+    </div>
+  `).join('');
+  
+  els.forEach(el => el.innerHTML = html);
 }
 
 /** 实时监听榜单 */
@@ -111,6 +250,48 @@ function startRealtimeListeners() {
       renderBankruptLeaderboard(leaderboardCache.bankrupt);
       saveLocalCache();
     }, err => console.log('破产榜监听失败:', err));
+  
+  // 硬核榜 - 7天内数据（云端实时监听）
+  startHardcoreRealtimeListener();
+}
+
+/** 硬核榜实时监听（7天过滤） */
+function startHardcoreRealtimeListener() {
+  if (!db) return;
+  
+  const sevenDaysAgo = Date.now() - HARDCORE_LB_MAX_AGE;
+  
+  // 查询7天内的记录，按财富降序
+  db.collection('hardcore_leaderboard')
+    .where('timestamp', '>=', sevenDaysAgo)
+    .orderBy('timestamp', 'desc')
+    .onSnapshot(snapshot => {
+      // 获取所有7天内的记录
+      const allEntries = snapshot.docs.map(doc => doc.data());
+      
+      // 去重：同玩家只保留最高分
+      const seen = new Map();
+      for (const item of allEntries) {
+        if (!seen.has(item.name) || seen.get(item.name).wealth < item.wealth) {
+          seen.set(item.name, item);
+        }
+      }
+      
+      // 排序并取前10
+      leaderboardCache.hardcore = Array.from(seen.values())
+        .sort((a, b) => b.wealth - a.wealth)
+        .slice(0, 10);
+      
+      renderHardcoreLeaderboard(leaderboardCache.hardcore);
+      saveLocalCache();
+      
+      console.log('📊 硬核榜已更新（云端）:', leaderboardCache.hardcore.length, '条记录');
+    }, err => {
+      console.log('硬核榜监听失败，使用本地数据:', err);
+      // 失败时使用本地数据
+      loadHardcoreLeaderboard();
+      renderHardcoreLeaderboard(leaderboardCache.hardcore);
+    });
 }
 
 /** 生成安全的 Firestore 文档 ID */
@@ -162,6 +343,7 @@ async function submitGameResult(playerData) {
 
 /** 渲染 */
 function renderLeaderboards() {
+  renderHardcoreLeaderboard(leaderboardCache.hardcore);
   renderWealthLeaderboard(leaderboardCache.wealth);
   renderBankruptLeaderboard(leaderboardCache.bankrupt);
 }
