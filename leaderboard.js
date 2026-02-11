@@ -134,12 +134,15 @@ function saveHardcoreLeaderboard() {
 async function submitHardcoreResult(playerData) {
   const netWealth = (playerData.wealth || 0) - (playerData.debt || 0);
   const rawId = playerData.playerId || '';
-  const name = rawId.slice(0, 12) || '匿名';
+  // 对中文ID进行编码，避免Firebase特殊字符问题
+  const displayName = rawId.slice(0, 12) || '匿名';
+  const encodedName = encodeURIComponent(displayName);
   const correctRate = playerData.hcCorrectRate || 0;
   const totalDecisions = playerData.hcTotalDecisions || 0;
   
   const entry = {
-    name: name,
+    name: displayName,           // 显示用原始名称
+    encodedName: encodedName,    // 查询用编码名称
     wealth: Math.floor(netWealth),
     correctRate: Math.round(correctRate * 100),
     totalDecisions: totalDecisions,
@@ -149,11 +152,12 @@ async function submitHardcoreResult(playerData) {
   // 1. 保存到本地（作为备份）
   leaderboardCache.hardcore.push(entry);
   
-  // 去重：同一玩家只保留最高分
+  // 去重：同一玩家只保留最高分（使用编码后的名称作为key）
   const seen = new Map();
   for (const item of leaderboardCache.hardcore) {
-    if (!seen.has(item.name) || seen.get(item.name).wealth < item.wealth) {
-      seen.set(item.name, item);
+    const key = item.encodedName || item.name;
+    if (!seen.has(key) || seen.get(key).wealth < item.wealth) {
+      seen.set(key, item);
     }
   }
   
@@ -178,9 +182,12 @@ async function submitHardcoreResult(playerData) {
 
 /** 提交硬核成绩到 Firebase */
 async function submitHardcoreToFirebase(entry) {
+  // 使用编码后的名称查询，避免中文特殊字符问题
+  const searchName = entry.encodedName || encodeURIComponent(entry.name);
+  
   // 检查是否已有该玩家的记录
   const existing = await db.collection('hardcore_leaderboard')
-    .where('name', '==', entry.name)
+    .where('encodedName', '==', searchName)
     .get();
   
   if (!existing.empty) {
@@ -215,14 +222,25 @@ function renderHardcoreLeaderboard(list) {
   }
   
   const medals = ['🥇','🥈','🥉'];
-  const html = list.map((item, i) => `
+  const html = list.map((item, i) => {
+    // 解码显示名称（兼容旧数据没有encodedName的情况）
+    let displayName = item.name;
+    try {
+      // 如果name是编码后的，尝试解码
+      if (displayName && displayName.includes('%')) {
+        displayName = decodeURIComponent(displayName);
+      }
+    } catch(e) {
+      // 解码失败就用原样
+    }
+    return `
     <div class="lb-item ${i<3?'lb-top':''}" style="${i<3?'background:rgba(240,185,11,0.1);':''}">
       <span class="lb-rank">${medals[i]||i+1}</span>
-      <span class="lb-name">${escapeHtml(item.name)}</span>
+      <span class="lb-name">${escapeHtml(displayName)}</span>
       <span class="lb-score">${formatU(item.wealth)}</span>
       <span class="lb-status" style="font-size:10px;color:#888;margin-left:4px;">${item.correctRate}%</span>
     </div>
-  `).join('');
+  `}).join('');
   
   els.forEach(el => el.innerHTML = html);
 }
@@ -269,11 +287,12 @@ function startHardcoreRealtimeListener() {
       // 获取所有7天内的记录
       const allEntries = snapshot.docs.map(doc => doc.data());
       
-      // 去重：同玩家只保留最高分
+      // 去重：同玩家只保留最高分（使用encodedName作为key，兼容中文ID）
       const seen = new Map();
       for (const item of allEntries) {
-        if (!seen.has(item.name) || seen.get(item.name).wealth < item.wealth) {
-          seen.set(item.name, item);
+        const key = item.encodedName || encodeURIComponent(item.name);
+        if (!seen.has(key) || seen.get(key).wealth < item.wealth) {
+          seen.set(key, item);
         }
       }
       
