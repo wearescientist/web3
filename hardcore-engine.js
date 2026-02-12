@@ -165,7 +165,7 @@ class HardcoreMode {
     if (!fullExplanation) return '';
     
     // 移除变体说明部分
-    let cleanExp = fullExplanation.replace(/\n?\[\u53d8\u4f53\u8bf4\u660e：[^\]]+\]/g, '').trim();
+    let cleanExp = fullExplanation.replace(/\n?\[变体说明：[^\]]+\]/g, '').trim();
     
     // 按段落分割
     const paragraphs = cleanExp.split('\n\n').filter(p => p.trim());
@@ -173,34 +173,28 @@ class HardcoreMode {
     // 如果没有段落，返回原文本
     if (paragraphs.length === 0) return cleanExp;
     
-    // 尝试找到与选择对应的段落
-    // 格式通常是：【选项X-状态】解释...
-    const targetPatterns = [
-      new RegExp(`【[^】]*${choiceIndex + 1}[^】-次]*[-－][^】]*？`), // 【选项1-正确】
-      isCorrect ? /【[^】]*正确[^】]*】/ : null, // 【...正确】
-    ].filter(Boolean);
-    
-    for (const pattern of targetPatterns) {
-      for (const para of paragraphs) {
-        if (pattern.test(para)) {
-          // 移除标记，只保留解释内容
-          return para.replace(/【[^】]+】/, '').trim();
-        }
-      }
+    // 策略1: 直接按索引取对应段落（假设段落顺序与选项顺序一致）
+    // 通常解释段落顺序就是选项1、选项2、选项3、选项4...
+    if (choiceIndex < paragraphs.length) {
+      return paragraphs[choiceIndex].replace(/【[^】]+】/, '').trim();
     }
     
-    // 如果没找到匹配，根据正确/错误状态查找
-    const statusPattern = isCorrect ? /【[^】]*正确[^】]*】/ : /【[^】]*错误[^】]*】/;
-    for (const para of paragraphs) {
-      if (statusPattern.test(para)) {
-        return para.replace(/【[^】]+】/, '').trim();
-      }
+    // 策略2: 如果索引超出范围，根据正确/错误状态匹配
+    let statusPattern;
+    if (isCorrect) {
+      statusPattern = /【[^】]*正确[^】]*】/;
+    } else {
+      statusPattern = /【[^】]*(错误|次优)[^】]*】/;
     }
     
-    // 最后退步：返回第一个段落（通常是正确选项）
+    const matchedParagraphs = paragraphs.filter(p => statusPattern.test(p));
+    if (matchedParagraphs.length > 0) {
+      return matchedParagraphs[0].replace(/【[^】]+】/, '').trim();
+    }
+    
+    // 策略3: 返回第一个段落作为默认值
     return paragraphs[0].replace(/【[^】]+】/, '').trim();
   }
-
   resolveDecision(choiceIndex) {
     const decision = this.hardcoreState.pendingDecision;
     if (!decision) return null;
