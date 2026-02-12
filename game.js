@@ -939,15 +939,24 @@ function showDecisionModal(decision) {
     };
   }
   
-  // 启动倒计时（硬核模式30秒，普通模式10秒）
-  const timeout = game.decisionMode === 'hardcore' ? 30000 : game.decisionTimeout;
+  // 启动倒计时（硬核模式45秒，普通模式10秒）
+  const timeout = game.decisionMode === 'hardcore' ? 45000 : game.decisionTimeout;
   game.decisionTimeLeft = timeout;
   if (game.decisionTimer) clearInterval(game.decisionTimer);
   
   game.decisionTimer = setInterval(() => {
     game.decisionTimeLeft -= 100;
-    const pct = (game.decisionTimeLeft / game.decisionTimeout) * 100;
+    const pct = (game.decisionTimeLeft / timeout) * 100;
     timerBar.style.width = pct + '%';
+    
+    // 最后10秒变红闪烁
+    if (game.decisionTimeLeft <= 10000) {
+      timerBar.style.background = '#ef4444';
+      timerBar.style.animation = 'timer-flash 0.5s infinite alternate';
+    } else {
+      timerBar.style.background = '';
+      timerBar.style.animation = '';
+    }
     
     if (game.decisionTimeLeft <= 0) {
       // 超时自动随机选择
@@ -1164,8 +1173,8 @@ function showHardcoreDecisionModal(decision) {
     };
   }
   
-  // 启动倒计时（硬核模式30秒，普通模式10秒）
-  const timeout = game.decisionMode === 'hardcore' ? 30000 : game.decisionTimeout;
+  // 启动倒计时（硬核模式45秒，普通模式10秒）
+  const timeout = game.decisionMode === 'hardcore' ? 45000 : game.decisionTimeout;
   game.decisionTimeLeft = timeout;
   if (game.decisionTimer) clearInterval(game.decisionTimer);
   
@@ -1173,6 +1182,15 @@ function showHardcoreDecisionModal(decision) {
     game.decisionTimeLeft -= 100;
     const pct = (game.decisionTimeLeft / timeout) * 100;
     timerBar.style.width = pct + '%';
+    
+    // 最后10秒变红闪烁
+    if (game.decisionTimeLeft <= 10000) {
+      timerBar.style.background = '#ef4444';
+      timerBar.style.animation = 'timer-flash 0.5s infinite alternate';
+    } else {
+      timerBar.style.background = '';
+      timerBar.style.animation = '';
+    }
     
     if (game.decisionTimeLeft <= 0) {
       // 超时自动随机选择

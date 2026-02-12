@@ -154,6 +154,53 @@ class HardcoreMode {
    * 解析决策选择
    * @param {number} choiceIndex - 选择的索引
    */
+  /**
+   * 提取单个选项的解释说明（去掉其他选项和变体说明）
+   * @param {string} fullExplanation - 完整的解释文本
+   * @param {number} choiceIndex - 选择的索引
+   * @param {boolean} isCorrect - 是否正确
+   * @returns {string} 筛选后的解释
+   */
+  extractChoiceExplanation(fullExplanation, choiceIndex, isCorrect) {
+    if (!fullExplanation) return '';
+    
+    // 移除变体说明部分
+    let cleanExp = fullExplanation.replace(/\n?\[\u53d8\u4f53\u8bf4\u660e：[^\]]+\]/g, '').trim();
+    
+    // 按段落分割
+    const paragraphs = cleanExp.split('\n\n').filter(p => p.trim());
+    
+    // 如果没有段落，返回原文本
+    if (paragraphs.length === 0) return cleanExp;
+    
+    // 尝试找到与选择对应的段落
+    // 格式通常是：【选项X-状态】解释...
+    const targetPatterns = [
+      new RegExp(`【[^】]*${choiceIndex + 1}[^】-次]*[-－][^】]*？`), // 【选项1-正确】
+      isCorrect ? /【[^】]*正确[^】]*】/ : null, // 【...正确】
+    ].filter(Boolean);
+    
+    for (const pattern of targetPatterns) {
+      for (const para of paragraphs) {
+        if (pattern.test(para)) {
+          // 移除标记，只保留解释内容
+          return para.replace(/【[^】]+】/, '').trim();
+        }
+      }
+    }
+    
+    // 如果没找到匹配，根据正确/错误状态查找
+    const statusPattern = isCorrect ? /【[^】]*正确[^】]*】/ : /【[^】]*错误[^】]*】/;
+    for (const para of paragraphs) {
+      if (statusPattern.test(para)) {
+        return para.replace(/【[^】]+】/, '').trim();
+      }
+    }
+    
+    // 最后退步：返回第一个段落（通常是正确选项）
+    return paragraphs[0].replace(/【[^】]+】/, '').trim();
+  }
+
   resolveDecision(choiceIndex) {
     const decision = this.hardcoreState.pendingDecision;
     if (!decision) return null;
@@ -176,6 +223,13 @@ class HardcoreMode {
     // 计算效果（支持新旧两种格式）
     const effect = this.calculateDecisionEffect(decision, choice, isCorrect);
     
+    // 提取单个选项的解释
+    const singleExplanation = this.extractChoiceExplanation(
+      decision.explanation, 
+      choiceIndex, 
+      isCorrect
+    );
+    
     // 清空待处理决策
     this.hardcoreState.pendingDecision = null;
     
@@ -184,7 +238,7 @@ class HardcoreMode {
       choice,
       isCorrect,
       effect,
-      explanation: decision.explanation,
+      explanation: singleExplanation,
       commonSenseScore: this.hardcoreState.commonSenseScore
     };
   }
